@@ -89,5 +89,40 @@ contract cPiggyBank is Ownable, ReentrancyGuard {
         emit Deposited(msg.sender, amount, duration, safeMode);
     }
 
+    function withdraw(uint256 index) external nonReentrant {
+    require(index < userDeposits[msg.sender].length, "Invalid index");
 
+    PiggyDeposit storage piggy = userDeposits[msg.sender][index];
+
+    require(!piggy.claimed, "Already claimed");
+    require(block.timestamp >= piggy.unlockTime, "Still locked");
+
+    piggy.claimed = true;
+
+    uint256 principal = piggy.amount;
+
+    // 🔧 In future: call FX oracle or yield calculation here
+    uint256 reward = calculateReward(piggy);
+
+    // For now, user only gets back the original amount (no FX bonus)
+    uint256 payout = principal + reward;
+
+    // Transfer back in cCOP
+    cCOP.safeTransfer(msg.sender, payout);
+
+    emit Withdrawn(msg.sender, principal, reward);
+}
+
+function calculateReward(PiggyDeposit memory piggy) public view returns (uint256) {
+    //  TODO: Replace with FX-based logic or yield stuff
+    // Example: compare FX rate at deposit vs now using oracle
+    // Optionally simulate reward growth based on duration
+
+    return 0;
+}
+
+
+function getUserDeposits(address user) external view returns (PiggyDeposit[] memory) {
+    return userDeposits[user];
+}
 }
