@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "target": "ESNext",
+    "module": "CommonJS",
     "strict": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true
-  }
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "outDir": "dist",
+    "typeRoots": ["./node_modules/@types", "./types"]
+  },
+  "include": ["./scripts", "./test", "./typechain-types"]
 }
