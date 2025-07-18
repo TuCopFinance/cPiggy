@@ -31,6 +31,10 @@ contract cPiggyBank is Ownable, ReentrancyGuard {
     uint256 public constant DURATION_60 = 60 days;
     uint256 public constant DURATION_90 = 90 days;
 
+    uint256 public usdAllocation = 40; // 40%
+    uint256 public realAllocation = 30; // 30%
+    // Implicitly: 30% for cCOP (100 - usd - real)
+
     mapping(address => PiggyDeposit[]) public userDeposits;
 
     event Deposited(
@@ -119,26 +123,23 @@ contract cPiggyBank is Ownable, ReentrancyGuard {
     ) public view returns (uint256) {
         uint256 baseAmount = piggy.amount;
 
-        // Fetch FX rates from oracle (in cCOP per token, scaled by 100)
-        uint256 cUSDrate = fxOracle.getRate(address(cUSD), address(cCOP)); // e.g., 105
-        uint256 cREALrate = fxOracle.getRate(address(cREAL), address(cCOP)); // e.g., 110
+        uint256 usdWeight = piggy.safeMode ? usdAllocation / 2 : usdAllocation;
+        uint256 realWeight = piggy.safeMode
+            ? realAllocation / 2
+            : realAllocation;
 
-        // Apply allocation
-        uint256 cUSDportion = piggy.safeMode
-            ? (baseAmount * 25) / 100
-            : (baseAmount * 50) / 100;
-        uint256 cREALportion = piggy.safeMode
-            ? (baseAmount * 25) / 100
-            : (baseAmount * 50) / 100;
+        uint256 usdAmount = (baseAmount * usdWeight) / 100;
+        uint256 realAmount = (baseAmount * realWeight) / 100;
+        uint256 copAmount = baseAmount - usdAmount - realAmount;
 
-        // Calculate growth
-        uint256 cUSDvalue = (cUSDportion * cUSDrate) / 100;
-        uint256 cREALvalue = (cREALportion * cREALrate) / 100;
+        uint256 usdRate = fxOracle.getRate(address(cUSD), address(cCOP)); // e.g., 105
+        uint256 realRate = fxOracle.getRate(address(cREAL), address(cCOP)); // e.g., 110
 
-        uint256 totalFinal = cUSDvalue + cREALvalue;
+        uint256 usdValue = (usdAmount * usdRate) / 100;
+        uint256 realValue = (realAmount * realRate) / 100;
+        uint256 finalValue = usdValue + realValue + copAmount;
 
-        // Reward is excess over original
-        uint256 reward = totalFinal > baseAmount ? totalFinal - baseAmount : 0;
+        uint256 reward = finalValue > baseAmount ? finalValue - baseAmount : 0;
         return reward;
     }
 
@@ -152,6 +153,12 @@ contract cPiggyBank is Ownable, ReentrancyGuard {
     function setOracle(address _oracle) external onlyOwner {
         require(_oracle != address(0), "Invalid oracle address");
         fxOracle = IFXOracle(_oracle);
+    }
+
+    function setAllocations(uint256 _usd, uint256 _real) external onlyOwner {
+        require(_usd + _real <= 100, "Total allocation cannot exceed 100");
+        usdAllocation = _usd;
+        realAllocation = _real;
     }
 
     function getUserDeposits(
