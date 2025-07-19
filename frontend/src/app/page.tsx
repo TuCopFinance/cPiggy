@@ -1,24 +1,63 @@
-// import { cookieStorage, createStorage, http } from '@wagmi/core'
+// app/page.tsx
+
+"use client";
+
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { useAppKitAccount } from "@reown/appkit/react";
 import { ConnectButton } from "@/components/ConnectButton";
-import { InfoList } from "@/components/InfoList";
-import { ActionButtonList } from "@/components/ActionButtonList";
-import Image from 'next/image';
 
 export default function Home() {
+  const { address, isConnected, caipAddress, status, embeddedWalletInfo } =
+  useAppKitAccount();
 
   return (
-    <div className={"pages"}>
-      <Image src="/reown.svg" alt="Reown" width={150} height={150} priority />
-      <h1>AppKit Wagmi Next.js App Router Example</h1>
-
-      <ConnectButton />
-      <ActionButtonList />
-      <div className="advice">
-        <p>
-          This projectId only works on localhost. <br/>Go to <a href="https://cloud.reown.com" target="_blank" className="link-button" rel="Reown Cloud">Reown Cloud</a> to get your own.
+    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-white to-slate-100 p-6">
+      <div className="text-center space-y-6 max-w-xl">
+        <Image
+          src="/piggy-icon.svg"
+          alt="cPiggyFX Logo"
+          width={100}
+          height={100}
+          className="mx-auto"
+        />
+        <h1 className="text-5xl font-extrabold text-pink-700 tracking-tight">
+          cPiggyFX
+        </h1>
+        <p className="text-lg text-gray-700">
+          Diversified FX Piggy Bank for Colombians
         </p>
+        <p className="text-sm text-gray-500">
+          Save in <span className="font-semibold">cCOP</span>, grow in the world. Your
+          funds are automatically diversified into stablecoins like
+          <span className="font-semibold"> cUSD</span> and
+          <span className="font-semibold"> cREAL</span>, then returned to you with
+          potential FX gains.
+        </p>
+
+        <div className="pt-4">
+          <ConnectButton />
+        </div>
+
+        {isConnected && (
+          <div className="flex justify-center gap-4 mt-6">
+            <Link href="/create">
+              <Button className="px-6 py-2 text-base rounded-full shadow-md bg-pink-600 hover:bg-pink-700 text-white">
+                Create Piggy
+              </Button>
+            </Link>
+            <Link href="/dashboard">
+              <Button
+                variant="outline"
+                className="px-6 py-2 text-base rounded-full border-pink-600 text-pink-700 hover:bg-pink-50"
+              >
+                View My Piggy
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
-      <InfoList />
-    </div>
+    </main>
   );
 }
