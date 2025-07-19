@@ -1,191 +1,105 @@
 // SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
 
-pragma solidity ^0.8.20;
+import "./OracleHandler.sol";
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "./interfaces/IFXOracle.sol";
+interface IMentoRouter {
+    function swap(address fromToken, address toToken, uint256 amountIn, uint256 minAmountOut) external returns (uint256);
+    function getSwapOutput(address fromToken, address toToken, uint256 amountIn) external view returns (uint256);
+}
 
-contract cPiggyBank is Ownable, ReentrancyGuard {
-    using SafeERC20 for IERC20;
 
-    struct PiggyDeposit {
-        uint256 amount; // Original cCOP deposited
-        uint256 startTime; // deposit time
-        uint256 unlockTime; // when user can claim tokens back
-        uint256 duration; // lock period in seconds
-        bool claimed; // whether it is withdrawn or not
-        bool safeMode; // if used conservative allocation
+interface IERC20 {
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+    function transfer(address recipient, uint256 amount) external returns (bool);
+    function approve(address spender, uint256 amount) external returns (bool);
+}
+
+
+contract PiggyBank {
+    OracleHandler public oracle;
+    IMentoRouter public mentoRouter;
+
+    address public cCOP;
+    address public cUSD;
+    address public cREAL;
+
+    struct Piggy {
+        address owner;
+        uint256 cCOPAmount;
+        uint256 startTime;
+        uint256 duration;
+        uint256 initialUSD;
+        uint256 initialREAL;
+        bool claimed;
     }
 
-    IERC20 public immutable cCOP;
-    IERC20 public cUSD;
-    IERC20 public cREAL;
+    mapping(address => Piggy) public piggies;
 
-    address public swapRouter; // address of Mento swap Router
-    IFXOracle public fxOracle;
+    event PiggyCreated(address indexed user, uint256 amount, uint256 lockDays);
+    event PiggyClaimed(address indexed user, uint256 totalReturned);
 
-    uint256 public constant DURATION_30 = 30 days;
-    uint256 public constant DURATION_60 = 60 days;
-    uint256 public constant DURATION_90 = 90 days;
-
-    uint256 public usdAllocation = 40; // 40%
-    uint256 public realAllocation = 30; // 30%
-    // Implicitly: 30% for cCOP (100 - usd - real)
-
-    mapping(address => PiggyDeposit[]) public userDeposits;
-
-    event Deposited(
-        address indexed user,
-        uint256 amount,
-        uint256 duration,
-        bool safeMode
-    );
-    event Withdrawn(address indexed user, uint256 amount, uint256 reward);
-
-    constructor(
-        address _cCOP,
-        address _cUSD,
-        address _cREAL
-    ) Ownable(msg.sender) {
-        require(_cCOP != address(0), "Invalid cCOP address");
-        require(_cUSD != address(0), "Invalid cUSD address");
-        require(_cREAL != address(0), "Invalud cReal address");
-
-        cCOP = IERC20(_cCOP);
-        cUSD = IERC20(_cUSD);
-        cREAL = IERC20(_cREAL);
+    constructor(address _oracle, address _mentoRouter, address _cCOP, address _cUSD, address _cREAL) {
+        oracle = OracleHandler(_oracle);
+        mentoRouter = IMentoRouter(_mentoRouter);
+        cCOP = _cCOP;
+        cUSD = _cUSD;
+        cREAL = _cREAL;
     }
 
-    function deposit(
-        uint256 amount,
-        uint256 duration,
-        bool safeMode
-    ) external nonReentrant {
-        require(amount > 0, "Amount must be greater than 0");
-        require(
-            duration == DURATION_30 ||
-                duration == DURATION_60 ||
-                duration == DURATION_90,
-            "Invalid lock duration"
-        );
+    function deposit(uint256 amount, uint256 lockDays) external {
+        require(piggies[msg.sender].startTime == 0, "Piggy already exists");
+        require(amount > 0, "Amount must be positive");
 
-        // Transfer cCOP from user to contract
+        // Get allocation amounts
+        (uint256 partCCOP, uint256 partUSD, uint256 partREAL) = oracle.getSuggestedAllocation(amount);
 
-        //TODO: Probably need approve somehow (maybe only in frontend)
-        cCOP.safeTransferFrom(msg.sender, address(this), amount);
+        // Transfer in full cCOP from user
+        require(IERC20(cCOP).transferFrom(msg.sender, address(this), amount), "Transfer failed");
 
-        uint256 unlockTime = block.timestamp + duration;
+        // Perform swaps into cUSD and cREAL
+        require(IERC20(cCOP).approve(address(mentoRouter), partUSD + partREAL), "Approve failed");
+        uint256 receivedUSD = mentoRouter.swap(cCOP, cUSD, partUSD, 0);
+        uint256 receivedREAL = mentoRouter.swap(cCOP, cREAL, partREAL, 0);
 
-        // Store user deposit
-        PiggyDeposit memory newDeposit = PiggyDeposit({
-            amount: amount,
+        // Record piggy
+        piggies[msg.sender] = Piggy({
+            owner: msg.sender,
+            cCOPAmount: partCCOP,
             startTime: block.timestamp,
-            unlockTime: unlockTime,
-            duration: duration,
-            claimed: false,
-            safeMode: safeMode
+            duration: lockDays * 1 days,
+            initialUSD: receivedUSD,
+            initialREAL: receivedREAL,
+            claimed: false
         });
 
-        userDeposits[msg.sender].push(newDeposit);
-
-        emit Deposited(msg.sender, amount, duration, safeMode);
+        emit PiggyCreated(msg.sender, amount, lockDays);
     }
 
-    function withdraw(uint256 index) external nonReentrant {
-        require(index < userDeposits[msg.sender].length, "Invalid index");
+    function claim() external {
+        Piggy storage p = piggies[msg.sender];
+        require(!p.claimed, "Already claimed");
+        require(block.timestamp >= p.startTime + p.duration, "Lock not ended");
 
-        PiggyDeposit storage piggy = userDeposits[msg.sender][index];
+        // Swap cUSD and cREAL back to cCOP
+        require(IERC20(cUSD).approve(address(mentoRouter), p.initialUSD), "Approve USD failed");
+        require(IERC20(cREAL).approve(address(mentoRouter), p.initialREAL), "Approve REAL failed");
+        uint256 copFromUSD = mentoRouter.swap(cUSD, cCOP, p.initialUSD, 0);
+        uint256 copFromREAL = mentoRouter.swap(cREAL, cCOP, p.initialREAL, 0);
 
-        require(!piggy.claimed, "Already claimed");
-        require(block.timestamp >= piggy.unlockTime, "Still locked");
+        uint256 totalReturn = p.cCOPAmount + copFromUSD + copFromREAL;
+        p.claimed = true;
 
-        piggy.claimed = true;
+        require(IERC20(cCOP).transfer(msg.sender, totalReturn), "Return transfer failed");
 
-        uint256 principal = piggy.amount;
-
-        //  In future: call FX oracle or yield calculation here
-        uint256 reward = calculateReward(piggy);
-
-        // For now, user only gets back the original amount (no FX bonus)
-        uint256 payout = principal + reward;
-
-        // Transfer back in cCOP
-        cCOP.safeTransfer(msg.sender, payout);
-
-        emit Withdrawn(msg.sender, principal, reward);
+        emit PiggyClaimed(msg.sender, totalReturn);
     }
 
-    function calculateReward(
-        PiggyDeposit memory piggy
-    ) public view returns (uint256) {
-        uint256 baseAmount = piggy.amount;
-
-        uint256 usdWeight = piggy.safeMode ? usdAllocation / 2 : usdAllocation;
-        uint256 realWeight = piggy.safeMode
-            ? realAllocation / 2
-            : realAllocation;
-
-        uint256 usdAmount = (baseAmount * usdWeight) / 100;
-        uint256 realAmount = (baseAmount * realWeight) / 100;
-        uint256 copAmount = baseAmount - usdAmount - realAmount;
-
-        uint256 usdRate = fxOracle.getRate(address(cUSD), address(cCOP)); // e.g., 105
-        uint256 realRate = fxOracle.getRate(address(cREAL), address(cCOP)); // e.g., 110
-
-        uint256 usdValue = (usdAmount * usdRate) / 100;
-        uint256 realValue = (realAmount * realRate) / 100;
-        uint256 finalValue = usdValue + realValue + copAmount;
-
-        uint256 reward = finalValue > baseAmount ? finalValue - baseAmount : 0;
-        return reward;
-    }
-
-    // --- Admin Functions ---
-
-    function setSwapRouter(address _router) external onlyOwner {
-        require(_router != address(0), "Invalid router address");
-        swapRouter = _router;
-    }
-
-    function setOracle(address _oracle) external onlyOwner {
-        require(_oracle != address(0), "Invalid oracle address");
-        fxOracle = IFXOracle(_oracle);
-    }
-
-    function setAllocations(uint256 _usd, uint256 _real) external onlyOwner {
-        require(_usd + _real <= 100, "Total allocation cannot exceed 100");
-        usdAllocation = _usd;
-        realAllocation = _real;
-    }
-
-    function getUserDeposits(
-        address user
-    ) external view returns (PiggyDeposit[] memory) {
-        return userDeposits[user];
-    }
-
-    function estimateReward(
-        address user,
-        uint256 index
-    ) external view returns (uint256 reward) {
-        require(index < userDeposits[user].length, "Invalid index");
-        PiggyDeposit memory piggy = userDeposits[user][index];
-        require(!piggy.claimed, "Already claimed");
-
-        return calculateReward(piggy);
-    }
-
-    function getPendingRewards(
-        address user
-    ) external view returns (uint256 totalReward) {
-        PiggyDeposit[] memory piggies = userDeposits[user];
-        for (uint256 i = 0; i < piggies.length; i++) {
-            if (!piggies[i].claimed) {
-                totalReward += calculateReward(piggies[i]);
-            }
-        }
+    function estimateReturn(address user) external view returns (uint256) {
+        Piggy storage p = piggies[user];
+        if (p.startTime == 0) return 0;
+        uint256 copUSD = mentoRouter.getSwapOutput(cUSD, cCOP, p.initialUSD);
+        uint256 copREAL = mentoRouter.getSwapOutput(cREAL, cCOP, p.initialREAL);
+        return p.cCOPAmount + copUSD + copREAL;
     }
 }
