@@ -60,4 +60,7 @@ contract OracleHandler {
         cUSDPortion = (totalAmount * 30) / 100;
         cREALPortion = (totalAmount * 30) / 100;
     }
+function getRate(address from, address to) public view returns (uint256) {
+    return getFXRate(from, to);
+}
 }
