@@ -141,7 +141,7 @@ function claim(uint256 _index) external {
     function estimateReturn(
         address _user,
         uint256 _index
-    ) external view returns (uint256) {
+    ) external  returns (uint256) {
         require(_index < piggies[_user].length, "Invalid piggy index");
 
         Piggy storage p = piggies[_user][_index];
