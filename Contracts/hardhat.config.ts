@@ -12,6 +12,7 @@ const config: HardhatUserConfig = {
       url: "https://alfajores-forno.celo-testnet.org",
       accounts: [process.env.PRIVATE_KEY!], // Use .env to keep your key safe
       chainId: 44787,
+      gasPrice: 5000000000,
     },
   },
   etherscan: {

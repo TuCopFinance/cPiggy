@@ -1,42 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./OracleHandler.sol";
+import "./UniswapOracleHandler.sol";
 import "hardhat/console.sol";
 
-interface IMentoRouter {
-    function swap(
-        address fromToken,
-        address toToken,
-        uint256 amountIn,
-        uint256 minAmountOut
-    ) external returns (uint256);
-
-    function getSwapOutput(
-        address fromToken,
-        address toToken,
-        uint256 amountIn
-    ) external view returns (uint256);
-}
-
-interface IERC20 {
-    function transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) external returns (bool);
-
-    function transfer(
-        address recipient,
-        uint256 amount
-    ) external returns (bool);
-
-    function approve(address spender, uint256 amount) external returns (bool);
-}
 
 contract PiggyBank {
-    OracleHandler public oracle;
-    IMentoRouter public mentoRouter;
+    UniswapOracleHandler public uniswapOracle;
 
     address public cCOP;
     address public cUSD;
@@ -72,14 +42,12 @@ contract PiggyBank {
     );
 
     constructor(
-        address _oracle,
-        address _mentoRouter,
+        address _uniswapOracle,
         address _cCOP,
         address _cUSD,
         address _cREAL
     ) {
-        oracle = OracleHandler(_oracle);
-        mentoRouter = IMentoRouter(_mentoRouter);
+        uniswapOracle = UniswapOracleHandler(_uniswapOracle);
         cCOP = _cCOP;
         cUSD = _cUSD;
         cREAL = _cREAL;
@@ -88,7 +56,7 @@ contract PiggyBank {
     function deposit(uint256 amount, uint256 lockDays, bool safeMode) external {
         require(amount > 0, "Amount must be positive");
 
-        (uint256 partCCOP, uint256 partUSD, uint256 partREAL) = oracle
+        (uint256 partCCOP, uint256 partUSD, uint256 partREAL) = uniswapOracle
             .getSuggestedAllocation(amount);
 
         require(
@@ -96,12 +64,12 @@ contract PiggyBank {
             "Transfer failed"
         );
         require(
-            IERC20(cCOP).approve(address(mentoRouter), partUSD + partREAL),
+            IERC20(cCOP).approve(address(uniswapOracle), partUSD + partREAL),
             "Approve failed"
         );
 
-        uint256 receivedUSD = mentoRouter.swap(cCOP, cUSD, partUSD, 0);
-        uint256 receivedREAL = mentoRouter.swap(cCOP, cREAL, partREAL, 0);
+        uint256 receivedUSD = uniswapOracle.swapTokens(cCOP, cUSD, partUSD, 0);
+        uint256 receivedREAL = uniswapOracle.swapTokens(cCOP, cREAL, partREAL, 0);
 
         piggies[msg.sender].push(
             Piggy({
@@ -134,16 +102,16 @@ function claim(uint256 _index) external {
     require(block.timestamp >= p.startTime + p.duration, "Lock not ended");
 
     require(
-        IERC20(cUSD).approve(address(mentoRouter), p.initialUSD),
+        IERC20(cUSD).approve(address(uniswapOracle), p.initialUSD),
         "Approve USD failed"
     );
     require(
-        IERC20(cREAL).approve(address(mentoRouter), p.initialREAL),
+        IERC20(cREAL).approve(address(uniswapOracle), p.initialREAL),
         "Approve REAL failed"
     );
 
-    uint256 copFromUSD = mentoRouter.swap(cUSD, cCOP, p.initialUSD, 0);
-    uint256 copFromREAL = mentoRouter.swap(cREAL, cCOP, p.initialREAL, 0);
+    uint256 copFromUSD = uniswapOracle.swapTokens(cUSD, cCOP, p.initialUSD, 0);
+    uint256 copFromREAL = uniswapOracle.swapTokens(cREAL, cCOP, p.initialREAL, 0);
 
     uint256 grossReturn = p.cCOPAmount + copFromUSD + copFromREAL;
     uint256 fxGain = grossReturn > p.cCOPAmount
@@ -179,8 +147,8 @@ function claim(uint256 _index) external {
         Piggy storage p = piggies[_user][_index];
         if (p.startTime == 0) return 0;
 
-        uint256 copUSD = mentoRouter.getSwapOutput(cUSD, cCOP, p.initialUSD);
-        uint256 copREAL = mentoRouter.getSwapOutput(cREAL, cCOP, p.initialREAL);
+        uint256 copUSD = uniswapOracle.getSwapOutput(cUSD, cCOP, p.initialUSD);
+        uint256 copREAL = uniswapOracle.getSwapOutput(cREAL, cCOP, p.initialREAL);
         return p.cCOPAmount + copUSD + copREAL;
     }
 
