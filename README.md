@@ -74,6 +74,8 @@ npx hardhat compile
 # This will deploy the contracts and create a `deployedAddresses.json` file in the root `Contracts` directory.
 npx hardhat run scripts/deploy.ts --network celo
 
+You can also skip the deployment, if you would like to use the already deployed addresses ( they are in the main contracts Folder as deployedAddresses.json ). If you go this way, you need to manually approve your cCOP and cUSD for the PiggyContract
+
 2. Frontend Setup
 
 Next, set up the Next.js frontend.
