@@ -60,12 +60,12 @@ cd <your-repo-folder>/Contracts
 npm install
 
 # 3. Create an environment file in Contracts foler
-# Create a .env file and add your private key and CeloScan API key
-# PRIVATE_KEY="your wallet mnemonic phrase here"
-# CELOSCAN_API_KEY="your celoscan api key"
+## Create a .env file and add your private key and CeloScan API key
+## PRIVATE_KEY="your wallet mnemonic phrase here"
+## CELOSCAN_API_KEY="your celoscan api key"
 
 # In Frontend Folder please also create a .env file with:
-#NEXT_PUBLIC_PROJECT_ID="your reown appId for wallet integration"
+## NEXT_PUBLIC_PROJECT_ID="your reown appId for wallet integration"
 
 # 4. Compile the contracts
 npx hardhat compile
