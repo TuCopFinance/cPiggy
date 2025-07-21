@@ -60,19 +60,19 @@ cd <your-repo-folder>/Contracts
 npm install
 
 # 3. Create an environment file in Contracts foler
-## Create a .env file and add your private key and CeloScan API key
-## PRIVATE_KEY="your wallet mnemonic phrase here"
-## CELOSCAN_API_KEY="your celoscan api key"
+ Create a .env file and add your private key and CeloScan API key
+ PRIVATE_KEY="your wallet mnemonic phrase here"
+ CELOSCAN_API_KEY="your celoscan api key"
 
 # In Frontend Folder please also create a .env file with:
-## NEXT_PUBLIC_PROJECT_ID="your reown appId for wallet integration"
+ NEXT_PUBLIC_PROJECT_ID="your reown appId for wallet integration"
 
 # 4. Compile the contracts
 npx hardhat compile
 
 # 5. Deploy to the Celo network
 # This will deploy the contracts and create a `deployedAddresses.json` file in the root `Contracts` directory.
-npx hardhat run scripts/deploy.ts --network celo
+npx hardhat run scripts/deploy.ts --network celo (with this you also approve the tokens for PiggyBank). This automatically sets up the contracts for the frontend
 
 You can also skip the deployment, if you would like to use the already deployed addresses ( they are in the main contracts Folder as deployedAddresses.json ). If you go this way, you need to manually approve your cCOP and cUSD for the PiggyContract
 
