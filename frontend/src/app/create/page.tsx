@@ -11,7 +11,7 @@ import { ArrowLeft, CheckCircle, Info, Loader2, Shield, Zap } from "lucide-react
 
 // ABIs and Deployed Addresses
 import PiggyBankABI from "../../../lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
-import deployedAddresses from "../../../../Contracts/deployedAddresses.json";
+import deployedAddresses from "../../../lib/deployedAddresses.json";
 
 // A minimal ERC20 ABI for the approve/allowance flow
 const erc20Abi = [

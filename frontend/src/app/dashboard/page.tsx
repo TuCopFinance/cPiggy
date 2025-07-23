@@ -11,7 +11,7 @@ import { ArrowLeft, PiggyBank, Clock, CheckCircle, RefreshCw, AlertTriangle } fr
 
 // ABIs and Deployed Addresses
 import PiggyBankABI from "../../../lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
-import deployedAddresses from "../../../../Contracts/deployedAddresses.json";
+import deployedAddresses from "../../../lib/deployedAddresses.json";
 
 // Define the type for a single Piggy based on the contract's struct
 interface Piggy {
