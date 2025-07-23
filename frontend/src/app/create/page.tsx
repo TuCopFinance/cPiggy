@@ -102,7 +102,8 @@ export default function CreatePiggy() {
         setIsSuccess(true);
         setAmount("10");
       }
-    } catch (err: any) {
+    } catch (err) {
+      if(err instanceof Error)
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -179,7 +180,7 @@ export default function CreatePiggy() {
             <div className="bg-blue-50 text-blue-700 p-3 rounded-lg text-sm flex items-center gap-2">
               <Info className="w-5 h-5"/>
               <div>
-                Approval sent! Wait for confirmation, then click "Create My Piggy" again.
+                Approval sent! Wait for confirmation, then click &quot;Create My Piggy&quot; again.
                 <a href={`https://celoscan.io/tx/${txHash}`} target="_blank" rel="noopener noreferrer" className="font-semibold underline ml-1">View Tx</a>
               </div>
             </div>

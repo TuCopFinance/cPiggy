@@ -70,7 +70,8 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
         args: [BigInt(index)],
       });
       setClaimSuccess(true);
-    } catch (e: any) {
+    } catch (e) {
+      if(e instanceof Error)
       setClaimError(e.message);
     } finally {
       setIsClaiming(false);
@@ -199,7 +200,7 @@ export default function DashboardPage() {
           <div className="text-center py-16 bg-white border rounded-lg">
             <PiggyBank className="w-12 h-12 mx-auto text-gray-400 mb-4" />
             <h2 className="text-xl font-semibold text-gray-700">No Piggies Found</h2>
-            <p className="text-gray-500 mt-2">You haven't created any piggies yet.</p>
+            <p className="text-gray-500 mt-2">You haven&apos;t created any piggies yet.</p>
             <Link href="/create" className="mt-4 inline-block">
               <Button className="bg-pink-600 hover:bg-pink-700">Create Your First Piggy</Button>
             </Link>

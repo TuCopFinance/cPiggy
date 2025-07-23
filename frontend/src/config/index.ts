@@ -1,5 +1,5 @@
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { celo, celoAlfajores, hardhat } from '@reown/appkit/networks'
+import { celo, celoAlfajores } from '@reown/appkit/networks'
 import type { AppKitNetwork } from '@reown/appkit/networks'
 
 // Get projectId from https://cloud.reown.com
