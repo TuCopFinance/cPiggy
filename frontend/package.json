@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "mkdir -p ./lib && cp -R ../Contracts/artifacts ./lib/artifacts && cp ../Contracts/deployedAddresses.json ./lib/deployedAddresses.json && next dev",
+    "dev": "next dev",
     "build": "next build",
     "prebuild": "mkdir -p ./lib && cp -R ../Contracts/artifacts ./lib/artifacts && cp ../Contracts/deployedAddresses.json ./lib/deployedAddresses.json && next dev",
     "start": "next start",
