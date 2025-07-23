@@ -10,7 +10,7 @@ import Link from "next/link";
 import { ArrowLeft, PiggyBank, Clock, CheckCircle, RefreshCw, AlertTriangle } from "lucide-react";
 
 // ABIs and Deployed Addresses
-import PiggyBankABI from "../../../../Contracts/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
+import PiggyBankABI from "../../../lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
 import deployedAddresses from "../../../../Contracts/deployedAddresses.json";
 
 // Define the type for a single Piggy based on the contract's struct

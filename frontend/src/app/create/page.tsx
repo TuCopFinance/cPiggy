@@ -10,7 +10,7 @@ import Link from "next/link";
 import { ArrowLeft, CheckCircle, Info, Loader2, Shield, Zap } from "lucide-react";
 
 // ABIs and Deployed Addresses
-import PiggyBankABI from "../../../../Contracts/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
+import PiggyBankABI from "../../../lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
 import deployedAddresses from "../../../../Contracts/deployedAddresses.json";
 
 // A minimal ERC20 ABI for the approve/allowance flow
