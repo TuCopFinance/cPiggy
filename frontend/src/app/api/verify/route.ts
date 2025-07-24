@@ -10,9 +10,6 @@ import {
 // 1. DEFINE YOUR VERIFICATION REQUIREMENTS
 //    This object MUST EXACTLY MATCH your frontend's `disclosures` object.
 const verification_config = {
-  minimumAge: 18,
-  nationality: true,
-  gender: true,
 };
 
 // 2. CREATE THE CONFIGURATION STORE

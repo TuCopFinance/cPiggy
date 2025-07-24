@@ -25,23 +25,11 @@ function VerificationPage() {
         endpoint: `${process.env.NEXT_PUBLIC_SELF_ENDPOINT}`,
         logoBase64: "https://i.postimg.cc/mrmVf9hm/self.png",
         userId: userId,
-        endpointType: "staging_https",
+        endpointType: "https",
         userIdType: "hex",
-        userDefinedData: "Bonjour Cannes!",
+        userDefinedData: "Welcome to cPiggy!",
         disclosures: {
-          /* 1. what you want to verify from users' identity */
-          minimumAge: 18,
-          // ofac: false,
-          // excludedCountries: [countries.BELGIUM],
-
-          /* 2. what you want users to reveal */
-          // name: false,
-          // issuing_state: true,
-          nationality: true,
-          // date_of_birth: true,
-          // passport_number: false,
-          gender: true,
-          // expiry_date: false,
+          // none here
         }
       }).build();
 
