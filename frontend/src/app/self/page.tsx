@@ -8,16 +8,27 @@ import {
   type SelfApp,
 } from "@selfxyz/qrcode";
 import { ethers } from "ethers";
-import { useRouter } from 'next/navigation'; // Import the router
+import { useRouter } from 'next/navigation';
 
 function VerificationPage() {
   const [selfApp, setSelfApp] = useState<SelfApp | null>(null);
   const [universalLink, setUniversalLink] = useState("");
   const [userId] = useState(ethers.ZeroAddress);
-  const router = useRouter(); // Initialize the router
+  const router = useRouter();
+
+  // DEBUGGING: Log environment variables to ensure they are loaded
+  console.log("--- ENV VARS ---");
+  console.log("NEXT_PUBLIC_SELF_APP_NAME:", process.env.NEXT_PUBLIC_SELF_APP_NAME);
+  console.log("NEXT_PUBLIC_SELF_SCOPE:", process.env.NEXT_PUBLIC_SELF_SCOPE);
+  console.log("NEXT_PUBLIC_SELF_ENDPOINT:", process.env.NEXT_PUBLIC_SELF_ENDPOINT);
+  console.log("------------------");
 
    useEffect(() => {
+    console.log("🚀 useEffect triggered. Initializing SelfAppBuilder...");
     try {
+      // DEBUGGING: Log the userId being used
+      console.log("👤 Using userId:", userId);
+
       const app = new SelfAppBuilder({
         version: 2,
         appName: process.env.NEXT_PUBLIC_SELF_APP_NAME || "cPiggyFX",
@@ -33,20 +44,24 @@ function VerificationPage() {
         }
       }).build();
 
+      // DEBUGGING: Log the entire generated app object
+      console.log("✅ SelfApp object built successfully:", app);
+
       setSelfApp(app);
-      setUniversalLink(getUniversalLink(app));
+
+      const generatedLink = getUniversalLink(app);
+      // DEBUGGING: Log the generated universal link
+      console.log("🔗 Generated Universal Link:", generatedLink);
+      setUniversalLink(generatedLink);
+
     } catch (error) {
-      console.error("Failed to initialize Self app:", error);
+      console.error("❌ Failed to initialize Self app in useEffect:", error);
     }
   }, [userId]);
 
   const handleSuccessfulVerification = () => {
-    console.log("Verification successful! Redirecting...");
-    
-    // 1. Set a flag in localStorage to remember the verification status
+    console.log("✅ Verification successful! Redirecting...");
     localStorage.setItem('isSelfVerified', 'true');
-    
-    // 2. Redirect the user back to the main page
     router.push('/');
   };
 
@@ -62,7 +77,7 @@ function VerificationPage() {
               selfApp={selfApp}
               onSuccess={handleSuccessfulVerification}
               onError={(error) => {
-                console.error("Error: Failed to verify identity", error);
+                console.error("❌ QR Code Error: Failed to verify identity", error);
               }}
             />
           </div>
