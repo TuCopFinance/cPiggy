@@ -86,15 +86,19 @@ export async function POST(req: NextRequest) {
         details: result.isValidDetails,
       }, { status: 400 }); // Use 400 for a bad request (invalid proof) instead of 500
     }
-  } catch (error: any) {
+ } catch (error: unknown) { // Changed 'any' to 'unknown'
     // DEBUGGING: Log the full error object for a complete stack trace
     console.error('💥 An unexpected error occurred during verification:', error);
+
+    // Type-safe way to get the error message
+    const message = error instanceof Error ? error.message : "An unknown error occurred.";
+
     return NextResponse.json({
       status: "error",
       result: false,
       message: "An unexpected error occurred on the server.",
       // In development, you might want to return the error message for easier debugging
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: process.env.NODE_ENV === 'development' ? message : undefined,
     }, { status: 500 });
   }
 }
