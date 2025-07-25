@@ -205,33 +205,39 @@ contract PiggyBank {
     }
 
     function getPiggyValue(address _user, uint256 _index) external view returns (uint256) {
-        require(_index < piggies[msg.sender].length, "Invalid piggy index");
+        require(_index < piggies[_user].length, "Invalid piggy index");
         Piggy storage p = piggies[_user][_index];
-        if (p.claimed) return 0;
+        if (p.claimed) {
+            return 0;
+        }
 
+        // Start with the guaranteed cCOP amount. This is the baseline value.
+        uint256 totalValueInCCOP = p.cCOPAmount;
+
+        // --- Step 1: Try to convert EUR to USD ---
         uint256 totalUSDValue = p.cUSDAmount;
         if (p.cEURAmount > 0) {
-            uint256 usdFromEUR = iMentoBroker.getAmountOut(
-                exchangeProvider,
-                exchangeId_cUSD_cEUR,
-                cEUR,
-                cUSD,
-                p.cEURAmount
-            );
-            totalUSDValue += usdFromEUR;
+            try iMentoBroker.getAmountOut(exchangeProvider, exchangeId_cUSD_cEUR, cEUR, cUSD, p.cEURAmount) returns (uint256 usdFromEUR) {
+                // If successful, add the converted value.
+                totalUSDValue += usdFromEUR;
+            } catch {
+                // If the EUR -> USD swap simulation fails, we do nothing and proceed with the original USD amount.
+                // This makes the function resilient.
+            }
         }
 
-        uint256 ccopFromSwaps = 0;
+        // --- Step 2: Try to convert the total USD value to cCOP ---
         if (totalUSDValue > 0) {
-            ccopFromSwaps = iMentoBroker.getAmountOut(
-                exchangeProvider,
-                exchangeId_cCOP_cUSD,
-                cUSD,
-                cCOP,
-                totalUSDValue
-            );
+            try iMentoBroker.getAmountOut(exchangeProvider, exchangeId_cCOP_cUSD, cUSD, cCOP, totalUSDValue) returns (uint256 ccopFromSwaps) {
+                // If successful, add the final converted value to our total.
+                totalValueInCCOP += ccopFromSwaps;
+            } catch {
+                // If the USD -> cCOP swap simulation fails, we do nothing.
+                // The function will return the value it has calculated so far.
+            }
         }
 
-        return p.cCOPAmount + ccopFromSwaps;
+        return totalValueInCCOP;
     }
+
 }

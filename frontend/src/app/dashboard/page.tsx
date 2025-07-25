@@ -13,14 +13,15 @@ import { ArrowLeft, PiggyBank, Clock, CheckCircle, RefreshCw, AlertTriangle } fr
 import PiggyBankABI from "../../../lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
 import deployedAddresses from "../../../lib/deployedAddresses.json";
 
-// Define the type for a single Piggy based on the contract's struct
+// --- UPDATED: Piggy interface now matches the contract's struct ---
 interface Piggy {
   owner: Address;
   cCOPAmount: bigint;
+  cUSDAmount: bigint; // Added
+  cEURAmount: bigint; // Added
   startTime: bigint;
   duration: bigint;
   safeMode: boolean;
-  initialUSDAmount: bigint;
   claimed: boolean;
 }
 
@@ -32,26 +33,23 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
 
-  // State for handling claim transaction
   const [isClaiming, setIsClaiming] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
   const [claimSuccess, setClaimSuccess] = useState(false);
 
   const piggyBankAddress = deployedAddresses.PiggyBank as Address;
 
-  // --- 1. Fetch the current value of this specific piggy ---
   const { data: currentValue, isLoading: isValueLoading } = useReadContract({
     address: piggyBankAddress,
     abi: PiggyBankABI.abi,
     functionName: 'getPiggyValue',
     args: [address!, BigInt(index)],
     query: {
-      enabled: !!address && !piggy.claimed && !claimSuccess, // Only fetch for active piggies
-      refetchInterval: 15000, // Refetch every 15 seconds to get live value
+      enabled: !!address && !piggy.claimed && !claimSuccess,
+      refetchInterval: 15000,
     },
   });
 
-  // --- 2. Determine if the piggy is ready to be claimed ---
   const claimTimestamp = Number(piggy.startTime + piggy.duration);
   const nowInSeconds = Date.now() / 1000;
   const isClaimable = !piggy.claimed && nowInSeconds >= claimTimestamp;
@@ -78,7 +76,6 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
     }
   };
 
-  // Helper to format time
   const formatTimeLeft = (seconds: number) => {
     if (seconds <= 0) return "Ready to Claim";
     const days = Math.floor(seconds / (3600 * 24));
@@ -93,6 +90,8 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
     return { text: "Active", color: "text-yellow-600", icon: <Clock className="w-4 h-4" /> };
   };
   const status = getStatus();
+  
+  const formatAmount = (amount: bigint) => formatEther(amount).substring(0, 8);
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-md p-6 space-y-4 transition-all hover:shadow-lg">
@@ -102,28 +101,42 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
           {status.icon} {status.text}
         </span>
       </div>
+      
+      {/* --- Main Value Display --- */}
+      <div className="text-center bg-slate-50 p-4 rounded-lg">
+        <p className="text-gray-500 text-sm">Current Value</p>
+        <p className="font-bold text-2xl text-gray-800">
+          {isValueLoading
+            ? "Loading..."
+            : `${formatAmount(typeof currentValue === 'bigint' ? currentValue : 0n)} cCOP`}
+        </p>
+      </div>
 
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div className="space-y-1">
-          <p className="text-gray-500">Current Value</p>
-          <p className="font-semibold text-lg text-gray-800">
-            {isValueLoading
-  ? "Loading..."
-  : `${formatEther(typeof currentValue === 'bigint' ? currentValue : 0n).substring(0, 8)} cCOP`}
-
-          </p>
+      {/* --- UPDATED: Asset Breakdown --- */}
+      <div className="space-y-3">
+        <p className="text-sm font-semibold text-gray-600">Asset Breakdown</p>
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-gray-500">cCOP Balance</span>
+          <span className="font-medium text-gray-800">{formatAmount(piggy.cCOPAmount)}</span>
         </div>
-        <div className="space-y-1">
-          <p className="text-gray-500">Initial Deposit (cCOP)</p>
-          <p className="font-semibold text-lg text-gray-800">{formatEther(piggy.cCOPAmount).substring(0, 8)}</p>
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-gray-500">cUSD Balance</span>
+          <span className="font-medium text-gray-800">{formatAmount(piggy.cUSDAmount)}</span>
         </div>
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-gray-500">cEUR Balance</span>
+          <span className="font-medium text-gray-800">{formatAmount(piggy.cEURAmount)}</span>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4 text-sm pt-2 border-t">
         <div className="space-y-1">
           <p className="text-gray-500">Time Left</p>
           <p className="font-semibold text-gray-800">{formatTimeLeft(timeLeft)}</p>
         </div>
         <div className="space-y-1">
           <p className="text-gray-500">Mode</p>
-          <p className={`font-semibold ${piggy.safeMode ? 'text-green-700' : 'text-red-700'}`}>
+          <p className={`font-semibold ${piggy.safeMode ? 'text-green-700' : 'text-purple-700'}`}>
             {piggy.safeMode ? "Safe" : "Standard"}
           </p>
         </div>

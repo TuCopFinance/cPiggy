@@ -16,13 +16,6 @@ function VerificationPage() {
   const [userId] = useState(ethers.ZeroAddress);
   const router = useRouter();
 
-  // DEBUGGING: Log environment variables to ensure they are loaded
-  console.log("--- ENV VARS ---");
-  console.log("NEXT_PUBLIC_SELF_APP_NAME:", process.env.NEXT_PUBLIC_SELF_APP_NAME);
-  console.log("NEXT_PUBLIC_SELF_SCOPE:", process.env.NEXT_PUBLIC_SELF_SCOPE);
-  console.log("NEXT_PUBLIC_SELF_ENDPOINT:", process.env.NEXT_PUBLIC_SELF_ENDPOINT);
-  console.log("------------------");
-
    useEffect(() => {
     console.log("🚀 useEffect triggered. Initializing SelfAppBuilder...");
     try {
