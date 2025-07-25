@@ -22,7 +22,7 @@ function VerificationPage() {
         version: 2,
         appName: process.env.NEXT_PUBLIC_SELF_APP_NAME || "cPiggyFX",
         scope: process.env.NEXT_PUBLIC_SELF_SCOPE || "cpiggyfx-production",
-        endpoint: process.env.NECT_PUBLIC_SELF_ENDPOINT || "https://cpiggy-production.up.railway.app/api/verify",
+        endpoint: process.env.NEXT_PUBLIC_SELF_ENDPOINT || "https://cpiggy-production.up.railway.app/api/verify",
         logoBase64: "https://i.postimg.cc/mrmVf9hm/self.png",
         userId: userId,
         endpointType: "https",
