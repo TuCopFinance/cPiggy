@@ -35,7 +35,7 @@ export default function Home() {
       return <p className="text-gray-500">Initializing...</p>;
     }
 
-    // If not connected, always show the connect button first.
+    // If not connected, show the enhanced connect button
     if (!isConnected) {
       return <ConnectButton />;
     }
@@ -44,35 +44,47 @@ export default function Home() {
     if (isSelfVerified) {
       // User is connected AND verified
       return (
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-          <Link href="/create">
-            <Button className="group w-full sm:w-auto px-6 py-3 text-base rounded-full shadow-lg bg-pink-600 hover:bg-pink-700 text-white transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
-              <PlusCircle className="w-5 h-5 transition-transform group-hover:rotate-90" />
-              Create a New Piggy
-            </Button>
-          </Link>
-          <Link href="/dashboard">
-            <Button
-              variant="outline"
-              className="group w-full sm:w-auto px-6 py-3 text-base rounded-full border-2 border-pink-600 text-pink-700 hover:bg-pink-50 hover:text-pink-800 transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
-            >
-              View My Piggies
-              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-            </Button>
-          </Link>
+        <div className="flex flex-col items-center gap-6">
+          {/* Show wallet info at the top */}
+          <ConnectButton />
+          
+          {/* Action buttons */}
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+            <Link href="/create">
+              <Button className="group w-full sm:w-auto px-6 py-3 text-base rounded-full shadow-lg bg-pink-600 hover:bg-pink-700 text-white transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
+                <PlusCircle className="w-5 h-5 transition-transform group-hover:rotate-90" />
+                Create a New Piggy
+              </Button>
+            </Link>
+            <Link href="/dashboard">
+              <Button
+                variant="outline"
+                className="group w-full sm:w-auto px-6 py-3 text-base rounded-full border-2 border-pink-600 text-pink-700 hover:bg-pink-50 hover:text-pink-800 transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+              >
+                View My Piggies
+                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </Link>
+          </div>
         </div>
       );
     } else {
       // User is connected BUT NOT verified
       return (
-        <div>
-          <p className="mb-4 text-gray-700 font-medium">Please verify your identity to continue.</p>
-          <Link href="/self">
-            <Button className="group w-full sm:w-auto px-6 py-3 text-base rounded-full shadow-lg bg-green-600 hover:bg-green-700 text-white transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5" />
-              Proceed to Verification
-            </Button>
-          </Link>
+        <div className="flex flex-col items-center gap-6">
+          {/* Show wallet info at the top */}
+          <ConnectButton />
+          
+          {/* Verification prompt */}
+          <div className="text-center">
+            <p className="mb-4 text-gray-700 font-medium">Please verify your identity to continue.</p>
+            <Link href="/self">
+              <Button className="group w-full sm:w-auto px-6 py-3 text-base rounded-full shadow-lg bg-green-600 hover:bg-green-700 text-white transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5" />
+                Proceed to Verification
+              </Button>
+            </Link>
+          </div>
         </div>
       );
     }
@@ -100,7 +112,7 @@ export default function Home() {
           <span className="font-semibold text-pink-600"> cUSD</span> to protect your savings.
         </p>
 
-        <div className="mt-10 space-y-4 h-24 flex flex-col items-center justify-center">
+        <div className="mt-10 space-y-4 flex flex-col items-center justify-center">
           {renderContent()}
         </div>
       </div>
