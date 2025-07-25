@@ -13,35 +13,36 @@ import { useState, useEffect } from "react";
 
 export default function Home() {
   const { isConnected } = useAppKitAccount();
+  
+  // --- UPDATED LOGIC ---
+  // Default to false. We only set to true if we find it in localStorage.
   const [isSelfVerified, setIsSelfVerified] = useState(false);
-  // 1. Add a loading state, default to true
+  // Start loading until we've checked the connection and verification status.
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // This effect runs when `isConnected` gets its value.
-    // We can now safely check localStorage and set loading to false.
-    if (isConnected) {
-      const verified = localStorage.getItem('isSelfVerified') === 'true';
-      setIsSelfVerified(verified);
-    }
-    // 2. Once we have a value for isConnected, we are no longer loading.
+    // This effect now runs only once when the component mounts.
+    // We check for the verification status saved in the browser.
+    const verified = localStorage.getItem('isSelfVerified') === 'true';
+    setIsSelfVerified(verified);
+    // After checking, we are no longer loading the verification status.
     setIsLoading(false);
-  }, [isConnected]);
+  }, []); // Empty dependency array means this runs once on mount
 
-  // Helper function to render the correct UI based on all states
   const renderContent = () => {
-    // 3. While loading, show a clear message
+    // Show loading state while checking wallet connection and verification
     if (isLoading) {
       return <p className="text-gray-500">Initializing...</p>;
     }
 
-    // After loading, check connection status
+    // If not connected, always show the connect button first.
     if (!isConnected) {
       return <ConnectButton />;
     }
 
-    // If connected, check verification status
+    // If connected, now we can check the verification status we loaded.
     if (isSelfVerified) {
+      // User is connected AND verified
       return (
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
           <Link href="/create">
@@ -62,6 +63,7 @@ export default function Home() {
         </div>
       );
     } else {
+      // User is connected BUT NOT verified
       return (
         <div>
           <p className="mb-4 text-gray-700 font-medium">Please verify your identity to continue.</p>
@@ -98,7 +100,6 @@ export default function Home() {
           <span className="font-semibold text-pink-600"> cUSD</span> to protect your savings.
         </p>
 
-        {/* This div now has a fixed height to prevent layout shifts */}
         <div className="mt-10 space-y-4 h-24 flex flex-col items-center justify-center">
           {renderContent()}
         </div>
