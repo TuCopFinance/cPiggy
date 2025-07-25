@@ -25,15 +25,29 @@ const selfBackendVerifier = new SelfBackendVerifier(
   "hex"
 );
 
+console.log(`🔧 Initializing verifier with SCOPE: ${process.env.NEXT_PUBLIC_SELF_SCOPE}`);
+console.log(`🔧 Initializing verifier with ENDPOINT: ${process.env.NEXT_PUBLIC_SELF_ENDPOINT}`);
+
 // 4. CREATE THE API ROUTE HANDLER
 export async function POST(req: NextRequest) {
   console.log("✅ Received request at /api/verify endpoint.");
 
+    let requestBody;
+  try {
+    requestBody = await req.json();
+    // DEBUGGING: Log the entire incoming payload to inspect what the frontend is sending
+    console.log("📦 Incoming request body:", JSON.stringify(requestBody, null, 2));
+  } catch (error) {
+    console.error("❌ Failed to parse request body as JSON:", error);
+    return NextResponse.json({ message: "Invalid JSON in request body" }, { status: 400 });
+  }
   // Extract data from the request
-  const { attestationId, proof, publicSignals, userContextData } = await req.json();
+  // Extract data from the request
+  const { attestationId, proof, publicSignals, userContextData } = requestBody;
 
   // Verify all required fields are present
   if (!proof || !publicSignals || !attestationId || !userContextData) {
+    console.error("❌ Missing required fields in request.");
     return NextResponse.json({
       message: "Proof, publicSignals, attestationId and userContextData are required",
     }, { status: 400 });
@@ -41,36 +55,46 @@ export async function POST(req: NextRequest) {
 
   // Verify the proof
   try {
+    console.log("⏳ Calling selfBackendVerifier.verify()...");
     const result = await selfBackendVerifier.verify(
-      attestationId,    // Document type (1 = passport, 2 = EU ID card)
-      proof,            // The zero-knowledge proof
-      publicSignals,    // Public signals array
-      userContextData   // User context data
+      attestationId,
+      proof,
+      publicSignals,
+      userContextData
     );
+
+    // DEBUGGING: Log the ENTIRE result object from the verifier.
+    // This object contains valuable details on why verification might have failed.
+    console.log("🔍 Verification result object:", JSON.stringify(result, null, 2));
 
     // Check if verification was successful
     if (result.isValidDetails.isValid) {
-      // Verification successful - process the result
+      console.log("✅ Verification successful!");
       return NextResponse.json({
         status: "success",
         result: true,
         credentialSubject: result.discloseOutput,
       });
     } else {
-      // Verification failed
+      // Verification failed, return the detailed reason
+      console.warn("⚠️ Verification failed. Details:", result.isValidDetails);
       return NextResponse.json({
         status: "error",
         result: false,
         message: "Verification failed",
+        // Return the specific details about why it failed
         details: result.isValidDetails,
-      }, { status: 500 });
+      }, { status: 400 }); // Use 400 for a bad request (invalid proof) instead of 500
     }
-  } catch (error) {
-    console.error('Verification failed:', error);
+  } catch (error: any) {
+    // DEBUGGING: Log the full error object for a complete stack trace
+    console.error('💥 An unexpected error occurred during verification:', error);
     return NextResponse.json({
       status: "error",
       result: false,
-      message: "Verification failed",
+      message: "An unexpected error occurred on the server.",
+      // In development, you might want to return the error message for easier debugging
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     }, { status: 500 });
   }
 }
