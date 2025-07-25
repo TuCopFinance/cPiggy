@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     // The verify method needs 4 specific arguments from the proof object.
     const isValid = await selfBackendVerifier.verify(
       proof.attestationId,
-      proof, // The full proof object
+      proof.proof, // The full proof object
       proof.pubSignals,
       proof.userContextData
     );
