@@ -29,39 +29,48 @@ const selfBackendVerifier = new SelfBackendVerifier(
 export async function POST(req: NextRequest) {
   console.log("✅ Received request at /api/verify endpoint.");
 
-    // Extract data from the request
-const { attestationId, proof, publicSignals, userContextData } = await req.json();
+  // Extract data from the request
+  const { attestationId, proof, publicSignals, userContextData } = await req.json();
 
-// Verify all required fields are present
-if (!proof || !publicSignals || !attestationId || !userContextData) {
-  return NextResponse.json({
-    message: "Proof, publicSignals, attestationId and userContextData are required",
-  }, { status: 400 });
-}
+  // Verify all required fields are present
+  if (!proof || !publicSignals || !attestationId || !userContextData) {
+    return NextResponse.json({
+      message: "Proof, publicSignals, attestationId and userContextData are required",
+    }, { status: 400 });
+  }
 
-// Verify the proof
-const result = await selfBackendVerifier.verify(
-  attestationId,    // Document type (1 = passport, 2 = EU ID card)
-  proof,            // The zero-knowledge proof
-  publicSignals,    // Public signals array
-  userContextData   // User context data
-);
+  // Verify the proof
+  try {
+    const result = await selfBackendVerifier.verify(
+      attestationId,    // Document type (1 = passport, 2 = EU ID card)
+      proof,            // The zero-knowledge proof
+      publicSignals,    // Public signals array
+      userContextData   // User context data
+    );
 
-// Check if verification was successful
-if (result.isValidDetails.isValid) {
-  // Verification successful - process the result
-  return NextResponse.json({
-    status: "success",
-    result: true,
-    credentialSubject: result.discloseOutput,
-  });
-} else {
-  // Verification failed
-  return NextResponse.json({
-    status: "error",
-    result: false,
-    message: "Verification failed",
-    details: result.isValidDetails,
-  }, { status: 500 });
-}
+    // Check if verification was successful
+    if (result.isValidDetails.isValid) {
+      // Verification successful - process the result
+      return NextResponse.json({
+        status: "success",
+        result: true,
+        credentialSubject: result.discloseOutput,
+      });
+    } else {
+      // Verification failed
+      return NextResponse.json({
+        status: "error",
+        result: false,
+        message: "Verification failed",
+        details: result.isValidDetails,
+      }, { status: 500 });
+    }
+  } catch (error) {
+    console.error('Verification failed:', error);
+    return NextResponse.json({
+      status: "error",
+      result: false,
+      message: "Verification failed",
+    }, { status: 500 });
+  }
 }
