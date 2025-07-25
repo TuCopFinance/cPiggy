@@ -38,7 +38,7 @@ export const ConnectButton = () => {
     }
   }
 
-  const formatAddress = (addr: string) => {
+  const formatAddress = (addr: string | undefined): string => {
     if (!addr) return 'Loading...'
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`
   }
