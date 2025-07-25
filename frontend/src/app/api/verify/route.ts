@@ -29,28 +29,39 @@ const selfBackendVerifier = new SelfBackendVerifier(
 export async function POST(req: NextRequest) {
   console.log("✅ Received request at /api/verify endpoint.");
 
-  try {
-    const proof = await req.json();
-    console.log("Received proof, attempting to verify...");
+    // Extract data from the request
+const { attestationId, proof, publicSignals, userContextData } = await req.json();
 
-    // The verify method needs 4 specific arguments from the proof object.
-    const isValid = await selfBackendVerifier.verify(
-      proof.attestationId,
-      proof.proof, // The full proof object
-      proof.pubSignals,
-      proof.userContextData
-    );
+// Verify all required fields are present
+if (!proof || !publicSignals || !attestationId || !userContextData) {
+  return NextResponse.json({
+    message: "Proof, publicSignals, attestationId and userContextData are required",
+  }, { status: 400 });
+}
 
-    if (isValid) {
-      console.log("✅ Verification successful!");
-      return NextResponse.json({ status: "verified" }, { status: 200 });
-    } else {
-      console.error("❌ Verification failed.");
-      return NextResponse.json({ error: "Verification failed" }, { status: 400 });
-    }
+// Verify the proof
+const result = await selfBackendVerifier.verify(
+  attestationId,    // Document type (1 = passport, 2 = EU ID card)
+  proof,            // The zero-knowledge proof
+  publicSignals,    // Public signals array
+  userContextData   // User context data
+);
 
-  } catch (error) {
-    console.error("An unexpected error occurred:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
-  }
+// Check if verification was successful
+if (result.isValidDetails.isValid) {
+  // Verification successful - process the result
+  return NextResponse.json({
+    status: "success",
+    result: true,
+    credentialSubject: result.discloseOutput,
+  });
+} else {
+  // Verification failed
+  return NextResponse.json({
+    status: "error",
+    result: false,
+    message: "Verification failed",
+    details: result.isValidDetails,
+  }, { status: 500 });
+}
 }
