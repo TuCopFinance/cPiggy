@@ -5,12 +5,13 @@ import {
   SelfBackendVerifier,
   AllIds,
   DefaultConfigStore,
-type VerificationConfig,
 } from '@selfxyz/core';
 
 // 1. DEFINE YOUR VERIFICATION REQUIREMENTS
 //    This object MUST EXACTLY MATCH your frontend's `disclosures` object.
-const verification_config: VerificationConfig = {};
+const verification_config = {
+    excludedCountries: []
+};
 
 // 2. CREATE THE CONFIGURATION STORE
 const configStore = new DefaultConfigStore(verification_config);
