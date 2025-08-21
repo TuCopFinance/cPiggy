@@ -15,8 +15,8 @@ const queryClient = new QueryClient()
 const metadata = {
   name: 'cPiggyFX',
   description: 'Diversified FX Piggy Bank on Celo',
-  url: typeof window !== 'undefined' ? window.location.origin : 'https://www.marranitostucop.xyz',
-  icons: ['https://www.marranitostucop.xyz/icon.png']
+  url: typeof window !== 'undefined' ? window.location.origin : 'https://cpiggy-tests.up.railway.app',
+  icons: ['https://cpiggy-tests.up.railway.app/icon.png']
 }
 
 // Create the modal

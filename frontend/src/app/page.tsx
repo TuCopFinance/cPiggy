@@ -18,7 +18,7 @@ import { MiniAppLayout } from "@/components/MiniAppLayout";
 export default function Home() {
   const { isConnected } = useAppKitAccount();
   const { t, currentLocale, setLocale } = useLanguage();
-  const { isFarcasterMiniApp } = useFarcaster();
+  const { isFarcasterMiniApp, isLoaded: isFarcasterLoaded, markReady } = useFarcaster();
   
   // --- UPDATED LOGIC ---
   // Default to false. We only set to true if we find it in localStorage.
@@ -34,6 +34,21 @@ export default function Home() {
     // After checking, we are no longer loading the verification status.
     setIsLoading(false);
   }, []); // Empty dependency array means this runs once on mount
+
+  // New effect to call markReady when the app is fully loaded
+  useEffect(() => {
+    const callReady = async () => {
+      // Wait for all loading states to complete
+      if (!isLoading && isFarcasterLoaded && isFarcasterMiniApp) {
+        // Add a small delay to ensure DOM is fully rendered
+        setTimeout(async () => {
+          await markReady();
+        }, 100);
+      }
+    };
+
+    callReady();
+  }, [isLoading, isFarcasterLoaded, isFarcasterMiniApp, markReady]);
 
   const renderContent = () => {
     // Show loading state while checking wallet connection and verification

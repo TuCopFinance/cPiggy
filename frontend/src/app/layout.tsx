@@ -11,25 +11,25 @@ export const metadata: Metadata = {
   other: {
     'fc:miniapp': JSON.stringify({
       version: '1',
-      image: 'https://www.marranitostucop.xyz/miniapp-image.png',
+      image: 'https://cpiggy-tests.up.railway.app/miniapp-image.png',
       button: {
         title: 'Open cPiggyFX',
         action: {
           type: 'launch',
           name: 'cPiggyFX',
-          url: 'https://www.marranitostucop.xyz'
+          url: 'https://cpiggy-tests.up.railway.app'
         }
       }
     }),
     'fc:frame': JSON.stringify({
       version: 'next',
-      image: 'https://www.marranitostucop.xyz/frame-image.png',
+      image: 'https://cpiggy-tests.up.railway.app/frame-image.png',
       button: {
         title: 'Start Saving',
         action: {
           type: 'launch',
           name: 'cPiggyFX',
-          url: 'https://www.marranitostucop.xyz'
+          url: 'https://cpiggy-tests.up.railway.app'
         }
       }
     })

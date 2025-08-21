@@ -13,6 +13,7 @@ interface FarcasterContextType {
   signIn: () => Promise<void>;
   shareToFeed: (text: string, embeds?: string[]) => Promise<void>;
   openUrl: (url: string) => Promise<void>;
+  markReady: () => Promise<void>;
 }
 
 const FarcasterContext = createContext<FarcasterContextType | undefined>(undefined);
@@ -41,8 +42,7 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
             setUser((contextData as any).user);
           }
           
-          // Signal that the app is ready
-          await sdk.actions.ready();
+          // Don't call ready() here - let the app call it when fully loaded
         }
         
         setIsLoaded(true);
@@ -93,6 +93,16 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const markReady = async () => {
+    if (isFarcasterMiniApp) {
+      try {
+        await sdk.actions.ready();
+      } catch (error) {
+        console.error('Failed to mark app as ready:', error);
+      }
+    }
+  };
+
   const value: FarcasterContextType = {
     isLoaded,
     isFarcasterMiniApp,
@@ -101,6 +111,7 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
     signIn,
     shareToFeed,
     openUrl,
+    markReady,
   };
 
   return (
