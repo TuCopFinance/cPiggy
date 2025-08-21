@@ -6,8 +6,34 @@ import './globals.css';
 import ContextProvider from '@/context'
 
 export const metadata: Metadata = {
-  title: "cPiggy",
-  description: "cPiggy dApp",
+  title: "cPiggyFX",
+  description: "Diversified FX Piggy Bank - Save in cCOP, grow in the world",
+  other: {
+    'fc:miniapp': JSON.stringify({
+      version: '1',
+      image: 'https://www.marranitostucop.xyz/miniapp-image.png',
+      button: {
+        title: 'Open cPiggyFX',
+        action: {
+          type: 'launch',
+          name: 'cPiggyFX',
+          url: 'https://www.marranitostucop.xyz'
+        }
+      }
+    }),
+    'fc:frame': JSON.stringify({
+      version: 'next',
+      image: 'https://www.marranitostucop.xyz/frame-image.png',
+      button: {
+        title: 'Start Saving',
+        action: {
+          type: 'launch',
+          name: 'cPiggyFX',
+          url: 'https://www.marranitostucop.xyz'
+        }
+      }
+    })
+  }
 };
 
 export const viewport: Viewport = {
