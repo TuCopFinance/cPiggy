@@ -13,15 +13,17 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ConnectButton } from "@/components/ConnectButton";
 
 // ABIs and Deployed Addresses
-import PiggyBankABI from "../../../lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
+import PiggyBankABI from "../../../lib/artifacts/contracts/PiggyBank.sol/PiggyBank.json";
 import deployedAddresses from "../../../lib/deployedAddresses.json";
 
-// --- UPDATED: Piggy interface now matches the contract's struct ---
+// --- UPDATED: Piggy interface now matches the contract's struct completely ---
 interface Piggy {
   owner: Address;
+  initialAmount: bigint; // Added to match the struct
   cCOPAmount: bigint;
-  cUSDAmount: bigint; // Added
-  cEURAmount: bigint; // Added
+  cUSDAmount: bigint;
+  cEURAmount: bigint;
+  cGBPAmount: bigint; // Added cGBP
   startTime: bigint;
   duration: bigint;
   safeMode: boolean;
@@ -116,7 +118,7 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
         </p>
       </div>
 
-      {/* --- UPDATED: Asset Breakdown --- */}
+      {/* --- UPDATED: Asset Breakdown now includes cGBP --- */}
       <div className="space-y-2 sm:space-y-3">
         <p className="text-xs sm:text-sm font-semibold text-gray-600">{t('dashboard.assetBreakdown')}</p>
         <div className="flex justify-between items-center text-xs sm:text-sm">
@@ -130,6 +132,11 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
         <div className="flex justify-between items-center text-xs sm:text-sm">
           <span className="text-gray-500">{t('dashboard.ceurBalance')}</span>
           <span className="font-medium text-gray-800">{formatAmount(piggy.cEURAmount)}</span>
+        </div>
+        {/* --- ADDED: Display for cGBP Balance --- */}
+        <div className="flex justify-between items-center text-xs sm:text-sm">
+          <span className="text-gray-500">{t('dashboard.cgbpBalance')}</span>
+          <span className="font-medium text-gray-800">{formatAmount(piggy.cGBPAmount)}</span>
         </div>
       </div>
       
