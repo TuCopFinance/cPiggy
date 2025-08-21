@@ -11,13 +11,15 @@ The user flow is designed to be as simple as possible:
 
     Connect Wallet: Users connect their Celo-compatible wallet (e.g., Celo Wallet, Valora, MetaMask).
 
+    Self Protocol Integration: In order to use the app, users must have verified accounts on self protocol. We are using off-chain verification.
+
     Create a Piggy: The user decides on an amount of cCOP to save and a lock-in duration (e.g., 30, 60, or 90 days).
 
     Choose a Mode:
 
-        Standard Mode: A growth-focused strategy that swaps 60% of the deposit into cUSD.
+        Standard Mode: A growth-focused strategy that swaps 40% of the deposit to cUSD and 30% to cEUR.
 
-        Safe Mode: A capital-preservation strategy that swaps only 30% of the deposit into cUSD, reducing FX risk.
+        Safe Mode: A capital-preservation strategy that swaps only 30% of the deposit into cUSD and 20% to cEUR, reducing FX risk.
 
     Lock & Diversify: The smart contract automatically executes the swap on the Mento Protocol, securing the user's diversified position.
 
@@ -33,7 +35,7 @@ The user flow is designed to be as simple as possible:
 
     Smart Contracts: Solidity, Hardhat
 
-    Core Protocol: Celo, Mento Protocol
+    Core Protocol: Celo, Mento Protocol, Self Protocol
 
     The app also includes TuCop Wallet integration for columbian users, you can find it in the All wallets part:
 
