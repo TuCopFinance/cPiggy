@@ -107,8 +107,35 @@ export default function CreatePiggy() {
       refetchAllowance();
       setApprovalTxHash(''); // Reset for next use
       setNeedsApprovalMessage(false);
+      // After approval is confirmed, automatically proceed to deposit
+      handleDeposit();
     }
   }, [isApprovalSuccess, refetchAllowance]);
+
+  // Separate function to handle deposit after approval
+  const handleDeposit = async () => {
+    if (parsedAmount === 0n) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const hash = await writeContractAsync({
+        address: piggyBankAddress,
+        abi: PiggyBankABI.abi,
+        functionName: 'deposit',
+        args: [parsedAmount, BigInt(duration), safeMode],
+      });
+      setTxHash(hash);
+      setIsSuccess(true);
+      setAmount("10");
+    } catch (err) {
+      if(err instanceof Error)
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Corrected logic: user must have an address to need approval.
   const needsApproval = !!address && parsedAmount > 0n && (!allowance || (allowance as bigint) < parsedAmount);
@@ -141,21 +168,18 @@ export default function CreatePiggy() {
           
           // The useEffect will automatically handle the approval confirmation
           // and refresh the allowance, which will update the button text
+          // Don't proceed to deposit - wait for approval confirmation
+          return;
         } else {
-          // Handle deposit transaction
-          const hash = await writeContractAsync({
-            address: piggyBankAddress,
-            abi: PiggyBankABI.abi,
-            functionName: 'deposit',
-            args: [parsedAmount, BigInt(duration), safeMode],
-          });
-          setTxHash(hash);
-          setIsSuccess(true);
-          setAmount("10");
+          // Handle deposit transaction (when user already has approval)
+          await handleDeposit();
         }
       } catch (err) {
         if(err instanceof Error)
         setError(err.message);
+        // Reset approval state on error
+        setApprovalTxHash('');
+        setNeedsApprovalMessage(false);
       } finally {
         setIsLoading(false);
       }
