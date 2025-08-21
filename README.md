@@ -17,9 +17,9 @@ The user flow is designed to be as simple as possible:
 
     Choose a Mode:
 
-       ### Standard Mode: A growth-focused strategy that swaps 40% of the deposit to cUSD, 30% to cEUR and 10% to cGBP.
+        Standard Mode: A growth-focused strategy that swaps 40% of the deposit to cUSD, 30% to cEUR and 10% to cGBP.
 
-       ### Safe Mode: A capital-preservation strategy that swaps only 30% of the deposit into cUSD, 20% to cEUR and 10% to cGBP, reducing FX risk.
+        Safe Mode: A capital-preservation strategy that swaps only 30% of the deposit into cUSD, 20% to cEUR and 10% to cGBP, reducing FX risk.
 
     Lock & Diversify: The smart contract automatically executes the swap on the Mento Protocol, securing the user's diversified position.
 
