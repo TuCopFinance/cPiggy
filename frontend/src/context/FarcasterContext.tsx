@@ -4,6 +4,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
+import { useConnect, useAccount } from 'wagmi';
 
 interface FarcasterContextType {
   isLoaded: boolean;
@@ -14,6 +15,8 @@ interface FarcasterContextType {
   shareToFeed: (text: string, embeds?: string[]) => Promise<void>;
   openUrl: (url: string) => Promise<void>;
   markReady: () => Promise<void>;
+  connectFarcasterWallet: () => Promise<void>;
+  isFarcasterWalletConnected: boolean;
 }
 
 const FarcasterContext = createContext<FarcasterContextType | undefined>(undefined);
@@ -23,6 +26,9 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
   const [isFarcasterMiniApp, setIsFarcasterMiniApp] = useState(false);
   const [context, setContext] = useState<unknown>(null);
   const [user, setUser] = useState<unknown>(null);
+  
+  const { connect, connectors } = useConnect();
+  const { isConnected } = useAccount();
 
   useEffect(() => {
     const initializeFarcaster = async () => {
@@ -43,6 +49,20 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
           }
           
           // Don't call ready() here - let the app call it when fully loaded
+          
+          // Auto-connect Farcaster wallet if in MiniApp and not connected
+          if (!isConnected) {
+            const farcasterConnector = connectors.find(
+              connector => connector.id === 'miniApp'
+            );
+            if (farcasterConnector) {
+              try {
+                connect({ connector: farcasterConnector });
+              } catch (error) {
+                console.error('Auto-connect failed:', error);
+              }
+            }
+          }
         }
         
         setIsLoaded(true);
@@ -53,7 +73,7 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
     };
 
     initializeFarcaster();
-  }, []);
+  }, [connect, connectors, isConnected]);
 
   const signIn = async () => {
     if (!isFarcasterMiniApp) return;
@@ -103,6 +123,22 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const connectFarcasterWallet = async () => {
+    if (!isFarcasterMiniApp) return;
+    
+    const farcasterConnector = connectors.find(
+      connector => connector.id === 'miniApp'
+    );
+    
+    if (farcasterConnector) {
+      try {
+        connect({ connector: farcasterConnector });
+      } catch (error) {
+        console.error('Failed to connect Farcaster wallet:', error);
+      }
+    }
+  };
+
   const value: FarcasterContextType = {
     isLoaded,
     isFarcasterMiniApp,
@@ -112,6 +148,8 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
     shareToFeed,
     openUrl,
     markReady,
+    connectFarcasterWallet,
+    isFarcasterWalletConnected: isFarcasterMiniApp && isConnected,
   };
 
   return (

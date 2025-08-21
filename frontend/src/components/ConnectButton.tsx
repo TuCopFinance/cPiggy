@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { LogOut, Wallet, User, Copy, Check, Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useLanguage } from '@/context/LanguageContext'
+import { useFarcaster } from '@/context/FarcasterContext'
 
 export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
   const { isConnected, address, embeddedWalletInfo } = useAppKitAccount()
@@ -13,6 +14,7 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
   const [copied, setCopied] = useState(false)
   const [mounted, setMounted] = useState(false)
   const { t } = useLanguage()
+  const { isFarcasterMiniApp, connectFarcasterWallet, isFarcasterWalletConnected } = useFarcaster()
 
   // Handle client-side mounting to prevent hydration issues
   useEffect(() => {
@@ -63,12 +65,23 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
     return (
       <div className="flex flex-col items-center gap-3 sm:gap-4">
         <Button 
-          onClick={() => open()}
+          onClick={() => {
+            if (isFarcasterMiniApp) {
+              connectFarcasterWallet();
+            } else {
+              open();
+            }
+          }}
           className="px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg font-semibold bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
         >
-          {t('home.connectWallet')}
+          {isFarcasterMiniApp ? 'Connect Farcaster Wallet' : t('home.connectWallet')}
         </Button>
-        <p className="text-xs sm:text-sm text-gray-600 text-center">{t('home.connectWalletMessage')}</p>
+        <p className="text-xs sm:text-sm text-gray-600 text-center">
+          {isFarcasterMiniApp 
+            ? 'Connect your Farcaster wallet to start saving'
+            : t('home.connectWalletMessage')
+          }
+        </p>
       </div>
     )
   }
@@ -83,11 +96,16 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
         </div>
         <div className="flex flex-col min-w-0">
           <span className="text-xs font-medium text-gray-800 truncate">
-            {embeddedWalletInfo?.user?.email || embeddedWalletInfo?.user?.username || formatAddress(address)}
+            {isFarcasterMiniApp && isFarcasterWalletConnected 
+              ? 'Farcaster Wallet'
+              : embeddedWalletInfo?.user?.email || embeddedWalletInfo?.user?.username || formatAddress(address)
+            }
           </span>
           <div className="flex items-center gap-1">
             <div className="w-1 h-1 bg-green-500 rounded-full"></div>
-            <span className="text-xs text-green-600">Connected</span>
+            <span className="text-xs text-green-600">
+              {isFarcasterMiniApp ? 'Farcaster Connected' : 'Connected'}
+            </span>
           </div>
         </div>
         <Button
@@ -115,11 +133,16 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
             </div>
             <div className="flex flex-col">
               <p className="text-sm font-semibold text-gray-800">
-                {embeddedWalletInfo?.user?.email || embeddedWalletInfo?.user?.username || t('wallet.wallet')}
+                {isFarcasterMiniApp && isFarcasterWalletConnected 
+                  ? 'Farcaster Wallet'
+                  : embeddedWalletInfo?.user?.email || embeddedWalletInfo?.user?.username || t('wallet.wallet')
+                }
               </p>
               <div className="flex items-center gap-1.5 text-xs text-green-600">
                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                <span>{t('wallet.walletConnected')}</span>
+                <span>
+                  {isFarcasterMiniApp ? 'Farcaster Connected' : t('wallet.walletConnected')}
+                </span>
               </div>
             </div>
           </div>
