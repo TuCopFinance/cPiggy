@@ -78,12 +78,17 @@ export default function CreatePiggy() {
     return { compoundAmount, interestEarned };
   };
 
-  // Format number with proper thousands and decimal separators
+  // Format number with proper thousands and decimal separators (no decimals)
   const formatNumber = (num: number) => {
     return num.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
     });
+  };
+
+  // Format interest rates with two decimal places
+  const formatInterestRate = (rate: number) => {
+    return rate.toFixed(2);
   };
 
   const piggyBankAddress = deployedAddresses.PiggyBank as Address;
@@ -107,8 +112,43 @@ export default function CreatePiggy() {
       refetchAllowance();
       setApprovalTxHash(''); // Reset for next use
       setNeedsApprovalMessage(false);
+      // After approval is confirmed, automatically proceed to deposit
+      handleDeposit();
     }
   }, [isApprovalSuccess, refetchAllowance]);
+
+  // Separate function to handle deposit after approval
+  const handleDeposit = async () => {
+    if (parsedAmount === 0n) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const hash = await writeContractAsync({
+        address: piggyBankAddress,
+        abi: PiggyBankABI.abi,
+        functionName: 'deposit',
+        args: [parsedAmount, BigInt(duration), safeMode],
+      });
+      setTxHash(hash);
+      setIsSuccess(true);
+      setAmount("10");
+    } catch (err) {
+      // Show user-friendly error message
+      if (err instanceof Error) {
+        if (err.message.includes('User rejected') || err.message.includes('User denied')) {
+          setError('Transaction was cancelled by user');
+        } else {
+          setError('Transaction failed. Please try again.');
+        }
+      } else {
+        setError('Transaction failed. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Corrected logic: user must have an address to need approval.
   const needsApproval = !!address && parsedAmount > 0n && (!allowance || (allowance as bigint) < parsedAmount);
@@ -141,21 +181,26 @@ export default function CreatePiggy() {
           
           // The useEffect will automatically handle the approval confirmation
           // and refresh the allowance, which will update the button text
+          // Don't proceed to deposit - wait for approval confirmation
+          return;
         } else {
-          // Handle deposit transaction
-          const hash = await writeContractAsync({
-            address: piggyBankAddress,
-            abi: PiggyBankABI.abi,
-            functionName: 'deposit',
-            args: [parsedAmount, BigInt(duration), safeMode],
-          });
-          setTxHash(hash);
-          setIsSuccess(true);
-          setAmount("10");
+          // Handle deposit transaction (when user already has approval)
+          await handleDeposit();
         }
       } catch (err) {
-        if(err instanceof Error)
-        setError(err.message);
+        // Show user-friendly error message
+        if (err instanceof Error) {
+          if (err.message.includes('User rejected') || err.message.includes('User denied')) {
+            setError('Transaction was cancelled by user');
+          } else {
+            setError('Transaction failed. Please try again.');
+          }
+        } else {
+          setError('Transaction failed. Please try again.');
+        }
+        // Reset approval state on error
+        setApprovalTxHash('');
+        setNeedsApprovalMessage(false);
       } finally {
         setIsLoading(false);
       }
@@ -333,7 +378,7 @@ export default function CreatePiggy() {
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-2 sm:p-3">
                   <div className="grid grid-cols-3 gap-1 sm:gap-2 text-center">
                     <div>
-                      <div className="text-sm sm:text-lg font-bold text-green-700">{monthlyRates[fixedDuration].toFixed(2)}%</div>
+                      <div className="text-sm sm:text-lg font-bold text-green-700">{formatInterestRate(monthlyRates[fixedDuration])}%</div>
                       <div className="text-xs text-green-600">APY</div>
                     </div>
                     <div>
