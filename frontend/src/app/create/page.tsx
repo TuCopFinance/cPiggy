@@ -156,9 +156,9 @@ export default function CreatePiggy() {
     : t('create.createFixedTerm');
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-blue-100 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-blue-100 p-3">
       {/* Language Switcher - Top Right */}
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-3 right-3">
         <LanguageSwitcher 
           currentLocale={currentLocale} 
           onLocaleChange={setLocale} 
@@ -167,62 +167,62 @@ export default function CreatePiggy() {
       
       {/* Compact Wallet Info - Top Left */}
       {address && (
-        <div className="absolute top-4 left-4">
+        <div className="absolute top-3 left-3">
           <ConnectButton compact={true} />
         </div>
       )}
       
       <div className="w-full max-w-4xl mx-auto">
-        <Link href="/" className="flex items-center gap-2 text-gray-600 hover:text-pink-700 transition-colors mb-4">
+        <Link href="/" className="flex items-center gap-2 text-gray-600 hover:text-pink-700 transition-colors mb-3">
           <ArrowLeft size={20} />
           <span className="font-medium">{t('common.back')} {t('navigation.home')}</span>
         </Link>
         
         {/* Investment Type Selection */}
-        <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-6 mb-6">
-          <h1 className="text-3xl font-bold text-center text-pink-800 tracking-tight mb-6">
+        <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-4 mb-4">
+          <h1 className="text-2xl font-bold text-center text-pink-800 tracking-tight mb-4">
             {t('create.title')}
           </h1>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => setInvestmentType('diversify')}
-              className={`p-6 rounded-xl border-2 transition-all ${
+              className={`p-3 rounded-lg border-2 transition-all ${
                 investmentType === 'diversify'
-                  ? 'border-pink-500 bg-pink-50 shadow-lg'
+                  ? 'border-pink-500 bg-pink-50 shadow-md'
                   : 'border-gray-200 bg-white/80 hover:border-pink-300'
               }`}
             >
               <div className="flex flex-col items-center text-center">
-                <TrendingUp className={`w-12 h-12 mb-3 ${
+                <TrendingUp className={`w-6 h-6 mb-1 ${
                   investmentType === 'diversify' ? 'text-pink-600' : 'text-gray-500'
                 }`} />
-                <h3 className="text-lg font-bold mb-2">{t('create.diversifyInvestments')}</h3>
-                <p className="text-sm text-gray-600">{t('create.diversifyDescription')}</p>
+                <h3 className="text-sm font-bold mb-1">{t('create.diversifyInvestments')}</h3>
+                <p className="text-xs text-gray-600">{t('create.diversifyDescription')}</p>
               </div>
             </button>
             
             <button
               onClick={() => setInvestmentType('fixed')}
-              className={`p-6 rounded-xl border-2 transition-all ${
+              className={`p-3 rounded-lg border-2 transition-all ${
                 investmentType === 'fixed'
-                  ? 'border-pink-500 bg-pink-50 shadow-lg'
+                  ? 'border-pink-500 bg-pink-50 shadow-md'
                   : 'border-gray-200 bg-white/80 hover:border-pink-300'
               }`}
             >
               <div className="flex flex-col items-center text-center">
-                <Lock className={`w-12 h-12 mb-3 ${
+                <Lock className={`w-6 h-6 mb-1 ${
                   investmentType === 'fixed' ? 'text-pink-600' : 'text-gray-500'
                 }`} />
-                <h3 className="text-lg font-bold mb-2">{t('create.createFixedTerms')}</h3>
-                <p className="text-sm text-gray-600">{t('create.fixedTermsDescription')}</p>
+                <h3 className="text-sm font-bold mb-1">{t('create.createFixedTerms')}</h3>
+                <p className="text-xs text-gray-600">{t('create.fixedTermsDescription')}</p>
               </div>
             </button>
           </div>
         </div>
 
         {/* Investment Forms */}
-        <form onSubmit={handleSubmit} className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-8 space-y-8">
+        <form onSubmit={handleSubmit} className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-6 space-y-6">
           
           {investmentType === 'diversify' ? (
             // Diversify Investment Form
@@ -231,17 +231,17 @@ export default function CreatePiggy() {
               <div className="space-y-2">
                 <label htmlFor="deposit-amount" className="block font-semibold text-gray-700">1. {t('create.depositAmount')}</label>
                 <div className="relative">
-                    <input id="deposit-amount" type="number" className="w-full border-2 border-gray-200 bg-white/50 rounded-lg px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="100,000" min="0"/>
-                    <span className="absolute right-4 top-3.5 text-gray-500 font-medium">cCOP</span>
+                    <input id="deposit-amount" type="number" className="w-full border-2 border-gray-200 bg-white/50 rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="100,000" min="0"/>
+                    <span className="absolute right-4 top-2.5 text-gray-500 font-medium">cCOP</span>
                 </div>
               </div>
 
               {/* Duration Selection */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <label className="block font-semibold text-gray-700">2. {t('create.lockDuration')}</label>
                 <div className="grid grid-cols-3 gap-2">
                   {[30, 60, 90].map(d => (
-                    <Button type="button" key={d} onClick={() => setDuration(d)} variant={duration === d ? 'default' : 'outline'} className={`py-6 text-base rounded-lg transition-all ${duration === d ? 'bg-pink-600 text-white shadow-md' : 'bg-white/80 text-gray-700'}`}>
+                    <Button type="button" key={d} onClick={() => setDuration(d)} variant={duration === d ? 'default' : 'outline'} className={`py-4 text-sm rounded-lg transition-all ${duration === d ? 'bg-pink-600 text-white shadow-md' : 'bg-white/80 text-gray-700'}`}>
                       {d} {t('create.days')}
                     </Button>
                   ))}
@@ -249,17 +249,17 @@ export default function CreatePiggy() {
               </div>
               
               {/* Mode Selection */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <label className="block font-semibold text-gray-700">3. {t('create.chooseMode')}</label>
                 <div className="grid grid-cols-2 gap-3">
-                  <div onClick={() => setSafeMode(true)} className={`cursor-pointer p-4 border-2 rounded-lg text-center transition-all ${safeMode ? 'border-pink-500 bg-pink-50' : 'border-gray-200 bg-white/80'}`}>
-                    <Shield className="mx-auto w-8 h-8 text-green-600 mb-1" />
-                    <p className="font-semibold text-green-700">{t('create.safeMode')}</p>
+                  <div onClick={() => setSafeMode(true)} className={`cursor-pointer p-3 border-2 rounded-lg text-center transition-all ${safeMode ? 'border-pink-500 bg-pink-50' : 'border-gray-200 bg-white/80'}`}>
+                    <Shield className="mx-auto w-6 h-6 text-green-600 mb-1" />
+                    <p className="font-semibold text-green-700 text-sm">{t('create.safeMode')}</p>
                     <p className="text-xs text-gray-500">{t('create.lowerRisk')}</p>
                   </div>
-                  <div onClick={() => setSafeMode(false)} className={`cursor-pointer p-4 border-2 rounded-lg text-center transition-all ${!safeMode ? 'border-pink-500 bg-pink-50' : 'border-gray-200 bg-white/80'}`}>
-                    <Zap className="mx-auto w-8 h-8 text-purple-600 mb-1" />
-                    <p className="font-semibold text-purple-700">{t('create.standardMode')}</p>
+                  <div onClick={() => setSafeMode(false)} className={`cursor-pointer p-3 border-2 rounded-lg text-center transition-all ${!safeMode ? 'border-pink-500 bg-pink-50' : 'border-gray-200 bg-white/80'}`}>
+                    <Zap className="mx-auto w-6 h-6 text-purple-600 mb-1" />
+                    <p className="font-semibold text-purple-700 text-sm">{t('create.standardMode')}</p>
                     <p className="text-xs text-gray-500">{t('create.higherGrowth')}</p>
                   </div>
                 </div>
@@ -269,16 +269,16 @@ export default function CreatePiggy() {
             // Fixed Terms Form
             <>
               {/* Warning Banner */}
-              <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-4 mb-6">
-                <div className="flex items-start gap-3">
+              <div className="bg-amber-50 border border-amber-300 rounded-lg p-3 mb-4">
+                <div className="flex items-start gap-2">
                   <div className="flex-shrink-0">
-                    <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
                   </div>
                   <div>
-                    <h4 className="font-bold text-amber-800 mb-1">{t('create.warningNotImplemented')}</h4>
-                    <p className="text-amber-700 text-sm">{t('create.warningDescription')}</p>
+                    <h4 className="font-semibold text-amber-800 text-sm mb-1">{t('create.warningNotImplemented')}</h4>
+                    <p className="text-amber-700 text-xs">{t('create.warningDescription')}</p>
                   </div>
                 </div>
               </div>
@@ -287,17 +287,17 @@ export default function CreatePiggy() {
               <div className="space-y-2">
                 <label htmlFor="fixed-amount" className="block font-semibold text-gray-700">1. {t('create.depositAmount')}</label>
                 <div className="relative">
-                    <input id="fixed-amount" type="number" className="w-full border-2 border-gray-200 bg-white/50 rounded-lg px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500" value={fixedAmount} onChange={(e) => setFixedAmount(e.target.value)} placeholder="100,000" min="0"/>
-                    <span className="absolute right-4 top-3.5 text-gray-700 font-medium">cCOP</span>
+                    <input id="fixed-amount" type="number" className="w-full border-2 border-gray-200 bg-white/50 rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500" value={fixedAmount} onChange={(e) => setFixedAmount(e.target.value)} placeholder="100,000" min="0"/>
+                    <span className="absolute right-4 top-2.5 text-gray-700 font-medium">cCOP</span>
                 </div>
               </div>
 
               {/* Duration Selection */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <label className="block font-semibold text-gray-700">2. {t('create.lockDuration')}</label>
                 <div className="grid grid-cols-3 gap-2">
                   {[30, 60, 90].map(d => (
-                    <Button type="button" key={d} onClick={() => setFixedDuration(d)} variant={fixedDuration === d ? 'default' : 'outline'} className={`py-6 text-base rounded-lg transition-all ${fixedDuration === d ? 'bg-pink-600 text-white shadow-md' : 'bg-white/80 text-gray-700'}`}>
+                    <Button type="button" key={d} onClick={() => setFixedDuration(d)} variant={fixedDuration === d ? 'default' : 'outline'} className={`py-4 text-sm rounded-lg transition-all ${fixedDuration === d ? 'bg-pink-600 text-white shadow-md' : 'bg-white/80 text-gray-700'}`}>
                       {d} {t('create.days')}
                     </Button>
                   ))}
@@ -305,34 +305,35 @@ export default function CreatePiggy() {
               </div>
 
               {/* Monthly Rate Display */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <label className="block font-semibold text-gray-700">3. {t('create.monthlyRate')}</label>
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg p-6 text-center">
-                  <div className="text-4xl font-bold text-green-700 mb-2">{monthlyRates[fixedDuration].toFixed(2)}%</div>
-                  <p className="text-green-600 font-medium">{t('create.monthlyInterestRate').replace('{days}', fixedDuration.toString())}</p>
-                  <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3">
+                  <div className="grid grid-cols-3 gap-2 text-center">
                     <div>
-                      <span className="text-gray-600">{t('create.estReturn')}:</span>
-                      <div className="font-semibold text-green-700">
-                        {formatNumber(calculateCompoundInterest(parseFloat(fixedAmount), monthlyRates[fixedDuration], fixedDuration / 30).interestEarned)} cCOP
-                      </div>
+                      <div className="text-lg font-bold text-green-700">{monthlyRates[fixedDuration].toFixed(2)}%</div>
+                      <div className="text-xs text-green-600">APY</div>
                     </div>
                     <div>
-                      <span className="text-gray-600">{t('create.totalAtMaturity')}:</span>
-                      <div className="font-semibold text-green-700">
-                        {formatNumber(calculateCompoundInterest(parseFloat(fixedAmount), monthlyRates[fixedDuration], fixedDuration / 30).compoundAmount)} cCOP
+                      <div className="text-lg font-bold text-green-700">
+                        {formatNumber(calculateCompoundInterest(parseFloat(fixedAmount), monthlyRates[fixedDuration], fixedDuration / 30).interestEarned)}
                       </div>
+                      <div className="text-xs text-green-600">{t('create.estReturn')}</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold text-green-700">
+                        {formatNumber(calculateCompoundInterest(parseFloat(fixedAmount), monthlyRates[fixedDuration], fixedDuration / 30).compoundAmount)}
+                      </div>
+                      <div className="text-xs text-green-600">{t('create.totalAtMaturity')}</div>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Terms and Conditions */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-semibold text-blue-800 mb-2">{t('create.fixedTermsFeatures')}:</h4>
-                <ul className="text-sm text-blue-700 space-y-1">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <h4 className="font-semibold text-blue-800 text-sm mb-2">{t('create.fixedTermsFeatures')}:</h4>
+                <ul className="text-xs text-blue-700 space-y-1">
                   <li>• {t('create.guaranteedAPY')}</li>
-                  <li>• {t('create.earlyWithdrawalPenalty')}</li>
                   <li>• {t('create.interestPaidAtMaturity')}</li>
                   <li>• {t('create.fullyBacked')}</li>
                 </ul>
