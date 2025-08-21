@@ -98,18 +98,18 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
   const formatAmount = (amount: bigint) => formatEther(amount).substring(0, 8);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-md p-6 space-y-4 transition-all hover:shadow-lg">
+    <div className="bg-white border border-gray-200 rounded-lg shadow-md p-4 sm:p-6 space-y-3 sm:space-y-4 transition-all hover:shadow-lg">
       <div className="flex justify-between items-center">
-        <h3 className="text-xl font-bold text-pink-700">{t('dashboard.piggyNumber').replace('{number}', (index + 1).toString())}</h3>
-        <span className={`flex items-center gap-1 text-sm font-medium ${status.color}`}>
+        <h3 className="text-lg sm:text-xl font-bold text-pink-700">{t('dashboard.piggyNumber').replace('{number}', (index + 1).toString())}</h3>
+        <span className={`flex items-center gap-1 text-xs sm:text-sm font-medium ${status.color}`}>
           {status.icon} {status.text}
         </span>
       </div>
       
       {/* --- Main Value Display --- */}
-      <div className="text-center bg-slate-50 p-4 rounded-lg">
-        <p className="text-gray-500 text-sm">{t('dashboard.currentValue')}</p>
-        <p className="font-bold text-2xl text-gray-800">
+      <div className="text-center bg-slate-50 p-3 sm:p-4 rounded-lg">
+        <p className="text-gray-500 text-xs sm:text-sm">{t('dashboard.currentValue')}</p>
+        <p className="font-bold text-lg sm:text-2xl text-gray-800">
           {isValueLoading
             ? t('common.loading')
             : `${formatAmount(typeof currentValue === 'bigint' ? currentValue : 0n)} cCOP`}
@@ -117,23 +117,23 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
       </div>
 
       {/* --- UPDATED: Asset Breakdown --- */}
-      <div className="space-y-3">
-        <p className="text-sm font-semibold text-gray-600">{t('dashboard.assetBreakdown')}</p>
-        <div className="flex justify-between items-center text-sm">
+      <div className="space-y-2 sm:space-y-3">
+        <p className="text-xs sm:text-sm font-semibold text-gray-600">{t('dashboard.assetBreakdown')}</p>
+        <div className="flex justify-between items-center text-xs sm:text-sm">
           <span className="text-gray-500">{t('dashboard.ccopBalance')}</span>
           <span className="font-medium text-gray-800">{formatAmount(piggy.cCOPAmount)}</span>
         </div>
-        <div className="flex justify-between items-center text-sm">
+        <div className="flex justify-between items-center text-xs sm:text-sm">
           <span className="text-gray-500">{t('dashboard.cusdBalance')}</span>
           <span className="font-medium text-gray-800">{formatAmount(piggy.cUSDAmount)}</span>
         </div>
-        <div className="flex justify-between items-center text-sm">
+        <div className="flex justify-between items-center text-xs sm:text-sm">
           <span className="text-gray-500">{t('dashboard.ceurBalance')}</span>
           <span className="font-medium text-gray-800">{formatAmount(piggy.cEURAmount)}</span>
         </div>
       </div>
       
-      <div className="grid grid-cols-2 gap-4 text-sm pt-2 border-t">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm pt-2 border-t">
         <div className="space-y-1">
           <p className="text-gray-500">{t('dashboard.timeLeft')}</p>
           <p className="font-semibold text-gray-800">{formatTimeLeft(timeLeft)}</p>
@@ -181,22 +181,22 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-slate-50 p-3 sm:p-4 md:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <Link href="/" className="flex items-center gap-2 text-pink-700 hover:text-pink-900">
-            <ArrowLeft size={20} />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+          <Link href="/" className="flex items-center gap-2 text-pink-700 hover:text-pink-900 text-sm sm:text-base">
+            <ArrowLeft size={16} className="sm:w-5 sm:h-5" />
             {t('common.back')} {t('navigation.home')}
           </Link>
-          <h1 className="text-3xl font-bold text-pink-800">{t('dashboard.title')}</h1>
-          <div className="flex items-center gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-pink-800 text-center sm:text-left">{t('dashboard.title')}</h1>
+          <div className="flex items-center justify-center sm:justify-end gap-2 sm:gap-4">
             <LanguageSwitcher 
               currentLocale={currentLocale} 
               onLocaleChange={setLocale} 
             />
             <ConnectButton compact />
-            <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading} className="h-8 w-8 sm:h-10 sm:w-10">
+              <RefreshCw className={`w-3 h-3 sm:w-4 sm:h-4 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>
           </div>
         </div>

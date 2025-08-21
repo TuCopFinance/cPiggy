@@ -65,9 +65,9 @@ function VerificationPage() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-green-50 via-teal-50 to-cyan-100 p-6">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-green-50 via-teal-50 to-cyan-100 p-3 sm:p-6">
       {/* Language Switcher - Top Right */}
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
         <LanguageSwitcher 
           currentLocale={currentLocale} 
           onLocaleChange={setLocale} 
@@ -76,14 +76,14 @@ function VerificationPage() {
       
       {/* Compact Wallet Info - Top Left */}
       {address && (
-        <div className="absolute top-4 left-4">
+        <div className="absolute top-2 left-2 sm:top-4 sm:left-4">
           <ConnectButton compact={true} />
         </div>
       )}
       
-      <div className="w-full max-w-xl mx-auto bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-8 sm:p-12 text-center">
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">{t('verification.title')}</h1>
-        <p className="text-gray-600 mb-6">{t('verification.description')}</p>
+      <div className="w-full max-w-xl mx-auto bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-4 sm:p-8 md:p-12 text-center">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-2">{t('verification.title')}</h1>
+        <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">{t('verification.description')}</p>
         
         {selfApp ? (
           <div className="flex justify-center">

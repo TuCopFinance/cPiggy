@@ -61,14 +61,14 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
   // Show connect button when not connected
   if (!isConnected) {
     return (
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-3 sm:gap-4">
         <Button 
           onClick={() => open()}
-          className="px-8 py-3 text-lg font-semibold bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+          className="px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg font-semibold bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
         >
           {t('home.connectWallet')}
         </Button>
-        <p className="text-sm text-gray-600">{t('home.connectWalletMessage')}</p>
+        <p className="text-xs sm:text-sm text-gray-600 text-center">{t('home.connectWalletMessage')}</p>
       </div>
     )
   }
@@ -77,9 +77,9 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
   if (compact) {
     // Mini version for top corner
     return (
-      <div className="flex items-center gap-2 bg-white/95 backdrop-blur-sm rounded-lg p-2 border border-gray-200/50 shadow-sm">
-        <div className="p-1 bg-pink-100 rounded-md">
-          <Wallet className="w-3 h-3 text-pink-600" />
+      <div className="flex items-center gap-1.5 sm:gap-2 bg-white/95 backdrop-blur-sm rounded-lg p-1.5 sm:p-2 border border-gray-200/50 shadow-sm">
+        <div className="p-0.5 sm:p-1 bg-pink-100 rounded-md">
+          <Wallet className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-pink-600" />
         </div>
         <div className="flex flex-col min-w-0">
           <span className="text-xs font-medium text-gray-800 truncate">
@@ -94,9 +94,9 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
           onClick={handleDisconnect}
           variant="ghost"
           size="sm"
-          className="h-6 w-6 p-0 hover:bg-red-100 rounded-md flex-shrink-0"
+          className="h-5 w-5 sm:h-6 sm:w-6 p-0 hover:bg-red-100 rounded-md flex-shrink-0"
         >
-          <LogOut className="w-3 h-3 text-red-600" />
+          <LogOut className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-red-600" />
         </Button>
       </div>
     )

@@ -49,20 +49,20 @@ export default function Home() {
       return (
         <div className="flex flex-col items-center gap-6">
           {/* Action buttons */}
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <Link href="/create">
-              <Button className="group w-full sm:w-auto px-6 py-3 text-base rounded-full shadow-lg bg-pink-600 hover:bg-pink-700 text-white transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
-                <PlusCircle className="w-5 h-5 transition-transform group-hover:rotate-90" />
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 w-full">
+            <Link href="/create" className="w-full sm:w-auto">
+              <Button className="group w-full px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base rounded-full shadow-lg bg-pink-600 hover:bg-pink-700 text-white transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2">
+                <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:rotate-90" />
                 {t('home.createPiggy')}
               </Button>
             </Link>
-            <Link href="/dashboard">
+            <Link href="/dashboard" className="w-full sm:w-auto">
               <Button
                 variant="outline"
-                className="group w-full sm:w-auto px-6 py-3 text-base rounded-full border-2 border-pink-600 text-pink-700 hover:bg-pink-50 hover:text-pink-800 transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+                className="group w-full px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base rounded-full border-2 border-pink-600 text-pink-700 hover:bg-pink-50 hover:text-pink-800 transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
               >
                 {t('home.viewPiggies')}
-                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
           </div>
@@ -75,12 +75,12 @@ export default function Home() {
           {/* Verification prompt */}
           <div className="flex flex-col items-center gap-4 w-full">
             <p className="text-gray-700 font-medium text-center">{t('home.verifyIdentity')}</p>
-            <Link href="/self">
-              <Button className="group w-full sm:w-auto px-8 py-4 text-lg font-semibold rounded-2xl shadow-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center gap-3 border-2 border-white/20 backdrop-blur-sm relative overflow-hidden">
+            <Link href="/self" className="w-full sm:w-auto">
+              <Button className="group w-full px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-2xl shadow-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center gap-2 sm:gap-3 border-2 border-white/20 backdrop-blur-sm relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <ShieldCheck className="w-6 h-6 relative z-10 group-hover:animate-pulse" />
+                <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 relative z-10 group-hover:animate-pulse" />
                 <span className="relative z-10">{t('home.proceedToVerification')}</span>
-                <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
               </Button>
             </Link>
           </div>
@@ -90,37 +90,37 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-blue-100 p-6">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-blue-100 p-3 sm:p-6">
       {/* Compact Wallet Info - Top Left */}
       {isConnected && (
-        <div className="absolute top-4 left-4">
+        <div className="absolute top-2 left-2 sm:top-4 sm:left-4">
           <ConnectButton compact={true} />
         </div>
       )}
       
       {/* Language Switcher - Top Right */}
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
         <LanguageSwitcher 
           currentLocale={currentLocale} 
           onLocaleChange={setLocale} 
         />
       </div>
       
-      <div className="w-full max-w-xl mx-auto bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-8 sm:p-12 text-center">
+      <div className="w-full max-w-xl mx-auto bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-4 sm:p-8 md:p-12 text-center">
         <Image
           src={cPiggyLogo}
           alt="cPiggyFX Logo"
-          width={120}
-          height={120}
-          className="mx-auto mb-4"
+          width={80}
+          height={80}
+          className="mx-auto mb-3 sm:mb-4 sm:w-[120px] sm:h-[120px]"
         />
-        <h1 className="text-5xl font-extrabold text-pink-700 tracking-tight">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-pink-700 tracking-tight">
           cPiggyFX
         </h1>
-        <p className="mt-2 text-lg text-gray-700">
+        <p className="mt-2 text-base sm:text-lg text-gray-700">
           {t('home.subtitle')}
         </p>
-        <p className="mt-4 text-sm text-gray-600 max-w-md mx-auto">
+        <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-600 max-w-md mx-auto">
           {t('home.description')}
         </p>
 
@@ -129,9 +129,9 @@ export default function Home() {
         </div>
 
         {/* Demo Link */}
-        <div className="mt-8 text-center">
+        <div className="mt-6 sm:mt-8 text-center">
           <Link href="/demo">
-            <Button variant="ghost" className="text-sm text-gray-500 hover:text-gray-700">
+            <Button variant="ghost" className="text-xs sm:text-sm text-gray-500 hover:text-gray-700 px-3 py-2">
               🌍 Try Language Demo
             </Button>
           </Link>

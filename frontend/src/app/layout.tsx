@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 
 import { headers } from 'next/headers' // added
@@ -8,6 +8,12 @@ import ContextProvider from '@/context'
 export const metadata: Metadata = {
   title: "cPiggy",
   description: "cPiggy dApp",
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default async function RootLayout({
