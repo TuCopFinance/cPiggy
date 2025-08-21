@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { parseEther, type Address } from "viem";
@@ -64,10 +64,16 @@ export default function CreatePiggy() {
   const [txHash, setTxHash] = useState('');
   const [needsApprovalMessage, setNeedsApprovalMessage] = useState(false);
   const [approvalTxHash, setApprovalTxHash] = useState<string>('');
+  const [depositTxHash, setDepositTxHash] = useState<string>('');
 
   // Watch for approval transaction confirmation
   const { isLoading: isApprovalPending, isSuccess: isApprovalSuccess } = useWaitForTransactionReceipt({
     hash: approvalTxHash as `0x${string}`,
+  });
+
+  // Watch for deposit transaction confirmation
+  const { isLoading: isDepositPending, isSuccess: isDepositSuccess, isError: isDepositError } = useWaitForTransactionReceipt({
+    hash: depositTxHash as `0x${string}`,
   });
 
   // Compound interest calculation function
@@ -96,15 +102,24 @@ export default function CreatePiggy() {
 
   const parsedAmount = parseEther(amount || "0");
 
-  const { data: allowance, refetch: refetchAllowance } = useReadContract({
+  const { data: allowance, refetch: refetchAllowance, isLoading: allowanceLoading } = useReadContract({
     address: cCOPAddress,
     abi: erc20Abi,
     functionName: 'allowance',
     args: [address!, piggyBankAddress],
     query: {
       enabled: !!address,
+      refetchInterval: 3000, // Refetch every 3 seconds to keep it fresh
     },
   });
+
+  // Helper function to create error message with transaction link
+  const createErrorMessage = useCallback((message: string, txHash?: string) => {
+    if (txHash) {
+      return `${message} ${t('create.errors.checkTransaction')}: https://celoscan.io/tx/${txHash}`;
+    }
+    return message;
+  }, [t]);
 
   // Automatically refresh allowance when approval is confirmed
   useEffect(() => {
@@ -112,10 +127,31 @@ export default function CreatePiggy() {
       refetchAllowance();
       setApprovalTxHash(''); // Reset for next use
       setNeedsApprovalMessage(false);
-      // After approval is confirmed, automatically proceed to deposit
-      handleDeposit();
+      // Don't automatically proceed to deposit - let user click button again
     }
   }, [isApprovalSuccess, refetchAllowance]);
+
+  // Handle deposit transaction results
+  useEffect(() => {
+    if (isDepositSuccess) {
+      setIsSuccess(true);
+      setTxHash(depositTxHash);
+      setDepositTxHash(''); // Reset for next use
+      setIsLoading(false);
+      // Refresh allowance after successful piggy creation
+      refetchAllowance();
+    } else if (isDepositError) {
+      // Default to insufficient allowance error for failed transactions
+      // This is more common when deposit fails after successful approval
+      const errorMessage = createErrorMessage(t('create.errors.insufficientAllowance'), depositTxHash);
+      setError(errorMessage);
+      setIsSuccess(false);
+      setDepositTxHash(''); // Reset for next use  
+      setIsLoading(false);
+      // Refresh allowance to update UI state
+      refetchAllowance();
+    }
+  }, [isDepositSuccess, isDepositError, depositTxHash, t, createErrorMessage, refetchAllowance]);
 
   // Separate function to handle deposit after approval
   const handleDeposit = async () => {
@@ -123,6 +159,7 @@ export default function CreatePiggy() {
     
     setIsLoading(true);
     setError(null);
+    setIsSuccess(false);
     
     try {
       const hash = await writeContractAsync({
@@ -131,27 +168,46 @@ export default function CreatePiggy() {
         functionName: 'deposit',
         args: [parsedAmount, BigInt(duration), safeMode],
       });
-      setTxHash(hash);
-      setIsSuccess(true);
-      setAmount("10");
+      setDepositTxHash(hash);
+      // Don't change the amount - user should keep their chosen amount
+      // Don't set isSuccess here - wait for transaction receipt
     } catch (err) {
       // Show user-friendly error message
       if (err instanceof Error) {
         if (err.message.includes('User rejected') || err.message.includes('User denied')) {
-          setError('Transaction was cancelled by user');
+          setError(t('create.errors.depositRejected'));
         } else {
-          setError('Transaction failed. Please try again.');
+          setError(t('create.errors.depositFailed'));
         }
       } else {
-        setError('Transaction failed. Please try again.');
+        setError(t('create.errors.networkError'));
       }
-    } finally {
       setIsLoading(false);
     }
   };
 
-  // Corrected logic: user must have an address to need approval.
-  const needsApproval = !!address && parsedAmount > 0n && (!allowance || (allowance as bigint) < parsedAmount);
+  // Check if approval is needed with improved logic
+  const needsApproval = useMemo(() => {
+    if (!address || parsedAmount === 0n || allowanceLoading) {
+      return false;
+    }
+    
+    // Convert allowance to bigint safely
+    const currentAllowance = allowance ? BigInt(allowance.toString()) : 0n;
+    const needsApprovalResult = currentAllowance < parsedAmount;
+    
+    // Debug logging in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Allowance Check:', {
+        currentAllowance: currentAllowance.toString(),
+        requiredAmount: parsedAmount.toString(),
+        needsApproval: needsApprovalResult,
+        allowanceData: allowance
+      });
+    }
+    
+    return needsApprovalResult;
+  }, [address, parsedAmount, allowance, allowanceLoading]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -163,10 +219,16 @@ export default function CreatePiggy() {
       setIsSuccess(false);
       setTxHash("");
       setNeedsApprovalMessage(false);
+      setDepositTxHash("");
+      setApprovalTxHash("");
 
       try {
         // Always get the latest allowance before proceeding
+        console.log('Refetching allowance before transaction...');
         await refetchAllowance();
+        
+        // Small delay to ensure allowance is updated
+        await new Promise(resolve => setTimeout(resolve, 100));
 
         if (needsApproval) {
           // Handle approval transaction
@@ -191,12 +253,12 @@ export default function CreatePiggy() {
         // Show user-friendly error message
         if (err instanceof Error) {
           if (err.message.includes('User rejected') || err.message.includes('User denied')) {
-            setError('Transaction was cancelled by user');
+            setError(t('create.errors.approvalRejected'));
           } else {
-            setError('Transaction failed. Please try again.');
+            setError(t('create.errors.approvalFailed'));
           }
         } else {
-          setError('Transaction failed. Please try again.');
+          setError(t('create.errors.networkError'));
         }
         // Reset approval state on error
         setApprovalTxHash('');
@@ -223,6 +285,9 @@ export default function CreatePiggy() {
 
   // Show approval pending state
   const isApprovalInProgress = isApprovalPending || (!!approvalTxHash && !isApprovalSuccess);
+  
+  // Show deposit pending state
+  const isDepositInProgress = isDepositPending || (!!depositTxHash && !isDepositSuccess && !isDepositError);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-blue-100 p-2 sm:p-3">
@@ -412,10 +477,14 @@ export default function CreatePiggy() {
           <Button
             type="submit"
             className="w-full bg-pink-600 hover:bg-pink-700 text-white py-3 sm:py-4 text-base sm:text-lg font-bold rounded-lg shadow-lg shadow-pink-500/50 transition-all transform hover:scale-105 disabled:bg-gray-400 disabled:shadow-none"
-            disabled={isLoading || isApprovalInProgress || (investmentType === 'diversify' && parsedAmount === 0n)}
+            disabled={isLoading || isApprovalInProgress || isDepositInProgress || (investmentType === 'diversify' && parsedAmount === 0n)}
           >
-            {(isLoading || isApprovalInProgress) && <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />}
-            {isApprovalInProgress ? t('create.approvalSent') : buttonText}
+            {(isLoading || isApprovalInProgress || isDepositInProgress) && <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />}
+            {isApprovalInProgress 
+              ? t('create.awaitingConfirmation') 
+              : isDepositInProgress 
+                ? t('create.processing')
+                : buttonText}
           </Button>
 
           {/* Feedback Messages */}
@@ -440,7 +509,30 @@ export default function CreatePiggy() {
               </div>
             </div>
           )}
-          {error && <p className="text-red-600 text-sm text-center break-words">⚠️ {t('common.error')}: {error}</p>}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm">
+              <div className="flex items-start gap-2">
+                <span className="text-red-500 font-bold">⚠️</span>
+                <div className="flex-1">
+                  {error.includes('https://') ? (
+                    <div>
+                      <span>{error.split('https://')[0]}</span>
+                      <a 
+                        href={`https://${error.split('https://')[1]}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="font-semibold underline hover:text-red-800 ml-1"
+                      >
+                        {t('create.errors.checkTransaction')}
+                      </a>
+                    </div>
+                  ) : (
+                    <span>{error}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </form>
       </div>
     </div>
