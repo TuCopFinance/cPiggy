@@ -17,9 +17,9 @@ The user flow is designed to be as simple as possible:
 
     Choose a Mode:
 
-        Standard Mode: A growth-focused strategy that swaps 40% of the deposit to cUSD, 30% to cEUR and 10% to cGBP.
+       ### Standard Mode: A growth-focused strategy that swaps 40% of the deposit to cUSD, 30% to cEUR and 10% to cGBP.
 
-        Safe Mode: A capital-preservation strategy that swaps only 30% of the deposit into cUSD, 20% to cEUR and 10% to cGBP, reducing FX risk.
+       ### Safe Mode: A capital-preservation strategy that swaps only 30% of the deposit into cUSD, 20% to cEUR and 10% to cGBP, reducing FX risk.
 
     Lock & Diversify: The smart contract automatically executes the swap on the Mento Protocol, securing the user's diversified position.
 
@@ -28,25 +28,26 @@ The user flow is designed to be as simple as possible:
     Claim: After the lock-in period ends, the user can claim their funds. The contract automatically swaps the cUSD portion back to cCOP and transfers the total amount back to the user's wallet.
 
 
-This  is a MVP foundation. Future versions will include:
+## This  is a MVP foundation. Future versions will include:
 
-    Multi-Currency Baskets: Re-introducing cREAL, eXOF, and other Mento stablecoins as liquidity allows.
+   - Multi-Currency Baskets: Re-introducing cREAL, eXOF, and other Mento stablecoins as liquidity allows.
 
-    Yield Integration: Staking the locked funds in protocols like cCOPStaking to generate additional yield for the user.
+   - Yield Integration: Staking the locked funds in protocols like cCOPStaking to generate additional yield for the user.
 
-    Gamification: Allowing users to name their piggies or earn NFT-based badges for savings milestones.
+   - Gamification: Allowing users to name their piggies or earn NFT-based badges for savings milestones.
 
-    Gas Abstraction: Sponsoring transaction fees to create an even smoother user experience.
+   - Gas Abstraction: Sponsoring transaction fees to create an even smoother user experience.
 
-    Testing and adding more diversification strategies, seeing what works and provide more strategy for saving money
+   - Testing and adding more diversification strategies, seeing what works and provide more strategy for saving money
 
-# Proof of Ship Season 
+## Proof of Ship Season 7 implementations:
 
-
+- Added cGBP among the diversified tokens, swap available within app
+- Added 1% developer fee, during user claiming assets back
 
 ## cPiggyBank Contract history:
 
-version 1: 0x64f5167cFA3Eb18DebD49F7074AD146AaE983F97
-version 1.1 (current): 0x765aeb85d160eb221Ab1D94506d6471f795763EC
+- version 1: 0x64f5167cFA3Eb18DebD49F7074AD146AaE983F97
+- version 1.1 (current): 0x765aeb85d160eb221Ab1D94506d6471f795763EC
 
 # This project is a proof-of-concept and should not be used in a production environment without a full security audit.
