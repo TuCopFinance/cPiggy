@@ -41,3 +41,8 @@ This  is a MVP foundation. Future versions will include:
     Testing and adding more diversification strategies, seeing what works and provide more strategy for saving money
 
 This project is a proof-of-concept and should not be used in a production environment without a full security audit.
+
+*cPiggyBank Contract history:
+
+version 1: 0x64f5167cFA3Eb18DebD49F7074AD146AaE983F97
+version 1.1 (current): 0x765aeb85d160eb221Ab1D94506d6471f795763EC
