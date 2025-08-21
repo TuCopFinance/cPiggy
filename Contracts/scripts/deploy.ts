@@ -33,12 +33,15 @@ async function main() {
   const cCOP = "0x8A567e2aE79CA692Bd748aB832081C45de4041eA";
   const cUSD = "0x765DE816845861e75A25fCA122bb6898B8B1282a";
   const cEUR = "0xD8763CBa276a3738E6DE85b4b3bF5FDed6D6cA73";
+  const cGBP = "0xCCF663b1fF11028f0b19058d0f7B674004a40746";
   const MENTO_BROKER_ADDRESS = "0x777A8255cA72412f0d706dc03C9D1987306B4CaD";
   const MENTO_EXCHANGE_PROVIDER = "0x22d9db95E6Ae61c104A7B6F6C78D7993B94ec901";
+  const DEVELOPER_ADDRESS = deployer.address; // Using deployer as the developer fee recipient
 
   // --- Mento Exchange IDs for Celo Mainnet ---
   const EXCHANGE_ID_cCOP_cUSD = "0x1c9378bd0973ff313a599d3effc654ba759f8ccca655ab6d6ce5bd39a212943b";
   const EXCHANGE_ID_cUSD_cEUR = "0x746455363e8f55d04e0a2cc040d1b348a6c031b336ba6af6ae91515c194929c8";
+  const EXCHANGE_ID_cUSD_cGBP = "0x6c369bfb1598b2f7718671221bc524c84874ad1ed7ba02a61121e7a06722e2ce";
 
   // 1. Deploy MentoOracleHandler
   const MentoOracleHandler = await ethers.getContractFactory("MentoOracleHandler");
@@ -49,27 +52,28 @@ async function main() {
 
   // 2. Deploy PiggyBank
   const PiggyBank = await ethers.getContractFactory("PiggyBank");
-  // --- UPDATED: Constructor arguments now include cEUR and the second exchange ID ---
+  // --- UPDATED: Constructor arguments now include cGBP, its exchange ID, and the developer address ---
   const constructorArgs = [
     MENTO_BROKER_ADDRESS,
     oracleAddress,
     MENTO_EXCHANGE_PROVIDER,
     cCOP,
     cUSD,
-    cEUR, // New argument
+    cEUR,
+    cGBP,
     EXCHANGE_ID_cCOP_cUSD,
-    EXCHANGE_ID_cUSD_cEUR, // New argument
+    EXCHANGE_ID_cUSD_cEUR,
+    EXCHANGE_ID_cUSD_cGBP,
+    DEVELOPER_ADDRESS, // Added developer address
   ];
   const piggy = await PiggyBank.deploy(...constructorArgs);
   await piggy.waitForDeployment();
   const piggyAddress = await piggy.getAddress();
   console.log(`✅ PiggyBank deployed to: ${piggyAddress}`);
 
-  // --- UPDATED: Approve PiggyBank to spend cCOP on behalf of the deployer ---
-  // This is necessary so the deployer can call the `deposit` function.
-  // The contract itself will handle approvals for the internal swaps.
+  // --- Approve PiggyBank to spend cCOP on behalf of the deployer ---
   console.log("💰 Approving PiggyBank to spend deployer's cCOP...");
-  const approvalAmount = ethers.parseEther("1000"); // Approve a larger amount for testing
+  const approvalAmount = ethers.parseEther("1000"); // Approve a large amount for testing
   const cCOPContract = new ethers.Contract(cCOP, erc20Abi, deployer);
 
   try {
@@ -81,16 +85,19 @@ async function main() {
   }
   
   // 3. Save deployed addresses to a file
+  // --- UPDATED: Added cGBP and its exchange ID to the saved file ---
   const addresses = {
     PiggyBank: piggyAddress,
     MentoOracleHandler: oracleAddress,
     MentoBroker: MENTO_BROKER_ADDRESS,
     MentoExchangeProvider: MENTO_EXCHANGE_PROVIDER,
-    Tokens: { cCOP, cUSD, cEUR },
+    Tokens: { cCOP, cUSD, cEUR, cGBP },
     MentoExchangeIDs: {
         cCOP_cUSD: EXCHANGE_ID_cCOP_cUSD,
-        cUSD_cEUR: EXCHANGE_ID_cUSD_cEUR
+        cUSD_cEUR: EXCHANGE_ID_cUSD_cEUR,
+        cUSD_cGBP: EXCHANGE_ID_cUSD_cGBP,
     },
+    Developer: DEVELOPER_ADDRESS,
     Deployer: deployer.address,
   };
 

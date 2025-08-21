@@ -1,4 +1,3 @@
-// contracts/PiggyBank.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
@@ -7,9 +6,8 @@ import "./interfaces/interfaces.sol";
 
 /**
  * @title PiggyBank
- * @notice A contract for time-locked savings with 3-way asset diversification.
- * @dev Allows users to deposit cCOP, which is diversified into cCOP, cUSD, and cEUR
- * based on a selected risk mode.
+ * @notice A contract for time-locked savings with 4-way asset diversification.
+ * @dev Allows users to deposit cCOP, which is diversified into cCOP, cUSD, cEUR, and cGBP.
  */
 contract PiggyBank {
     MentoOracleHandler public mentoOracle;
@@ -18,20 +16,25 @@ contract PiggyBank {
     address public immutable cCOP;
     address public immutable cUSD;
     address public immutable cEUR;
+    address public immutable cGBP; // Added cGBP token address
     address public immutable exchangeProvider;
+    address public developer;
 
     bytes32 public immutable exchangeId_cCOP_cUSD;
     bytes32 public immutable exchangeId_cUSD_cEUR;
+    bytes32 public immutable exchangeId_cUSD_cGBP; // Added exchange ID for cUSD -> cGBP
 
-    // Updated struct to hold the three diversified assets and the mode
+    // Updated struct to hold the four diversified assets
     struct Piggy {
         address owner;
+        uint256 initialAmount;
         uint256 cCOPAmount;
         uint256 cUSDAmount;
         uint256 cEURAmount;
+        uint256 cGBPAmount; // Added cGBP amount
         uint256 startTime;
         uint256 duration;
-        bool safeMode; // Re-added safeMode
+        bool safeMode;
         bool claimed;
     }
 
@@ -41,15 +44,17 @@ contract PiggyBank {
         address indexed user,
         uint256 totalAmount,
         uint256 duration,
-        bool safeMode, // Re-added safeMode
+        bool safeMode,
         uint256 cCOPAmount,
         uint256 cUSDAmountReceived,
-        uint256 cEURAmountReceived
+        uint256 cEURAmountReceived,
+        uint256 cGBPAmountReceived // Added cGBP to event
     );
     event PiggyClaimed(
         address indexed user,
         uint256 index,
-        uint256 finalCCOPReturn
+        uint256 userReturnAmount,
+        uint256 developerFee
     );
 
     constructor(
@@ -59,8 +64,11 @@ contract PiggyBank {
         address _cCOP,
         address _cUSD,
         address _cEUR,
+        address _cGBP, // Added cGBP address
         bytes32 _exchangeId_cCOP_cUSD,
-        bytes32 _exchangeId_cUSD_cEUR
+        bytes32 _exchangeId_cUSD_cEUR,
+        bytes32 _exchangeId_cUSD_cGBP, // Added cUSD -> cGBP exchange ID
+        address _developer
     ) {
         iMentoBroker = IMentoBroker(_iMentoBroker);
         mentoOracle = MentoOracleHandler(_mentoOracle);
@@ -68,8 +76,11 @@ contract PiggyBank {
         cCOP = _cCOP;
         cUSD = _cUSD;
         cEUR = _cEUR;
+        cGBP = _cGBP; // Set cGBP address
         exchangeId_cCOP_cUSD = _exchangeId_cCOP_cUSD;
         exchangeId_cUSD_cEUR = _exchangeId_cUSD_cEUR;
+        exchangeId_cUSD_cGBP = _exchangeId_cUSD_cGBP; // Set exchange ID
+        developer = _developer;
     }
 
     function _executeSwap(
@@ -100,25 +111,29 @@ contract PiggyBank {
         return amountOut;
     }
 
-    // Re-added safeMode parameter to the deposit function
     function deposit(uint256 amount, uint256 lockDays, bool safeMode) external {
         require(amount > 0, "Amount must be positive");
         require(lockDays > 0, "Duration must be positive");
 
+        // Now receives four values from the oracle
         (
             uint256 cCOPToKeep,
             uint256 cCOPForUSD,
-            uint256 cCOPForEUR
-        ) = mentoOracle.getSuggestedAllocation(amount, safeMode); // Pass safeMode to oracle
+            uint256 cCOPForEUR,
+            uint256 cCOPForGBP
+        ) = mentoOracle.getSuggestedAllocation(amount, safeMode);
 
         IERC20(cCOP).transferFrom(msg.sender, address(this), amount);
 
         uint256 receivedUSD = 0;
         uint256 receivedEUR = 0;
+        uint256 receivedGBP = 0;
         
-        uint256 totalCCOPToSwap = cCOPForUSD + cCOPForEUR;
+        // Total cCOP to be swapped for other currencies
+        uint256 totalCCOPToSwap = cCOPForUSD + cCOPForEUR + cCOPForGBP;
 
         if (totalCCOPToSwap > 0) {
+            // First, perform the single swap from cCOP to cUSD for the total amount needed
             uint256 intermediateUSD = _executeSwap(
                 exchangeId_cCOP_cUSD,
                 cCOP,
@@ -126,8 +141,11 @@ contract PiggyBank {
                 totalCCOPToSwap
             );
             
+            // Calculate how much of the intermediate cUSD is for EUR and GBP
             uint256 usdAmountForEURSwap = (intermediateUSD * cCOPForEUR) / totalCCOPToSwap;
+            uint256 usdAmountForGBPSwap = (intermediateUSD * cCOPForGBP) / totalCCOPToSwap;
             
+            // Swap for EUR
             if (usdAmountForEURSwap > 0) {
                 receivedEUR = _executeSwap(
                     exchangeId_cUSD_cEUR,
@@ -136,19 +154,32 @@ contract PiggyBank {
                     usdAmountForEURSwap
                 );
             }
+
+            // Swap for GBP
+            if (usdAmountForGBPSwap > 0) {
+                receivedGBP = _executeSwap(
+                    exchangeId_cUSD_cGBP,
+                    cUSD,
+                    cGBP,
+                    usdAmountForGBPSwap
+                );
+            }
             
-            receivedUSD = intermediateUSD - usdAmountForEURSwap;
+            // The remaining cUSD is the final received amount for USD
+            receivedUSD = intermediateUSD - usdAmountForEURSwap - usdAmountForGBPSwap;
         }
         
         piggies[msg.sender].push(
             Piggy({
                 owner: msg.sender,
+                initialAmount: amount,
                 cCOPAmount: cCOPToKeep,
                 cUSDAmount: receivedUSD,
                 cEURAmount: receivedEUR,
+                cGBPAmount: receivedGBP, // Store received GBP
                 startTime: block.timestamp,
                 duration: lockDays * 1 days,
-                safeMode: safeMode, // Store the selected mode
+                safeMode: safeMode,
                 claimed: false
             })
         );
@@ -157,10 +188,11 @@ contract PiggyBank {
             msg.sender,
             amount,
             lockDays,
-            safeMode, // Emit the selected mode
+            safeMode,
             cCOPToKeep,
             receivedUSD,
-            receivedEUR
+            receivedEUR,
+            receivedGBP // Emit received GBP
         );
     }
 
@@ -172,14 +204,24 @@ contract PiggyBank {
 
         uint256 totalUSDToSwapBack = p.cUSDAmount;
         
+        // Swap EUR back to USD
         if (p.cEURAmount > 0) {
-            uint256 usdFromEURSwap = _executeSwap(
+            totalUSDToSwapBack += _executeSwap(
                 exchangeId_cUSD_cEUR,
                 cEUR,
                 cUSD,
                 p.cEURAmount
             );
-            totalUSDToSwapBack += usdFromEURSwap;
+        }
+
+        // Swap GBP back to USD
+        if (p.cGBPAmount > 0) {
+            totalUSDToSwapBack += _executeSwap(
+                exchangeId_cUSD_cGBP,
+                cGBP,
+                cUSD,
+                p.cGBPAmount
+            );
         }
 
         uint256 ccopFromSwaps = 0;
@@ -195,9 +237,22 @@ contract PiggyBank {
         uint256 finalReturn = p.cCOPAmount + ccopFromSwaps;
         p.claimed = true;
 
-        IERC20(cCOP).transfer(msg.sender, finalReturn);
+        uint256 developerFee = 0;
+        uint256 userAmount = finalReturn;
 
-        emit PiggyClaimed(msg.sender, _index, finalReturn);
+        if (finalReturn > p.initialAmount) {
+            uint256 profit = finalReturn - p.initialAmount;
+            developerFee = (profit * 1) / 100;
+            userAmount = finalReturn - developerFee;
+            
+            if (developerFee > 0) {
+                IERC20(cCOP).transfer(developer, developerFee);
+            }
+        }
+
+        IERC20(cCOP).transfer(msg.sender, userAmount);
+
+        emit PiggyClaimed(msg.sender, _index, userAmount, developerFee);
     }
 
     function getUserPiggies(address _user) external view returns (Piggy[] memory) {
@@ -211,33 +266,30 @@ contract PiggyBank {
             return 0;
         }
 
-        // Start with the guaranteed cCOP amount. This is the baseline value.
         uint256 totalValueInCCOP = p.cCOPAmount;
-
-        // --- Step 1: Try to convert EUR to USD ---
         uint256 totalUSDValue = p.cUSDAmount;
+
+        // Simulate EUR -> USD
         if (p.cEURAmount > 0) {
             try iMentoBroker.getAmountOut(exchangeProvider, exchangeId_cUSD_cEUR, cEUR, cUSD, p.cEURAmount) returns (uint256 usdFromEUR) {
-                // If successful, add the converted value.
                 totalUSDValue += usdFromEUR;
-            } catch {
-                // If the EUR -> USD swap simulation fails, we do nothing and proceed with the original USD amount.
-                // This makes the function resilient.
-            }
+            } catch {}
         }
 
-        // --- Step 2: Try to convert the total USD value to cCOP ---
+        // Simulate GBP -> USD
+        if (p.cGBPAmount > 0) {
+            try iMentoBroker.getAmountOut(exchangeProvider, exchangeId_cUSD_cGBP, cGBP, cUSD, p.cGBPAmount) returns (uint256 usdFromGBP) {
+                totalUSDValue += usdFromGBP;
+            } catch {}
+        }
+
+        // Simulate total USD -> cCOP
         if (totalUSDValue > 0) {
             try iMentoBroker.getAmountOut(exchangeProvider, exchangeId_cCOP_cUSD, cUSD, cCOP, totalUSDValue) returns (uint256 ccopFromSwaps) {
-                // If successful, add the final converted value to our total.
                 totalValueInCCOP += ccopFromSwaps;
-            } catch {
-                // If the USD -> cCOP swap simulation fails, we do nothing.
-                // The function will return the value it has calculated so far.
-            }
+            } catch {}
         }
 
         return totalValueInCCOP;
     }
-
 }
