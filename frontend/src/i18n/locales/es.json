@@ -78,7 +78,9 @@
     "diversifyDescription": "Estrategia multi-moneda con gestión de riesgo",
     "createFixedTerms": "Crear plazos fijos en cCOP",
     "fixedTermsDescription": "APY fijo con retornos garantizados",
-    "fixedTermCreated": "¡Depósito a plazo fijo creado exitosamente!"
+    "fixedTermCreated": "¡Depósito a plazo fijo creado exitosamente!",
+    "warningNotImplemented": "⚠️ ADVERTENCIA: La función de plazos fijos aún no está implementada. Esta es solo una interfaz de demostración.",
+    "warningDescription": "Los cálculos y la interfaz son solo para fines de demostración. No se pueden crear depósitos a plazo fijo reales en este momento."
   },
   "dashboard": {
     "title": "Mis Marranitos",
