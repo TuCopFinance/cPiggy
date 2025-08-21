@@ -9,12 +9,18 @@ import {
 } from "@selfxyz/qrcode";
 import { ethers } from "ethers";
 import { useRouter } from 'next/navigation';
+import { useLanguage } from "@/context/LanguageContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ConnectButton } from "@/components/ConnectButton";
+import { useAccount } from "wagmi";
 
 function VerificationPage() {
   const [selfApp, setSelfApp] = useState<SelfApp | null>(null);
   const [universalLink, setUniversalLink] = useState("");
   const [userId] = useState(ethers.ZeroAddress);
   const router = useRouter();
+  const { t, currentLocale, setLocale } = useLanguage();
+  const { address } = useAccount();
 
    useEffect(() => {
     console.log("🚀 useEffect triggered. Initializing SelfAppBuilder...");
@@ -60,9 +66,24 @@ function VerificationPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-green-50 via-teal-50 to-cyan-100 p-6">
+      {/* Language Switcher - Top Right */}
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher 
+          currentLocale={currentLocale} 
+          onLocaleChange={setLocale} 
+        />
+      </div>
+      
+      {/* Compact Wallet Info - Top Left */}
+      {address && (
+        <div className="absolute top-4 left-4">
+          <ConnectButton compact={true} />
+        </div>
+      )}
+      
       <div className="w-full max-w-xl mx-auto bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-8 sm:p-12 text-center">
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">Verify Your Identity</h1>
-        <p className="text-gray-600 mb-6">Scan this QR code with the Self app to continue.</p>
+        <h1 className="text-4xl font-bold text-gray-800 mb-2">{t('verification.title')}</h1>
+        <p className="text-gray-600 mb-6">{t('verification.description')}</p>
         
         {selfApp ? (
           <div className="flex justify-center">
@@ -76,13 +97,13 @@ function VerificationPage() {
           </div>
         ) : (
           <div className="h-64 flex items-center justify-center">
-            <p className="text-gray-500">Loading QR Code...</p>
+            <p className="text-gray-500">{t('verification.verifying')}</p>
           </div>
         )}
 
         {universalLink && (
           <a href={universalLink} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline mt-4 inline-block">
-            Having trouble? Open in Self app directly.
+            {t('verification.tryAgain')}
           </a>
         )}
       </div>

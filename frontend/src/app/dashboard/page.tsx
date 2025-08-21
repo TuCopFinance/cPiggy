@@ -9,6 +9,8 @@ import { formatEther, type Address } from "viem";
 import Link from "next/link";
 import { ArrowLeft, PiggyBank, Clock, CheckCircle, RefreshCw, AlertTriangle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ConnectButton } from "@/components/ConnectButton";
 
 // ABIs and Deployed Addresses
 import PiggyBankABI from "../../../lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
@@ -166,7 +168,7 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
 export default function DashboardPage() {
   const { address, isConnected } = useAccount();
   const piggyBankAddress = deployedAddresses.PiggyBank as Address;
-  const { t } = useLanguage();
+  const { t, currentLocale, setLocale } = useLanguage();
 
   const { data: piggies, isLoading, error, refetch } = useReadContract({
     address: piggyBankAddress,
@@ -187,9 +189,16 @@ export default function DashboardPage() {
             {t('common.back')} {t('navigation.home')}
           </Link>
           <h1 className="text-3xl font-bold text-pink-800">{t('dashboard.title')}</h1>
-          <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          </Button>
+          <div className="flex items-center gap-4">
+            <LanguageSwitcher 
+              currentLocale={currentLocale} 
+              onLocaleChange={setLocale} 
+            />
+            <ConnectButton compact />
+            <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
         </div>
 
         {!isConnected ? (
