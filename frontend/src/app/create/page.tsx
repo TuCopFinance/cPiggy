@@ -8,6 +8,7 @@ import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import { parseEther, type Address } from "viem";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle, Info, Loader2, Shield, Zap } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 // ABIs and Deployed Addresses
 import PiggyBankABI from "../../../lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
@@ -41,6 +42,7 @@ export default function CreatePiggy() {
   const [amount, setAmount] = useState("10");
   const [duration, setDuration] = useState(30);
   const [safeMode, setSafeMode] = useState(true);
+  const { t } = useLanguage();
 
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
@@ -111,39 +113,39 @@ export default function CreatePiggy() {
   };
 
   const buttonText = isLoading
-    ? "Processing..."
+    ? t('create.processing')
     : needsApproval
-    ? `Approve ${amount} cCOP`
-    : "Create My Piggy";
+    ? `${t('create.approve')} ${amount} cCOP`
+    : t('create.createPiggy');
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-blue-100 p-4">
       <div className="w-full max-w-lg mx-auto">
         <Link href="/" className="flex items-center gap-2 text-gray-600 hover:text-pink-700 transition-colors mb-4">
           <ArrowLeft size={20} />
-          <span className="font-medium">Back to Home</span>
+          <span className="font-medium">{t('common.back')} {t('navigation.home')}</span>
         </Link>
         <form onSubmit={handleSubmit} className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-8 space-y-8">
           <h1 className="text-3xl font-bold text-center text-pink-800 tracking-tight">
-            Create Your Piggy
+            {t('create.title')}
           </h1>
 
           {/* Amount Input */}
           <div className="space-y-2">
-            <label htmlFor="deposit-amount" className="block font-semibold text-gray-700">1. Deposit Amount</label>
+            <label htmlFor="deposit-amount" className="block font-semibold text-gray-700">1. {t('create.depositAmount')}</label>
             <div className="relative">
-                <input id="deposit-amount" type="number" className="w-full border-2 border-gray-200 bg-white/50 rounded-lg px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g., 100" min="0"/>
+                <input id="deposit-amount" type="number" className="w-full border-2 border-gray-200 bg-white/50 rounded-lg px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder={t('create.amountPlaceholder')} min="0"/>
                 <span className="absolute right-4 top-3.5 text-gray-500 font-medium">cCOP</span>
             </div>
           </div>
 
           {/* Duration Selection */}
           <div className="space-y-3">
-            <label className="block font-semibold text-gray-700">2. Lock Duration</label>
+            <label className="block font-semibold text-gray-700">2. {t('create.lockDuration')}</label>
             <div className="grid grid-cols-3 gap-2">
               {[30, 60, 90].map(d => (
                 <Button type="button" key={d} onClick={() => setDuration(d)} variant={duration === d ? 'default' : 'outline'} className={`py-6 text-base rounded-lg transition-all ${duration === d ? 'bg-pink-600 text-white shadow-md' : 'bg-white/80 text-gray-700'}`}>
-                  {d} days
+                  {d} {t('create.days')}
                 </Button>
               ))}
             </div>
@@ -151,17 +153,17 @@ export default function CreatePiggy() {
           
           {/* Mode Selection */}
           <div className="space-y-3">
-            <label className="block font-semibold text-gray-700">3. Choose Your Mode</label>
+            <label className="block font-semibold text-gray-700">3. {t('create.chooseMode')}</label>
             <div className="grid grid-cols-2 gap-3">
               <div onClick={() => setSafeMode(true)} className={`cursor-pointer p-4 border-2 rounded-lg text-center transition-all ${safeMode ? 'border-pink-500 bg-pink-50' : 'border-gray-200 bg-white/80'}`}>
                 <Shield className="mx-auto w-8 h-8 text-green-600 mb-1" />
-                <p className="font-semibold text-green-700">Safe Mode</p>
-                <p className="text-xs text-gray-500">Lower Risk</p>
+                <p className="font-semibold text-green-700">{t('create.safeMode')}</p>
+                <p className="text-xs text-gray-500">{t('create.lowerRisk')}</p>
               </div>
               <div onClick={() => setSafeMode(false)} className={`cursor-pointer p-4 border-2 rounded-lg text-center transition-all ${!safeMode ? 'border-pink-500 bg-pink-50' : 'border-gray-200 bg-white/80'}`}>
                 <Zap className="mx-auto w-8 h-8 text-purple-600 mb-1" />
-                <p className="font-semibold text-purple-700">Standard</p>
-                <p className="text-xs text-gray-500">Higher Growth</p>
+                <p className="font-semibold text-purple-700">{t('create.standardMode')}</p>
+                <p className="text-xs text-gray-500">{t('create.higherGrowth')}</p>
               </div>
             </div>
           </div>
@@ -180,8 +182,8 @@ export default function CreatePiggy() {
             <div className="bg-blue-50 text-blue-700 p-3 rounded-lg text-sm flex items-center gap-2">
               <Info className="w-5 h-5"/>
               <div>
-                Approval sent! Wait for confirmation, then click &quot;Create My Piggy&quot; again.
-                <a href={`https://celoscan.io/tx/${txHash}`} target="_blank" rel="noopener noreferrer" className="font-semibold underline ml-1">View Tx</a>
+                {t('create.approvalSent')}
+                <a href={`https://celoscan.io/tx/${txHash}`} target="_blank" rel="noopener noreferrer" className="font-semibold underline ml-1">{t('create.viewTx')}</a>
               </div>
             </div>
           )}
@@ -189,12 +191,12 @@ export default function CreatePiggy() {
             <div className="bg-green-50 text-green-700 p-3 rounded-lg text-sm flex items-center gap-2">
               <CheckCircle className="w-5 h-5"/>
               <div>
-                Piggy created successfully!
-                <a href={`https://celoscan.io/tx/${txHash}`} target="_blank" rel="noopener noreferrer" className="font-semibold underline ml-1">View Tx</a>
+                {t('create.piggyCreated')}
+                <a href={`https://celoscan.io/tx/${txHash}`} target="_blank" rel="noopener noreferrer" className="font-semibold underline ml-1">{t('create.viewTx')}</a>
               </div>
             </div>
           )}
-          {error && <p className="text-red-600 text-sm text-center break-words">⚠️ Error: {error}</p>}
+          {error && <p className="text-red-600 text-sm text-center break-words">⚠️ {t('common.error')}: {error}</p>}
         </form>
       </div>
     </div>

@@ -8,6 +8,7 @@ import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import { formatEther, type Address } from "viem";
 import Link from "next/link";
 import { ArrowLeft, PiggyBank, Clock, CheckCircle, RefreshCw, AlertTriangle } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 // ABIs and Deployed Addresses
 import PiggyBankABI from "../../../lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
@@ -32,6 +33,7 @@ interface Piggy {
 function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
+  const { t } = useLanguage();
 
   const [isClaiming, setIsClaiming] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
@@ -77,17 +79,17 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
   };
 
   const formatTimeLeft = (seconds: number) => {
-    if (seconds <= 0) return "Ready to Claim";
+    if (seconds <= 0) return t('dashboard.readyToClaim');
     const days = Math.floor(seconds / (3600 * 24));
     const hours = Math.floor((seconds % (3600 * 24)) / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    return `${days}d ${hours}h ${minutes}m left`;
+    return `${days}d ${hours}h ${minutes}m ${t('dashboard.left')}`;
   };
   
   const getStatus = () => {
-    if (piggy.claimed || claimSuccess) return { text: "Claimed", color: "text-green-600", icon: <CheckCircle className="w-4 h-4" /> };
-    if (isClaimable) return { text: "Ready to Claim", color: "text-blue-600", icon: <PiggyBank className="w-4 h-4" /> };
-    return { text: "Active", color: "text-yellow-600", icon: <Clock className="w-4 h-4" /> };
+    if (piggy.claimed || claimSuccess) return { text: t('dashboard.status.claimed'), color: "text-green-600", icon: <CheckCircle className="w-4 h-4" /> };
+    if (isClaimable) return { text: t('dashboard.status.readyToClaim'), color: "text-blue-600", icon: <PiggyBank className="w-4 h-4" /> };
+    return { text: t('dashboard.status.active'), color: "text-yellow-600", icon: <Clock className="w-4 h-4" /> };
   };
   const status = getStatus();
   
@@ -96,7 +98,7 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-md p-6 space-y-4 transition-all hover:shadow-lg">
       <div className="flex justify-between items-center">
-        <h3 className="text-xl font-bold text-pink-700">Piggy #{index + 1}</h3>
+        <h3 className="text-xl font-bold text-pink-700">{t('dashboard.piggyNumber').replace('{number}', (index + 1).toString())}</h3>
         <span className={`flex items-center gap-1 text-sm font-medium ${status.color}`}>
           {status.icon} {status.text}
         </span>
@@ -104,40 +106,40 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
       
       {/* --- Main Value Display --- */}
       <div className="text-center bg-slate-50 p-4 rounded-lg">
-        <p className="text-gray-500 text-sm">Current Value</p>
+        <p className="text-gray-500 text-sm">{t('dashboard.currentValue')}</p>
         <p className="font-bold text-2xl text-gray-800">
           {isValueLoading
-            ? "Loading..."
+            ? t('common.loading')
             : `${formatAmount(typeof currentValue === 'bigint' ? currentValue : 0n)} cCOP`}
         </p>
       </div>
 
       {/* --- UPDATED: Asset Breakdown --- */}
       <div className="space-y-3">
-        <p className="text-sm font-semibold text-gray-600">Asset Breakdown</p>
+        <p className="text-sm font-semibold text-gray-600">{t('dashboard.assetBreakdown')}</p>
         <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-500">cCOP Balance</span>
+          <span className="text-gray-500">{t('dashboard.ccopBalance')}</span>
           <span className="font-medium text-gray-800">{formatAmount(piggy.cCOPAmount)}</span>
         </div>
         <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-500">cUSD Balance</span>
+          <span className="text-gray-500">{t('dashboard.cusdBalance')}</span>
           <span className="font-medium text-gray-800">{formatAmount(piggy.cUSDAmount)}</span>
         </div>
         <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-500">cEUR Balance</span>
+          <span className="text-gray-500">{t('dashboard.ceurBalance')}</span>
           <span className="font-medium text-gray-800">{formatAmount(piggy.cEURAmount)}</span>
         </div>
       </div>
       
       <div className="grid grid-cols-2 gap-4 text-sm pt-2 border-t">
         <div className="space-y-1">
-          <p className="text-gray-500">Time Left</p>
+          <p className="text-gray-500">{t('dashboard.timeLeft')}</p>
           <p className="font-semibold text-gray-800">{formatTimeLeft(timeLeft)}</p>
         </div>
         <div className="space-y-1">
-          <p className="text-gray-500">Mode</p>
+          <p className="text-gray-500">{t('dashboard.mode')}</p>
           <p className={`font-semibold ${piggy.safeMode ? 'text-green-700' : 'text-purple-700'}`}>
-            {piggy.safeMode ? "Safe" : "Standard"}
+            {piggy.safeMode ? t('create.safeMode') : t('create.standardMode')}
           </p>
         </div>
       </div>
@@ -148,11 +150,11 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
           onClick={handleClaim}
           disabled={!isClaimable || isClaiming}
         >
-          {isClaiming ? "Claiming..." : "Claim Piggy"}
+          {isClaiming ? t('dashboard.claiming') : t('dashboard.claimPiggy')}
         </Button>
       )}
 
-      {claimSuccess && <p className="text-green-600 text-center text-sm">✅ Successfully claimed!</p>}
+      {claimSuccess && <p className="text-green-600 text-center text-sm">✅ {t('dashboard.successfullyClaimed')}</p>}
       {claimError && <p className="text-red-500 text-center text-sm break-words">⚠️ {claimError}</p>}
     </div>
   );
@@ -164,6 +166,7 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
 export default function DashboardPage() {
   const { address, isConnected } = useAccount();
   const piggyBankAddress = deployedAddresses.PiggyBank as Address;
+  const { t } = useLanguage();
 
   const { data: piggies, isLoading, error, refetch } = useReadContract({
     address: piggyBankAddress,
@@ -181,9 +184,9 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between mb-6">
           <Link href="/" className="flex items-center gap-2 text-pink-700 hover:text-pink-900">
             <ArrowLeft size={20} />
-            Back to Home
+            {t('common.back')} {t('navigation.home')}
           </Link>
-          <h1 className="text-3xl font-bold text-pink-800">My Piggies</h1>
+          <h1 className="text-3xl font-bold text-pink-800">{t('dashboard.title')}</h1>
           <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
           </Button>
@@ -191,16 +194,16 @@ export default function DashboardPage() {
 
         {!isConnected ? (
           <div className="text-center py-16">
-            <p className="text-gray-600">Please connect your wallet to see your piggies.</p>
+            <p className="text-gray-600">{t('dashboard.connectWalletMessage')}</p>
           </div>
         ) : isLoading ? (
           <div className="text-center py-16">
-            <p className="text-gray-600">Fetching your piggies...</p>
+            <p className="text-gray-600">{t('dashboard.fetchingPiggies')}</p>
           </div>
         ) : error ? (
           <div className="text-center py-16 bg-red-50 border border-red-200 rounded-lg p-4">
             <AlertTriangle className="w-8 h-8 mx-auto text-red-500 mb-2" />
-            <p className="text-red-700 font-semibold">Could not fetch your piggies.</p>
+            <p className="text-red-700 font-semibold">{t('dashboard.couldNotFetch')}</p>
             <p className="text-red-600 text-sm break-words">{error.message}</p>
           </div>
         ) : piggies && (piggies as Piggy[]).length > 0 ? (
@@ -212,10 +215,10 @@ export default function DashboardPage() {
         ) : (
           <div className="text-center py-16 bg-white border rounded-lg">
             <PiggyBank className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-            <h2 className="text-xl font-semibold text-gray-700">No Piggies Found</h2>
-            <p className="text-gray-500 mt-2">You haven&apos;t created any piggies yet.</p>
+            <h2 className="text-xl font-semibold text-gray-700">{t('dashboard.noPiggiesFound')}</h2>
+            <p className="text-gray-500 mt-2">{t('dashboard.noPiggiesMessage')}</p>
             <Link href="/create" className="mt-4 inline-block">
-              <Button className="bg-pink-600 hover:bg-pink-700">Create Your First Piggy</Button>
+              <Button className="bg-pink-600 hover:bg-pink-700">{t('dashboard.createFirstPiggy')}</Button>
             </Link>
           </div>
         )}

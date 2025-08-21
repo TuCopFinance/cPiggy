@@ -1,15 +1,18 @@
 'use client'
 
-import { useAppKitAccount, useDisconnect } from '@reown/appkit/react'
+import { useAppKitAccount, useDisconnect, useAppKit } from '@reown/appkit/react'
 import { Button } from '@/components/ui/button'
 import { LogOut, Wallet, User, Copy, Check, Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { useLanguage } from '@/context/LanguageContext'
 
-export const ConnectButton = () => {
+export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
   const { isConnected, address, embeddedWalletInfo } = useAppKitAccount()
   const { disconnect } = useDisconnect()
+  const { open } = useAppKit()
   const [copied, setCopied] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const { t } = useLanguage()
 
   // Handle client-side mounting to prevent hydration issues
   useEffect(() => {
@@ -39,7 +42,7 @@ export const ConnectButton = () => {
   }
 
   const formatAddress = (addr: string | undefined): string => {
-    if (!addr) return 'Loading...'
+    if (!addr) return t('common.loading')
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`
   }
 
@@ -49,7 +52,7 @@ export const ConnectButton = () => {
       <div className="flex flex-col items-center gap-4">
         <div className="flex items-center gap-2 text-gray-500">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <span>Loading...</span>
+          <span>{t('common.loading')}</span>
         </div>
       </div>
     )
@@ -59,34 +62,74 @@ export const ConnectButton = () => {
   if (!isConnected) {
     return (
       <div className="flex flex-col items-center gap-4">
-        <appkit-button />
-        <p className="text-sm text-gray-600">Connect your wallet to get started</p>
+        <Button 
+          onClick={() => open()}
+          className="px-8 py-3 text-lg font-semibold bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+        >
+          {t('home.connectWallet')}
+        </Button>
+        <p className="text-sm text-gray-600">{t('home.connectWalletMessage')}</p>
       </div>
     )
   }
 
   // Show wallet info when connected
-  return (
-    <div className="flex flex-col items-center gap-4 w-full max-w-sm">
-      {/* Wallet Info Card */}
-      <div className="w-full bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200 shadow-sm">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="p-2 bg-pink-100 rounded-lg">
-            <Wallet className="w-5 h-5 text-pink-600" />
+  if (compact) {
+    // Mini version for top corner
+    return (
+      <div className="flex items-center gap-2 bg-white/95 backdrop-blur-sm rounded-lg p-2 border border-gray-200/50 shadow-sm">
+        <div className="p-1 bg-pink-100 rounded-md">
+          <Wallet className="w-3 h-3 text-pink-600" />
+        </div>
+        <div className="flex flex-col min-w-0">
+          <span className="text-xs font-medium text-gray-800 truncate">
+            {embeddedWalletInfo?.user?.email || embeddedWalletInfo?.user?.username || formatAddress(address)}
+          </span>
+          <div className="flex items-center gap-1">
+            <div className="w-1 h-1 bg-green-500 rounded-full"></div>
+            <span className="text-xs text-green-600">Connected</span>
           </div>
-          <div className="flex-1">
-            <p className="font-semibold text-gray-800">Connected Wallet</p>
-            <p className="text-sm text-gray-600">
-              {embeddedWalletInfo?.user?.email || embeddedWalletInfo?.user?.username || 'Wallet'}
-            </p>
+        </div>
+        <Button
+          onClick={handleDisconnect}
+          variant="ghost"
+          size="sm"
+          className="h-6 w-6 p-0 hover:bg-red-100 rounded-md flex-shrink-0"
+        >
+          <LogOut className="w-3 h-3 text-red-600" />
+        </Button>
+      </div>
+    )
+  }
+
+  // Full version for main content
+  return (
+    <div className="flex flex-col items-center gap-2 w-full max-w-sm">
+      {/* Ultra Compact Wallet Info Card */}
+      <div className="w-full bg-white/90 backdrop-blur-md rounded-xl p-4 border border-gray-200/50 shadow-lg">
+        {/* Compact Header Row */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-gradient-to-r from-pink-100 to-purple-100 rounded-lg">
+              <Wallet className="w-4 h-4 text-pink-600" />
+            </div>
+            <div className="flex flex-col">
+              <p className="text-sm font-semibold text-gray-800">
+                {embeddedWalletInfo?.user?.email || embeddedWalletInfo?.user?.username || t('wallet.wallet')}
+              </p>
+              <div className="flex items-center gap-1.5 text-xs text-green-600">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                <span>{t('wallet.walletConnected')}</span>
+              </div>
+            </div>
           </div>
         </div>
         
-        {/* Address Display */}
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-3">
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-gray-500" />
-            <span className="text-sm font-mono text-gray-700">
+        {/* Compact Address Row */}
+        <div className="flex items-center justify-between p-2.5 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg mb-3">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <User className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+            <span className="text-xs font-mono text-gray-700 truncate">
               {formatAddress(address)}
             </span>
           </div>
@@ -94,32 +137,29 @@ export const ConnectButton = () => {
             variant="ghost"
             size="sm"
             onClick={copyAddress}
-            className="h-8 w-8 p-0 hover:bg-gray-200"
+            className="h-7 w-7 p-0 hover:bg-gray-200/80 rounded-md flex-shrink-0 transition-colors"
             disabled={!address}
           >
             {copied ? (
-              <Check className="w-4 h-4 text-green-600" />
+              <Check className="w-3.5 h-3.5 text-green-600" />
             ) : (
-              <Copy className="w-4 h-4 text-gray-500" />
+              <Copy className="w-3.5 h-3.5 text-gray-500" />
             )}
           </Button>
         </div>
 
-        {/* Disconnect Button */}
-        <Button
-          onClick={handleDisconnect}
-          variant="outline"
-          className="w-full border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300"
-        >
-          <LogOut className="w-4 h-4 mr-2" />
-          Disconnect Wallet
-        </Button>
-      </div>
-
-      {/* Connection Status */}
-      <div className="flex items-center gap-2 text-sm text-green-600">
-        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-        <span>Wallet Connected</span>
+        {/* Compact Action Buttons Row */}
+        <div className="flex gap-2">
+          <Button
+            onClick={handleDisconnect}
+            variant="outline"
+            size="sm"
+            className="flex-1 h-8 text-xs border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300 transition-colors"
+          >
+            <LogOut className="w-3.5 h-3.5 mr-1.5" />
+            {t('wallet.disconnectWallet')}
+          </Button>
+        </div>
       </div>
     </div>
   )
