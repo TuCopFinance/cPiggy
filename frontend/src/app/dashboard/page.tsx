@@ -133,7 +133,6 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
           <span className="text-gray-500">{t('dashboard.ceurBalance')}</span>
           <span className="font-medium text-gray-800">{formatAmount(piggy.cEURAmount)}</span>
         </div>
-        {/* --- ADDED: Display for cGBP Balance --- */}
         <div className="flex justify-between items-center text-xs sm:text-sm">
           <span className="text-gray-500">{t('dashboard.cgbpBalance')}</span>
           <span className="font-medium text-gray-800">{formatAmount(piggy.cGBPAmount)}</span>

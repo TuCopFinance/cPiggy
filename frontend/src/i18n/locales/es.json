@@ -107,6 +107,7 @@
     "ccopBalance": "Saldo cCOP",
     "cusdBalance": "Saldo cUSD",
     "ceurBalance": "Saldo cEUR",
+    "cgbpBalance" : "Saldo cGBP",
     "mode": "Modo",
     "claimPiggy": "Reclamar Marranito",
     "successfullyClaimed": "¡Reclamada exitosamente!",
