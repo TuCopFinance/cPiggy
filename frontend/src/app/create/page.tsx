@@ -2,9 +2,9 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useAccount, useReadContract, useWriteContract } from "wagmi";
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { parseEther, type Address } from "viem";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle, Info, Loader2, Shield, Zap, TrendingUp, Lock } from "lucide-react";
@@ -58,6 +58,18 @@ export default function CreatePiggy() {
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [txHash, setTxHash] = useState('');
+  const [needsApprovalMessage, setNeedsApprovalMessage] = useState(false);
+  const [approvalTxHash, setApprovalTxHash] = useState<string>('');
+
+  // Watch for approval transaction confirmation
+  const { isLoading: isApprovalPending, isSuccess: isApprovalSuccess } = useWaitForTransactionReceipt({
+    hash: approvalTxHash as `0x${string}`,
+  });
+
   // Compound interest calculation function
   const calculateCompoundInterest = (principal: number, monthlyRate: number, months: number) => {
     const monthlyRateDecimal = monthlyRate / 100;
@@ -89,14 +101,17 @@ export default function CreatePiggy() {
     },
   });
 
+  // Automatically refresh allowance when approval is confirmed
+  useEffect(() => {
+    if (isApprovalSuccess) {
+      refetchAllowance();
+      setApprovalTxHash(''); // Reset for next use
+      setNeedsApprovalMessage(false);
+    }
+  }, [isApprovalSuccess, refetchAllowance]);
+
   // Corrected logic: user must have an address to need approval.
   const needsApproval = !!address && parsedAmount > 0n && (!allowance || (allowance as bigint) < parsedAmount);
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [txHash, setTxHash] = useState('');
-  const [needsApprovalMessage, setNeedsApprovalMessage] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -110,18 +125,24 @@ export default function CreatePiggy() {
       setNeedsApprovalMessage(false);
 
       try {
-        await refetchAllowance(); // Always get the latest allowance
+        // Always get the latest allowance before proceeding
+        await refetchAllowance();
 
         if (needsApproval) {
+          // Handle approval transaction
           const hash = await writeContractAsync({
             address: cCOPAddress,
             abi: erc20Abi,
             functionName: 'approve',
             args: [piggyBankAddress, parsedAmount],
           });
-          setTxHash(hash);
-          setNeedsApprovalMessage(true); // Show a persistent message instead of an alert
+          setApprovalTxHash(hash);
+          setNeedsApprovalMessage(true);
+          
+          // The useEffect will automatically handle the approval confirmation
+          // and refresh the allowance, which will update the button text
         } else {
+          // Handle deposit transaction
           const hash = await writeContractAsync({
             address: piggyBankAddress,
             abi: PiggyBankABI.abi,
@@ -154,6 +175,9 @@ export default function CreatePiggy() {
     : investmentType === 'diversify'
     ? (needsApproval ? `${t('create.approve')} ${formatNumber(parseFloat(amount))} cCOP` : t('create.createPiggy'))
     : t('create.createFixedTerm');
+
+  // Show approval pending state
+  const isApprovalInProgress = isApprovalPending || (!!approvalTxHash && !isApprovalSuccess);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-blue-100 p-2 sm:p-3">
@@ -343,10 +367,10 @@ export default function CreatePiggy() {
           <Button
             type="submit"
             className="w-full bg-pink-600 hover:bg-pink-700 text-white py-3 sm:py-4 text-base sm:text-lg font-bold rounded-lg shadow-lg shadow-pink-500/50 transition-all transform hover:scale-105 disabled:bg-gray-400 disabled:shadow-none"
-            disabled={isLoading || (investmentType === 'diversify' && parsedAmount === 0n)}
+            disabled={isLoading || isApprovalInProgress || (investmentType === 'diversify' && parsedAmount === 0n)}
           >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />}
-            {buttonText}
+            {(isLoading || isApprovalInProgress) && <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />}
+            {isApprovalInProgress ? t('create.approvalSent') : buttonText}
           </Button>
 
           {/* Feedback Messages */}
@@ -354,8 +378,11 @@ export default function CreatePiggy() {
             <div className="bg-blue-50 text-blue-700 p-3 rounded-lg text-sm flex items-center gap-2">
               <Info className="w-5 h-5"/>
               <div>
-                {t('create.approvalSent')}
-                <a href={`https://celoscan.io/tx/${txHash}`} target="_blank" rel="noopener noreferrer" className="font-semibold underline ml-1">{t('create.viewTx')}</a>
+                {isApprovalInProgress 
+                  ? `${t('create.approvalSent')} ${isApprovalPending ? t('create.processing') : ''}`
+                  : t('create.approvalSent')
+                }
+                <a href={`https://celoscan.io/tx/${approvalTxHash}`} target="_blank" rel="noopener noreferrer" className="font-semibold underline ml-1">{t('create.viewTx')}</a>
               </div>
             </div>
           )}
