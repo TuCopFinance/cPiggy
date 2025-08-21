@@ -13,7 +13,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ConnectButton } from "@/components/ConnectButton";
 
 // ABIs and Deployed Addresses
-import PiggyBankABI from "../../../lib/artifacts/contracts/PiggyBank.sol/PiggyBank.json";
+import PiggyBankABI from "../../../lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
 import deployedAddresses from "../../../lib/deployedAddresses.json";
 
 // --- UPDATED: Piggy interface now matches the contract's struct completely ---
