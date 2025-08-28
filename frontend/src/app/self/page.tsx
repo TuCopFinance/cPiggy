@@ -39,7 +39,7 @@ function VerificationPage() {
         userIdType: "hex",
         userDefinedData: "Welcome to cPiggy!",
         disclosures: {
-          // none here
+          excludedCountries: []
         }
       }).build();
 
