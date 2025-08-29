@@ -61,6 +61,7 @@
     "processing": "Processing...",
     "approve": "Approve",
     "approvalSent": "Approval sent! Wait for confirmation, then click \"Create My Piggy\" again.",
+    "awaitingConfirmation": "Awaiting confirmation...",
     "viewTx": "View Tx",
     "createFixedTerm": "Create Fixed Term",
     "depositAmount": "Deposit Amount",
@@ -79,7 +80,17 @@
     "createFixedTerms": "Create fixed terms in cCOP",
     "fixedTermsDescription": "Fixed APY with guaranteed returns",
     "fixedTermCreated": "Fixed term deposit created successfully!",
-    "warningNotImplemented": "⚠️ WARNING: Fixed terms feature is not yet implemented. This is a demo/mockup interface only."
+    "warningNotImplemented": "⚠️ WARNING: Fixed terms feature is not yet implemented. This is a demo/mockup interface only.",
+    "errors": {
+      "approvalRejected": "You cancelled the approval transaction. No tokens were approved.",
+      "depositRejected": "You cancelled the piggy creation transaction. Your tokens are still approved for future use.",
+      "approvalFailed": "Token approval failed. This might be due to network issues or insufficient gas fees.",
+      "depositFailed": "Piggy creation failed. This could be due to insufficient funds, network issues, or gas problems.",
+      "insufficientFunds": "Transaction failed due to insufficient cCOP balance in your wallet.",
+      "insufficientAllowance": "Transaction failed due to insufficient token approval. Please approve tokens first.",
+      "networkError": "Network error occurred. Please check your connection and try again.",
+      "checkTransaction": "Check transaction"
+    }
   },
   "dashboard": {
     "title": "My Piggies",

@@ -61,6 +61,7 @@
     "processing": "Procesando...",
     "approve": "Aprobar",
     "approvalSent": "¡Aprobación enviada! Espera la confirmación, luego haz clic en \"Crear Mi Marranito\" nuevamente.",
+    "awaitingConfirmation": "Esperando confirmación...",
     "viewTx": "Ver Tx",
     "createFixedTerm": "Crear Plazo Fijo",
     "depositAmount": "Cantidad de Depósito",
@@ -79,7 +80,17 @@
     "createFixedTerms": "Crear plazos fijos en cCOP",
     "fixedTermsDescription": "APY fijo con retornos garantizados",
     "fixedTermCreated": "¡Depósito a plazo fijo creado exitosamente!",
-    "warningNotImplemented": "⚠️ ADVERTENCIA: La función de plazos fijos aún no está implementada. Esta es solo una interfaz de demostración."
+    "warningNotImplemented": "⚠️ ADVERTENCIA: La función de plazos fijos aún no está implementada. Esta es solo una interfaz de demostración.",
+    "errors": {
+      "approvalRejected": "Cancelaste la transacción de aprobación. No se aprobaron tokens.",
+      "depositRejected": "Cancelaste la transacción de creación de marranito. Tus tokens siguen aprobados para uso futuro.",
+      "approvalFailed": "La aprobación de tokens falló. Esto podría deberse a problemas de red o tarifas de gas insuficientes.",
+      "depositFailed": "La creación del marranito falló. Esto podría deberse a fondos insuficientes, problemas de red o gas.",
+      "insufficientFunds": "La transacción falló debido a saldo insuficiente de cCOP en tu billetera.",
+      "insufficientAllowance": "La transacción falló debido a aprobación de tokens insuficiente. Por favor aprueba los tokens primero.",
+      "networkError": "Ocurrió un error de red. Por favor verifica tu conexión e inténtalo de nuevo.",
+      "checkTransaction": "Ver transacción"
+    }
   },
   "dashboard": {
     "title": "Mis Marranitos",

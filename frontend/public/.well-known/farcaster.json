@@ -1,0 +1,18 @@
+{
+  "version": "1",
+  "accountAssociation": {
+    "header": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9",
+    "payload": "eyJkb21haW4iOiJjcGlnZ3kueHl6IiwiZmNpZCI6MH0",
+    "signature": "signature_placeholder"
+  },
+  "app": {
+    "name": "cPiggyFX",
+    "description": "Diversified FX Piggy Bank - Save in cCOP, grow in the world. Create savings goals with automatic currency diversification on Celo blockchain.",
+    "homeUrl": "https://cpiggy.xyz",
+    "iconUrl": "https://cpiggy.xyz/icon.png",
+    "splashImageUrl": "https://cpiggy.xyz/splash.png",
+    "webhookUrl": "https://cpiggy.xyz/api/webhook",
+    "categories": ["finance", "defi", "savings"],
+    "requiredCapabilities": ["wallet.getEthereumProvider", "actions.signIn"]
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "name": "next-wagmi-app-router",
+  "name": "cpiggy-farcaster-miniapp",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,6 +11,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@farcaster/miniapp-sdk": "^0.1.9",
+    "@farcaster/miniapp-wagmi-connector": "^1.0.0",
     "@formatjs/intl-localematcher": "^0.6.1",
     "@radix-ui/react-slot": "^1.2.3",
     "@reown/appkit": "1.7.15",

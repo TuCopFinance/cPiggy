@@ -6,6 +6,7 @@ import { createAppKit } from '@reown/appkit/react'
 import React, { type ReactNode } from 'react'
 import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi'
 import { LanguageProvider } from './LanguageContext'
+import { FarcasterProvider } from './FarcasterContext'
 
 // Set up queryClient
 const queryClient = new QueryClient()
@@ -14,8 +15,8 @@ const queryClient = new QueryClient()
 const metadata = {
   name: 'cPiggyFX',
   description: 'Diversified FX Piggy Bank on Celo',
-  url: typeof window !== 'undefined' ? window.location.origin : 'https://cpiggyfx.com',
-  icons: ['https://avatars.githubusercontent.com/u/179229932']
+  url: typeof window !== 'undefined' ? window.location.origin : 'https://cpiggy-tests.up.railway.app',
+  icons: ['https://cpiggy-tests.up.railway.app/icon.png']
 }
 
 // Create the modal
@@ -39,9 +40,11 @@ function ContextProvider({ children, cookies }: { children: ReactNode; cookies: 
   return (
     <WagmiProvider config={wagmiAdapter.wagmiConfig as Config} initialState={initialState}>
       <QueryClientProvider client={queryClient}>
-        <LanguageProvider>
-          {children}
-        </LanguageProvider>
+        <FarcasterProvider>
+          <LanguageProvider>
+            {children}
+          </LanguageProvider>
+        </FarcasterProvider>
       </QueryClientProvider>
     </WagmiProvider>
   )
