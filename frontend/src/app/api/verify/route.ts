@@ -18,9 +18,9 @@ const configStore = new DefaultConfigStore(verification_config);
 
 // 3. INITIALIZE THE VERIFIER
 const selfBackendVerifier = new SelfBackendVerifier(
-  process.env.NEXT_PUBLIC_SELF_SCOPE || "cpiggyfx-tests",
+  process.env.NEXT_PUBLIC_SELF_SCOPE || "3320755529850068918937765044709703364016558061582600111115206205369709951791",
   process.env.NEXT_PUBLIC_SELF_ENDPOINT || "https://cpiggy-tests.up.railway.app/api/verify",
-  false, // true = mock for testing
+  true, // true = mock for testing
   AllIds,
   configStore,
   "hex"
