@@ -30,9 +30,9 @@ function VerificationPage() {
 
       const app = new SelfAppBuilder({
         version: 2,
-        appName: process.env.NEXT_PUBLIC_SELF_APP_NAME || "cPiggyFX",
-        scope: process.env.NEXT_PUBLIC_SELF_SCOPE || "3320755529850068918937765044709703364016558061582600111115206205369709951791",
-        endpoint: process.env.NEXT_PUBLIC_SELF_ENDPOINT || "https://cpiggy-tests.up.railway.app/api/verify",
+        appName: process.env.NEXT_PUBLIC_SELF_APP_NAME,
+        scope: process.env.NEXT_PUBLIC_SELF_SCOPE,
+        endpoint: process.env.NEXT_PUBLIC_SELF_ENDPOINT,
         logoBase64: "https://i.postimg.cc/mrmVf9hm/self.png",
         userId: userId,
         endpointType: "https",
