@@ -18,7 +18,7 @@ const configStore = new DefaultConfigStore(verification_config);
 
 // 3. INITIALIZE THE VERIFIER
 const selfBackendVerifier = new SelfBackendVerifier(
-  process.env.NEXT_PUBLIC_SELF_SCOPE || "cpiggyfx-prod",
+  process.env.NEXT_PUBLIC_SELF_SCOPE || "cpiggy-prod",
   process.env.NEXT_PUBLIC_SELF_ENDPOINT || "https://cpiggy.xyz/api/verify",
   true, // true = mock for testing
   AllIds,
