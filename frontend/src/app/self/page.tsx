@@ -31,7 +31,7 @@ function VerificationPage() {
       const app = new SelfAppBuilder({
         version: 2,
         appName: process.env.NEXT_PUBLIC_SELF_APP_NAME,
-        scope: process.env.NEXT_PUBLIC_SELF_SCOPE,
+        scope: process.env.NEXT_PUBLIC_SELF_SCOPE || "2693572998379463921559712132528794818864196352591062284041112622353970995484",
         endpoint: process.env.NEXT_PUBLIC_SELF_ENDPOINT,
         logoBase64: "https://i.postimg.cc/mrmVf9hm/self.png",
         userId: userId,
