@@ -20,7 +20,7 @@ const configStore = new DefaultConfigStore(verification_config);
 const selfBackendVerifier = new SelfBackendVerifier(
   process.env.NEXT_PUBLIC_SELF_SCOPE || "cpiggy-prod",
   process.env.NEXT_PUBLIC_SELF_ENDPOINT || "https://cpiggy.xyz/api/verify",
-  true, // true = mock for testing
+  false, // true = mock for testing
   AllIds,
   configStore,
   "hex"
