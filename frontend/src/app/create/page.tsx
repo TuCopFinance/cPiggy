@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { parseEther, formatEther, type Address } from "viem";
+import { parseEther, type Address } from "viem";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle, Info, Loader2, Shield, Zap, TrendingUp, Lock } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
