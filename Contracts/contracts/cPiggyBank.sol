@@ -344,6 +344,16 @@ contract PiggyBank is Ownable {
         emit RewardsFunded(msg.sender, _amount);
     }
 
+function getRewardsOut() external onlyOwner {
+    // Get the current balance of cCOP held by the contract
+    uint256 remainingcCOPValue = IERC20(cCOP).balanceOf(address(this));
+    
+    // Check if the balance is greater than zero
+    require(remainingcCOPValue > 0, "You cannot get out any funds as it is zero");
+    
+    // Transfer the entire balance directly to the owner (msg.sender)
+    IERC20(cCOP).transfer(msg.sender, remainingcCOPValue);
+}
     /**
      * @notice Stakes a specific amount of cCOP for a fixed duration to earn APY.
      * @param _amount The amount of cCOP to stake.

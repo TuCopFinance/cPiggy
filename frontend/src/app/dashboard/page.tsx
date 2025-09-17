@@ -30,6 +30,15 @@ interface Piggy {
   claimed: boolean;
 }
 
+// --- NEW: StakingPosition interface to match the contract's struct ---
+interface StakingPosition {
+    amount: bigint;
+    startTime: bigint;
+    duration: bigint;
+    reward: bigint;
+    claimed: boolean;
+}
+
 /**
  * PiggyCard Component
  * Renders a single piggy bank with its details and actions.
@@ -168,6 +177,104 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
   );
 }
 
+// --- NEW: StakingCard Component to display staking positions ---
+function StakingCard({ stake, index }: { stake: StakingPosition; index: number }) {
+  const { t } = useLanguage();
+  const { writeContractAsync } = useWriteContract();
+  const piggyBankAddress = deployedAddresses.PiggyBank as Address;
+  const { address } = useAccount();
+
+  const [isClaiming, setIsClaiming] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
+  const [claimSuccess, setClaimSuccess] = useState(false);
+
+  const claimTimestamp = Number(stake.startTime + (stake.duration * BigInt(1 * 24 * 60 * 60)));
+  const nowInSeconds = Date.now() / 1000;
+  const isClaimable = !stake.claimed && nowInSeconds >= claimTimestamp;
+  const timeLeft = claimTimestamp - nowInSeconds;
+
+  const handleUnstake = async () => {
+    if (!isClaimable) return;
+    setIsClaiming(true);
+    setClaimError(null);
+    setClaimSuccess(false);
+    try {
+      await writeContractAsync({
+        address: piggyBankAddress,
+        abi: PiggyBankABI.abi,
+        functionName: 'unstake',
+        args: [BigInt(index)],
+      });
+      setClaimSuccess(true);
+    } catch (e) {
+      if(e instanceof Error)
+      setClaimError(e.message);
+    } finally {
+      setIsClaiming(false);
+    }
+  };
+
+  const formatTimeLeft = (seconds: number) => {
+    if (seconds <= 0) return t('dashboard.readyToClaim');
+    const days = Math.floor(seconds / (3600 * 24));
+    const hours = Math.floor((seconds % (3600 * 24)) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return `${days}d ${hours}h ${minutes}m ${t('dashboard.left')}`;
+  };
+
+  const getStatus = () => {
+    if (stake.claimed || claimSuccess) return { text: t('dashboard.status.claimed'), color: "text-green-600", icon: <CheckCircle className="w-4 h-4" /> };
+    if (isClaimable) return { text: t('dashboard.status.readyToClaim'), color: "text-blue-600", icon: <PiggyBank className="w-4 h-4" /> };
+    return { text: t('dashboard.status.active'), color: "text-yellow-600", icon: <Clock className="w-4 h-4" /> };
+  };
+  const status = getStatus();
+
+  const formatAmount = (amount: bigint) => formatEther(amount).substring(0, 8);
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg shadow-md p-4 sm:p-6 space-y-3 sm:space-y-4 transition-all hover:shadow-lg">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg sm:text-xl font-bold text-teal-700">{t('dashboard.stakingNumber').replace('{number}', (index + 1).toString())}</h3>
+        <span className={`flex items-center gap-1 text-xs sm:text-sm font-medium ${status.color}`}>
+          {status.icon} {status.text}
+        </span>
+      </div>
+
+      <div className="text-center bg-slate-50 p-3 sm:p-4 rounded-lg">
+        <p className="text-gray-500 text-xs sm:text-sm">{t('dashboard.stakedAmount')}</p>
+        <p className="font-bold text-lg sm:text-2xl text-gray-800">
+          {formatAmount(stake.amount)} cCOP
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm pt-2 border-t">
+        <div className="space-y-1">
+          <p className="text-gray-500">{t('dashboard.earnedReward')}</p>
+          <p className="font-semibold text-gray-800">{formatAmount(stake.reward)} cCOP</p>
+        </div>
+        <div className="space-y-1">
+          <p className="text-gray-500">{t('dashboard.duration')}</p>
+          <p className="font-semibold text-gray-800">{Number(stake.duration)} {t('common.days')}</p>
+        </div>
+      </div>
+
+      {!stake.claimed && !claimSuccess && (
+        <Button
+          className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-gray-400"
+          onClick={handleUnstake}
+          disabled={!isClaimable || isClaiming}
+        >
+          {isClaiming ? t('dashboard.unstaking') : t('dashboard.unstakeAndClaim')}
+        </Button>
+      )}
+
+      {claimSuccess && <p className="text-green-600 text-center text-sm">✅ {t('dashboard.successfullyUnstaked')}</p>}
+      {claimError && <p className="text-red-500 text-center text-sm break-words">⚠️ {claimError}</p>}
+    </div>
+  );
+}
+
+
 /**
  * Main Dashboard Page Component
  */
@@ -176,7 +283,8 @@ export default function DashboardPage() {
   const piggyBankAddress = deployedAddresses.PiggyBank as Address;
   const { t, currentLocale, setLocale } = useLanguage();
 
-  const { data: piggies, isLoading, error, refetch } = useReadContract({
+  // Fetch Piggy data
+  const { data: piggies, isLoading: isLoadingPiggies, error: piggiesError, refetch: refetchPiggies } = useReadContract({
     address: piggyBankAddress,
     abi: PiggyBankABI.abi,
     functionName: 'getUserPiggies',
@@ -185,6 +293,32 @@ export default function DashboardPage() {
       enabled: !!address,
     },
   });
+
+  // Fetch Staking data (New!)
+  const { data: stakes, isLoading: isLoadingStakes, error: stakesError, refetch: refetchStakes } = useReadContract({
+    address: piggyBankAddress,
+    abi: PiggyBankABI.abi,
+    functionName: 'getUserStakes',
+    args: [address!],
+    query: {
+      enabled: !!address,
+    },
+  });
+
+  const isLoading = isLoadingPiggies || isLoadingStakes;
+  const error = piggiesError || stakesError;
+  // Explicitly cast the data to the correct types
+  const userPiggies = piggies as Piggy[] | undefined;
+  const userStakes = stakes as StakingPosition[] | undefined;
+
+    // Define the boolean checks for rendering
+  const hasPiggies = userPiggies && userPiggies.length > 0;
+  const hasStakes = userStakes && userStakes.length > 0;
+
+  const handleRefetch = () => {
+    refetchPiggies();
+    refetchStakes();
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 p-3 sm:p-4 md:p-6 lg:p-8">
@@ -201,7 +335,7 @@ export default function DashboardPage() {
               onLocaleChange={setLocale} 
             />
             <ConnectButton compact />
-            <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading} className="h-8 w-8 sm:h-10 sm:w-10">
+            <Button variant="outline" size="icon" onClick={handleRefetch} disabled={isLoading} className="h-8 w-8 sm:h-10 sm:w-10">
               <RefreshCw className={`w-3 h-3 sm:w-4 sm:h-4 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>
           </div>
@@ -213,7 +347,7 @@ export default function DashboardPage() {
           </div>
         ) : isLoading ? (
           <div className="text-center py-16">
-            <p className="text-gray-600">{t('dashboard.fetchingPiggies')}</p>
+            <p className="text-gray-600">{t('dashboard.fetchingData')}</p>
           </div>
         ) : error ? (
           <div className="text-center py-16 bg-red-50 border border-red-200 rounded-lg p-4">
@@ -221,19 +355,37 @@ export default function DashboardPage() {
             <p className="text-red-700 font-semibold">{t('dashboard.couldNotFetch')}</p>
             <p className="text-red-600 text-sm break-words">{error.message}</p>
           </div>
-        ) : piggies && (piggies as Piggy[]).length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {(piggies as Piggy[]).map((piggy, index) => (
-              <PiggyCard key={index} piggy={piggy} index={index} />
-            ))}
+        ) : (hasPiggies || hasStakes) ? (
+          <div className="space-y-8">
+            {hasStakes && (
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-700 mb-4">{t('dashboard.fixedTermStakingTitle')}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {(stakes as StakingPosition[]).map((stake, index) => (
+                    <StakingCard key={`stake-${index}`} stake={stake} index={index} />
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {hasPiggies && (
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-700 mb-4">{t('dashboard.diversifyTitle')}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {(piggies as Piggy[]).map((piggy, index) => (
+                    <PiggyCard key={`piggy-${index}`} piggy={piggy} index={index} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="text-center py-16 bg-white border rounded-lg">
             <PiggyBank className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-            <h2 className="text-xl font-semibold text-gray-700">{t('dashboard.noPiggiesFound')}</h2>
-            <p className="text-gray-500 mt-2">{t('dashboard.noPiggiesMessage')}</p>
+            <h2 className="text-xl font-semibold text-gray-700">{t('dashboard.noInvestmentsFound')}</h2>
+            <p className="text-gray-500 mt-2">{t('dashboard.noInvestmentsMessage')}</p>
             <Link href="/create" className="mt-4 inline-block">
-              <Button className="bg-pink-600 hover:bg-pink-700">{t('dashboard.createFirstPiggy')}</Button>
+              <Button className="bg-pink-600 hover:bg-pink-700">{t('dashboard.createFirstInvestment')}</Button>
             </Link>
           </div>
         )}
