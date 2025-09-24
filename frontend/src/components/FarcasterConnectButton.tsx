@@ -35,15 +35,38 @@ export const FarcasterConnectButton = () => {
     )
   }
 
-  // Find Farcaster connector
-  const farcasterConnector = connectors.find(
-    connector => connector.id === 'miniApp'
-  )
+  // Debug: Log all available connectors
+  console.log('Available connectors:', connectors.map(c => ({ id: c.id, name: c.name, type: c.type })));
+  
+  // Find Farcaster connector with improved detection
+  const possibleIds = ['miniApp', 'farcaster', 'farcaster-miniapp', '@farcaster/miniapp-wagmi-connector', 'farcasterMiniApp'];
+  let farcasterConnector = null;
+  
+  // Try to find by ID first
+  for (const id of possibleIds) {
+    farcasterConnector = connectors.find(connector => connector.id === id);
+    if (farcasterConnector) {
+      console.log('Found Farcaster connector with ID:', id);
+      break;
+    }
+  }
+  
+  // If not found by ID, try to find by name
+  if (!farcasterConnector) {
+    farcasterConnector = connectors.find(connector => 
+      connector.name?.toLowerCase().includes('farcaster') ||
+      connector.name?.toLowerCase().includes('miniapp') ||
+      connector.name?.toLowerCase().includes('mini')
+    );
+    if (farcasterConnector) {
+      console.log('Found Farcaster connector by name:', farcasterConnector.name);
+    }
+  }
 
   if (!farcasterConnector) {
     return (
       <div className="text-red-500 text-sm">
-        Farcaster connector not available
+        Farcaster connector not available. Available connectors: {connectors.map(c => c.id).join(', ')}
       </div>
     )
   }

@@ -60,17 +60,46 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
             }
           }
           
+          // Debug available connectors
+          console.log('Available connectors:', connectors.map(c => ({
+            id: c.id,
+            name: c.name,
+            type: c.type
+          })));
+          
           // Auto-connect Farcaster wallet if in MiniApp and not connected
           if (!isConnected) {
-            const farcasterConnector = connectors.find(
-              connector => connector.id === 'miniApp'
-            );
+            // Try multiple possible connector IDs
+            const possibleIds = ['miniApp', 'farcaster', 'farcaster-miniapp', '@farcaster/miniapp-wagmi-connector', 'farcasterMiniApp'];
+            let farcasterConnector = null;
+            
+            for (const id of possibleIds) {
+              farcasterConnector = connectors.find(connector => connector.id === id);
+              if (farcasterConnector) {
+                console.log('Found Farcaster connector with ID:', id);
+                break;
+              }
+            }
+            
+            // Fallback: look for connector with 'farcaster' in name
+            if (!farcasterConnector) {
+              farcasterConnector = connectors.find(connector => 
+                connector.name.toLowerCase().includes('farcaster') ||
+                connector.name.toLowerCase().includes('mini')
+              );
+              if (farcasterConnector) {
+                console.log('Found Farcaster connector by name:', farcasterConnector.name);
+              }
+            }
+            
             if (farcasterConnector) {
               try {
                 connect({ connector: farcasterConnector });
               } catch (error) {
                 console.error('Auto-connect failed:', error);
               }
+            } else {
+              console.warn('No Farcaster connector found. Available connectors:', connectors.map(c => c.id));
             }
           }
         }
@@ -136,9 +165,32 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
   const connectFarcasterWallet = async () => {
     if (!isFarcasterMiniApp) return;
     
-    const farcasterConnector = connectors.find(
-      connector => connector.id === 'miniApp'
-    );
+    // Debug: Log all available connectors
+    console.log('Available connectors in FarcasterContext:', connectors.map(c => ({ id: c.id, name: c.name, type: c.type })));
+    
+    // Try multiple connector IDs
+    const possibleIds = ['miniApp', 'farcaster', 'farcaster-miniapp', '@farcaster/miniapp-wagmi-connector', 'farcasterMiniApp'];
+    let farcasterConnector = null;
+    
+    for (const id of possibleIds) {
+      farcasterConnector = connectors.find(connector => connector.id === id);
+      if (farcasterConnector) {
+        console.log('Found Farcaster connector with ID:', id);
+        break;
+      }
+    }
+    
+    // If not found by ID, try by name
+    if (!farcasterConnector) {
+      farcasterConnector = connectors.find(connector => 
+        connector.name?.toLowerCase().includes('farcaster') ||
+        connector.name?.toLowerCase().includes('miniapp') ||
+        connector.name?.toLowerCase().includes('mini')
+      );
+      if (farcasterConnector) {
+        console.log('Found Farcaster connector by name:', farcasterConnector.name);
+      }
+    }
     
     if (farcasterConnector) {
       try {
@@ -155,6 +207,8 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         console.error('Failed to connect Farcaster wallet:', error);
       }
+    } else {
+      console.error('Farcaster connector not found. Available connectors:', connectors.map(c => c.id));
     }
   };
 
