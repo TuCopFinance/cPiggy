@@ -1,9 +1,9 @@
 {
   "version": "1",
   "accountAssociation": {
-    "header": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9",
-    "payload": "eyJkb21haW4iOiJjcGlnZ3kueHl6IiwiZmNpZCI6MH0",
-    "signature": "signature_placeholder"
+    "header": "eyJmaWQiOjEzMzE3NjIsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg4MjY1RjEzYzI2M2I5MWUxMDI3YWVFMzcwYzdjNDJjZjEzMmY5QjA2In0",
+    "payload": "eyJkb21haW4iOiJjcGlnZ3kueHl6In0",
+    "signature": "MHhlNzE4MzlhNDY5ODVlMTRiZTc5ZTFjY2E3YmU5ZTgwNDQxNTM5NGNkZDQ3YWVlMmY1YjQ5MjllZjg2MTRhMDYyNjYwYzY2YzUzN2MzMzA5NWVhYWYxNjRhNjlmMjlhMWRjNWRlMTMzYWNkZjg3NDA5MmJlNjA3YTllZGEyMDljOTFi"
   },
   "app": {
     "name": "cPiggyFX",
