@@ -27,26 +27,26 @@ export const useMiniAppDetection = (): MiniAppDetectionResult => {
   useEffect(() => {
     const detectMiniApp = async () => {
       try {
-        // 1. Frame detection
+        // 1. Frame detection (more specific)
         const isInFrame = window !== window.top
         
-        // 2. Window context detection
+        // 2. Window context detection (more specific)
         const isInMiniApp = window.top !== window.self && 
                            window.location !== window.parent.location
         
-        // 3. User Agent detection
+        // 3. User Agent detection (more specific)
         const hasFarcasterUA = navigator.userAgent.includes('Farcaster') || 
                               navigator.userAgent.includes('MiniApp') ||
                               navigator.userAgent.includes('Warpcast')
         
-        // 4. URL parameter detection
+        // 4. URL parameter detection (development only)
         const urlParams = new URLSearchParams(window.location.search)
         const hasMiniAppParam = urlParams.get('miniapp') === 'true' ||
                                urlParams.get('miniApp') === 'true' ||
                                urlParams.get('farcaster') === 'true' ||
                                urlParams.get('warpcast') === 'true'
         
-        // 5. Farcaster SDK detection
+        // 5. Farcaster SDK detection (primary method)
         let sdkAvailable = false
         try {
           await sdk.context
@@ -55,7 +55,7 @@ export const useMiniAppDetection = (): MiniAppDetectionResult => {
           console.log('Farcaster SDK not available:', error)
         }
         
-        // 6. Path-based detection (for development)
+        // 6. Path-based detection (development only)
         const hasMiniAppPath = window.location.pathname.includes('/miniapp') ||
                                window.location.pathname.includes('/mini')
         
@@ -67,9 +67,11 @@ export const useMiniAppDetection = (): MiniAppDetectionResult => {
         else if (isInFrame) detectionMethod = 'frame'
         else if (hasMiniAppPath) detectionMethod = 'path'
         
-        // Determine if it's a Mini App
-        const isMiniApp = isInFrame || isInMiniApp || hasFarcasterUA || hasMiniAppParam || sdkAvailable || hasMiniAppPath
-        const isFarcasterMiniApp = isMiniApp && (sdkAvailable || hasFarcasterUA || hasMiniAppParam)
+        // More conservative detection - prioritize SDK and specific indicators
+        // Only activate for actual Farcaster environments or explicit testing
+        const isDevelopment = process.env.NODE_ENV === 'development'
+        const isMiniApp = sdkAvailable || hasFarcasterUA || hasMiniAppParam || (hasMiniAppPath && isDevelopment)
+        const isFarcasterMiniApp = sdkAvailable || (hasFarcasterUA && isInFrame) || hasMiniAppParam
         
         setDetection({
           isMiniApp,
@@ -89,8 +91,15 @@ export const useMiniAppDetection = (): MiniAppDetectionResult => {
           hasMiniAppParam,
           sdkAvailable,
           hasMiniAppPath,
-          detectionMethod
+          detectionMethod,
+          isDevelopment
         })
+        
+        if (isFarcasterMiniApp) {
+          console.log('🎉 Farcaster Mini App detected! Using Farcaster-specific features.')
+        } else {
+          console.log('🌐 Regular web app detected. Using standard web3 features.')
+        }
         
       } catch (error) {
         console.error('Mini App detection failed:', error)
