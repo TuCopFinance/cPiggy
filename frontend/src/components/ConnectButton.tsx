@@ -6,6 +6,7 @@ import { LogOut, Wallet, User, Copy, Check, Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useLanguage } from '@/context/LanguageContext'
 import { useFarcaster } from '@/context/FarcasterContext'
+import { FarcasterConnectButton, useFarcasterWallet } from './FarcasterConnectButton'
 
 export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
   const { isConnected, address, embeddedWalletInfo } = useAppKitAccount()
@@ -15,6 +16,7 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
   const [mounted, setMounted] = useState(false)
   const { t } = useLanguage()
   const { isFarcasterMiniApp, connectFarcasterWallet, isFarcasterWalletConnected } = useFarcaster()
+  const { shouldShowFarcasterUI, isFarcasterWalletConnected: isFCConnected } = useFarcasterWallet()
 
   // Handle client-side mounting to prevent hydration issues
   useEffect(() => {
@@ -62,25 +64,29 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
 
   // Show connect button when not connected
   if (!isConnected) {
+    // Use Farcaster-specific component if in Mini App
+    if (shouldShowFarcasterUI) {
+      return (
+        <div className="flex flex-col items-center gap-3 sm:gap-4">
+          <FarcasterConnectButton />
+          <p className="text-xs sm:text-sm text-gray-600 text-center">
+            Connect your Farcaster wallet to start saving
+          </p>
+        </div>
+      )
+    }
+
+    // Regular AppKit connect button for web
     return (
       <div className="flex flex-col items-center gap-3 sm:gap-4">
         <Button 
-          onClick={() => {
-            if (isFarcasterMiniApp) {
-              connectFarcasterWallet();
-            } else {
-              open();
-            }
-          }}
+          onClick={() => open()}
           className="px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg font-semibold bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
         >
-          {isFarcasterMiniApp ? 'Connect Farcaster Wallet' : t('home.connectWallet')}
+          {t('home.connectWallet')}
         </Button>
         <p className="text-xs sm:text-sm text-gray-600 text-center">
-          {isFarcasterMiniApp 
-            ? 'Connect your Farcaster wallet to start saving'
-            : t('home.connectWalletMessage')
-          }
+          {t('home.connectWalletMessage')}
         </p>
       </div>
     )
@@ -95,18 +101,18 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
           <Wallet className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-pink-600" />
         </div>
         <div className="flex flex-col min-w-0">
-          <span className="text-xs font-medium text-gray-800 truncate">
-            {isFarcasterMiniApp && isFarcasterWalletConnected 
-              ? 'Farcaster Wallet'
-              : embeddedWalletInfo?.user?.email || embeddedWalletInfo?.user?.username || formatAddress(address)
-            }
-          </span>
-          <div className="flex items-center gap-1">
-            <div className="w-1 h-1 bg-green-500 rounded-full"></div>
-            <span className="text-xs text-green-600">
-              {isFarcasterMiniApp ? 'Farcaster Connected' : 'Connected'}
+            <span className="text-xs font-medium text-gray-800 truncate">
+              {shouldShowFarcasterUI && isFCConnected
+                ? 'Farcaster Wallet'
+                : embeddedWalletInfo?.user?.email || embeddedWalletInfo?.user?.username || formatAddress(address)
+              }
             </span>
-          </div>
+            <div className="flex items-center gap-1">
+              <div className="w-1 h-1 bg-green-500 rounded-full"></div>
+              <span className="text-xs text-green-600">
+                {shouldShowFarcasterUI && isFCConnected ? 'Farcaster Connected' : 'Connected'}
+              </span>
+            </div>
         </div>
         <Button
           onClick={handleDisconnect}
@@ -133,7 +139,7 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
             </div>
             <div className="flex flex-col">
               <p className="text-sm font-semibold text-gray-800">
-                {isFarcasterMiniApp && isFarcasterWalletConnected 
+                {shouldShowFarcasterUI && isFCConnected
                   ? 'Farcaster Wallet'
                   : embeddedWalletInfo?.user?.email || embeddedWalletInfo?.user?.username || t('wallet.wallet')
                 }
@@ -141,7 +147,7 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
               <div className="flex items-center gap-1.5 text-xs text-green-600">
                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
                 <span>
-                  {isFarcasterMiniApp ? 'Farcaster Connected' : t('wallet.walletConnected')}
+                  {shouldShowFarcasterUI && isFCConnected ? 'Farcaster Connected' : t('wallet.walletConnected')}
                 </span>
               </div>
             </div>

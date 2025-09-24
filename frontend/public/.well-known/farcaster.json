@@ -11,6 +11,7 @@
     "homeUrl": "https://cpiggy.xyz",
     "iconUrl": "https://cpiggy.xyz/icon.png",
     "splashImageUrl": "https://cpiggy.xyz/splash.png",
+    "buttonTitle": "🚩 Start",
     "webhookUrl": "https://cpiggy.xyz/api/webhook",
     "categories": ["finance", "defi", "savings"],
     "requiredCapabilities": ["wallet.getEthereumProvider", "actions.signIn"]
