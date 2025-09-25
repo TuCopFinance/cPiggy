@@ -17,7 +17,7 @@ export const metadata: Metadata = {
         action: {
           type: 'launch',
           name: 'cPiggyFX',
-          url: 'https://cpiggy-tests.up.railway.app'
+          url: 'https://cpiggy.xyz'
         }
       }
     }),
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
         action: {
           type: 'launch',
           name: 'cPiggyFX',
-          url: 'https://cpiggy-tests.up.railway.app'
+          url: 'https://cpiggy.xyz'
         }
       }
     })
