@@ -27,8 +27,10 @@ export const useMiniAppDetection = (): MiniAppDetectionResult => {
   useEffect(() => {
     const detectMiniApp = async () => {
       try {
-        // 1. Frame detection (more specific)
-        const isInFrame = window !== window.top
+        // 1. Frame detection (more specific) - enhanced for mobile apps
+        const isInFrame = window !== window.top || 
+                         window.parent !== window || 
+                         window.top !== window.self
         
         // 2. Window context detection (more specific)
         const isInMiniApp = window.top !== window.self && 
@@ -46,18 +48,20 @@ export const useMiniAppDetection = (): MiniAppDetectionResult => {
                                urlParams.get('farcaster') === 'true' ||
                                urlParams.get('warpcast') === 'true'
         
-        // 5. Farcaster SDK detection (primary method) - more robust check
+        // 5. Farcaster SDK detection (primary method) - enhanced for mobile apps
         let sdkAvailable = false
         try {
           // Check if SDK is actually available and functional
           const context = await sdk.context
-          // Additional check: ensure we're actually in a Farcaster environment
-          if (context && typeof context === 'object' && !isInFrame) {
-            // If we have context but we're not in a frame, it might be a false positive
-            console.log('SDK context available but not in frame - possible false positive')
-            sdkAvailable = false
-          } else {
+          console.log('SDK context result:', context)
+          
+          // More lenient check for mobile apps - if SDK context is available, trust it
+          if (context && typeof context === 'object') {
             sdkAvailable = true
+            console.log('SDK detected as available')
+          } else {
+            sdkAvailable = false
+            console.log('SDK context not properly available')
           }
         } catch (error) {
           console.log('Farcaster SDK not available:', error)
@@ -86,9 +90,10 @@ export const useMiniAppDetection = (): MiniAppDetectionResult => {
         // 3. OR explicit testing parameters
         const isMiniApp = sdkAvailable || (hasFarcasterUA && isInFrame) || hasMiniAppParam || (hasMiniAppPath && isDevelopment)
         
-        // Even more strict for Farcaster-specific detection
-        // Only show Farcaster UI if we have SDK AND we're in a frame OR we're explicitly testing
-        const isFarcasterMiniApp = (sdkAvailable && isInFrame) || hasMiniAppParam
+        // Enhanced detection for Farcaster-specific UI
+        // Show Farcaster UI if SDK is available (primary) OR we're explicitly testing
+        // SDK availability is the most reliable indicator for Farcaster environment
+        const isFarcasterMiniApp = sdkAvailable || hasMiniAppParam
         
         setDetection({
           isMiniApp,
@@ -111,7 +116,15 @@ export const useMiniAppDetection = (): MiniAppDetectionResult => {
           detectionMethod,
           isDevelopment,
           userAgent: navigator.userAgent,
-          isInMiniApp
+          isInMiniApp,
+          windowComparison: {
+            windowTop: window.top,
+            windowSelf: window.self,
+            windowParent: window.parent,
+            isTopEqual: window === window.top,
+            isParentEqual: window.parent === window,
+            isTopSelfEqual: window.top === window.self
+          }
         })
         
         if (isFarcasterMiniApp) {
