@@ -46,13 +46,22 @@ export const useMiniAppDetection = (): MiniAppDetectionResult => {
                                urlParams.get('farcaster') === 'true' ||
                                urlParams.get('warpcast') === 'true'
         
-        // 5. Farcaster SDK detection (primary method)
+        // 5. Farcaster SDK detection (primary method) - more robust check
         let sdkAvailable = false
         try {
-          await sdk.context
-          sdkAvailable = true
+          // Check if SDK is actually available and functional
+          const context = await sdk.context
+          // Additional check: ensure we're actually in a Farcaster environment
+          if (context && typeof context === 'object' && !isInFrame) {
+            // If we have context but we're not in a frame, it might be a false positive
+            console.log('SDK context available but not in frame - possible false positive')
+            sdkAvailable = false
+          } else {
+            sdkAvailable = true
+          }
         } catch (error) {
           console.log('Farcaster SDK not available:', error)
+          sdkAvailable = false
         }
         
         // 6. Path-based detection (development only)
@@ -78,8 +87,8 @@ export const useMiniAppDetection = (): MiniAppDetectionResult => {
         const isMiniApp = sdkAvailable || (hasFarcasterUA && isInFrame) || hasMiniAppParam || (hasMiniAppPath && isDevelopment)
         
         // Even more strict for Farcaster-specific detection
-        // Only show Farcaster UI if we have SDK OR we're explicitly testing
-        const isFarcasterMiniApp = sdkAvailable || hasMiniAppParam
+        // Only show Farcaster UI if we have SDK AND we're in a frame OR we're explicitly testing
+        const isFarcasterMiniApp = (sdkAvailable && isInFrame) || hasMiniAppParam
         
         setDetection({
           isMiniApp,
