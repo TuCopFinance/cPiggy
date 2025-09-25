@@ -34,10 +34,10 @@ export const useMiniAppDetection = (): MiniAppDetectionResult => {
         const isInMiniApp = window.top !== window.self && 
                            window.location !== window.parent.location
         
-        // 3. User Agent detection (more specific)
+        // 3. User Agent detection (more specific - avoid mobile browser false positives)
         const hasFarcasterUA = navigator.userAgent.includes('Farcaster') || 
                               navigator.userAgent.includes('MiniApp') ||
-                              navigator.userAgent.includes('Warpcast')
+                              (navigator.userAgent.includes('Warpcast') && isInFrame)
         
         // 4. URL parameter detection (development only)
         const urlParams = new URLSearchParams(window.location.search)
@@ -70,8 +70,16 @@ export const useMiniAppDetection = (): MiniAppDetectionResult => {
         // More conservative detection - prioritize SDK and specific indicators
         // Only activate for actual Farcaster environments or explicit testing
         const isDevelopment = process.env.NODE_ENV === 'development'
-        const isMiniApp = sdkAvailable || hasFarcasterUA || hasMiniAppParam || (hasMiniAppPath && isDevelopment)
-        const isFarcasterMiniApp = sdkAvailable || (hasFarcasterUA && isInFrame) || hasMiniAppParam
+        
+        // Only consider it a mini app if we have strong indicators
+        // 1. SDK is available (most reliable)
+        // 2. OR we're in a frame AND have Farcaster UA (embedded in Farcaster)
+        // 3. OR explicit testing parameters
+        const isMiniApp = sdkAvailable || (hasFarcasterUA && isInFrame) || hasMiniAppParam || (hasMiniAppPath && isDevelopment)
+        
+        // Even more strict for Farcaster-specific detection
+        // Only show Farcaster UI if we have SDK OR we're explicitly testing
+        const isFarcasterMiniApp = sdkAvailable || hasMiniAppParam
         
         setDetection({
           isMiniApp,
@@ -92,7 +100,9 @@ export const useMiniAppDetection = (): MiniAppDetectionResult => {
           sdkAvailable,
           hasMiniAppPath,
           detectionMethod,
-          isDevelopment
+          isDevelopment,
+          userAgent: navigator.userAgent,
+          isInMiniApp
         })
         
         if (isFarcasterMiniApp) {
