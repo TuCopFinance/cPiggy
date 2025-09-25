@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   other: {
     'fc:miniapp': JSON.stringify({
       version: '1',
-      image: 'https://cpiggy-tests.up.railway.app/miniapp-image.png',
+      image: 'https://cpiggy.xyz/splash.png',
       button: {
         title: 'Open cPiggyFX',
         action: {
@@ -23,13 +23,14 @@ export const metadata: Metadata = {
     }),
     'fc:frame': JSON.stringify({
       version: 'next',
-      image: 'https://cpiggy-tests.up.railway.app/frame-image.png',
+      image: 'https://cpiggy.xyz/splash.png',
       button: {
         title: 'Start Saving',
         action: {
-          type: 'launch',
+          type: 'launch_frame',
           name: 'cPiggyFX',
-          url: 'https://cpiggy.xyz'
+          url: 'https://cpiggy.xyz',
+          splashImageUrl: 'https://cpiggy.xyz/splash.png'
         }
       }
     })
