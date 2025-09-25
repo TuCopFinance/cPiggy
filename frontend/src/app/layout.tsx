@@ -15,9 +15,10 @@ export const metadata: Metadata = {
       button: {
         title: 'Open cPiggyFX',
         action: {
-          type: 'launch',
+          type: 'launch_miniapp',
           name: 'cPiggyFX',
-          url: 'https://cpiggy.xyz'
+          url: 'https://cpiggy.xyz',
+          splashImageUrl: 'https://cpiggy.xyz/splash.png'
         }
       }
     }),
