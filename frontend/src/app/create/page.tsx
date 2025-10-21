@@ -88,9 +88,9 @@ export default function CreatePiggy() {
   const activeAmount = useMemo(() => investmentType === 'diversify' ? amount : fixedAmount, [investmentType, amount, fixedAmount]);
   const parsedActiveAmount = useMemo(() => parseEther(activeAmount || "0"), [activeAmount]);
 
-  // Format number with proper thousands and decimal separators (no decimals)
+  // Format number with proper thousands and decimal separators (European format: . for thousands, , for decimals)
   const formatNumber = (num: number) => {
-    return num.toLocaleString('en-US', {
+    return num.toLocaleString('es-CO', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     });
@@ -276,13 +276,13 @@ export default function CreatePiggy() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-100 p-2 sm:p-3 pt-16 sm:pt-20">
       {/* Top Navigation Bar */}
-      <div className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-gray-200/50 px-2 sm:px-4 py-2 sm:py-3 z-50">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-2">
-          <Link href="/" className="flex items-center gap-2 text-gray-600 hover:text-pink-700 transition-colors text-sm sm:text-base">
+      <div className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-gray-200/50 px-2 sm:px-4 py-2 z-50">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-1 sm:gap-2">
+          <Link href="/" className="flex items-center gap-1 text-gray-600 hover:text-pink-700 transition-colors text-sm sm:text-base flex-shrink-0">
             <ArrowLeft size={16} className="sm:w-5 sm:h-5" />
             <span className="font-medium hidden sm:inline">{t('common.back')}</span>
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
             {address && <ConnectButton compact={true} />}
             <LanguageSwitcher currentLocale={currentLocale} onLocaleChange={setLocale} />
           </div>
