@@ -122,16 +122,15 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
       {/* --- Main Value Display --- */}
       <div className="text-center bg-slate-50 p-3 sm:p-4 rounded-lg">
         <p className="text-gray-500 text-xs sm:text-sm">{t('dashboard.currentValue')}</p>
-        <div className="font-bold text-lg sm:text-2xl text-gray-800">
-          {isValueLoading ? (
-            t('common.loading')
-          ) : (
-            <CCOPWithUSD
-              ccopAmount={formatAmountNumeric(typeof currentValue === 'bigint' ? currentValue : 0n)}
-              format="block"
-            />
-          )}
-        </div>
+        {isValueLoading ? (
+          <p className="font-bold text-lg sm:text-2xl text-gray-800">{t('common.loading')}</p>
+        ) : (
+          <CCOPWithUSD
+            ccopAmount={formatAmountNumeric(typeof currentValue === 'bigint' ? currentValue : 0n)}
+            format="block"
+            className="text-lg sm:text-2xl"
+          />
+        )}
       </div>
 
       {/* --- UPDATED: Asset Breakdown now includes cGBP --- */}
@@ -250,24 +249,22 @@ function StakingCard({ stake, index }: { stake: StakingPosition; index: number }
 
       <div className="text-center bg-slate-50 p-3 sm:p-4 rounded-lg">
         <p className="text-gray-500 text-xs sm:text-sm">{t('dashboard.stakedAmount')}</p>
-        <div className="font-bold text-lg sm:text-2xl text-gray-800">
-          <CCOPWithUSD
-            ccopAmount={formatAmountNumeric(stake.amount)}
-            format="block"
-          />
-        </div>
+        <CCOPWithUSD
+          ccopAmount={formatAmountNumeric(stake.amount)}
+          format="block"
+          className="text-lg sm:text-2xl"
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm pt-2 border-t">
         <div className="space-y-1">
           <p className="text-gray-500">{t('dashboard.earnedReward')}</p>
-          <div className="font-semibold text-gray-800">
-            <CCOPWithUSD
-              ccopAmount={formatAmountNumeric(stake.reward)}
-              format="block"
-              showLabel={true}
-            />
-          </div>
+          <CCOPWithUSD
+            ccopAmount={formatAmountNumeric(stake.reward)}
+            format="block"
+            showLabel={true}
+            className="text-sm"
+          />
         </div>
         <div className="space-y-1">
           <p className="text-gray-500">{t('dashboard.duration')}</p>

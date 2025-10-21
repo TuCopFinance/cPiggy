@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { useCOPUSDRate, convertCOPtoUSD, formatUSD } from '@/hooks/useCOPUSDRate';
 
@@ -32,6 +34,19 @@ export function CCOPWithUSD({
     ? parseFloat(ccopAmount.replace(/,/g, ''))
     : ccopAmount;
 
+  // Handle invalid numbers
+  if (isNaN(numericAmount) || !isFinite(numericAmount)) {
+    return format === 'block' ? (
+      <div className={className}>
+        <div className="font-semibold text-gray-800">0 {showLabel && 'cCOP'}</div>
+      </div>
+    ) : (
+      <span className={className}>
+        <span className="font-semibold text-gray-800">0 {showLabel && 'cCOP'}</span>
+      </span>
+    );
+  }
+
   const usdValue = convertCOPtoUSD(numericAmount, copUsdRate);
 
   // Format the cCOP amount with commas
@@ -43,11 +58,11 @@ export function CCOPWithUSD({
   if (format === 'block') {
     return (
       <div className={className}>
-        <div className="font-semibold text-gray-800">
+        <div className="font-bold text-gray-800">
           {formattedCCOP} {showLabel && 'cCOP'}
         </div>
         {showLoading && isRateLoading ? (
-          <div className="text-xs text-gray-400">Loading rate...</div>
+          <div className="text-sm text-gray-400">Loading rate...</div>
         ) : usdValue !== null ? (
           <div className="text-sm text-gray-500">≈ {formatUSD(usdValue)}</div>
         ) : null}
