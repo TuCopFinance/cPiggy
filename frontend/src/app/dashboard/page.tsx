@@ -11,6 +11,7 @@ import { ArrowLeft, PiggyBank, Clock, CheckCircle, RefreshCw, AlertTriangle } fr
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ConnectButton } from "@/components/ConnectButton";
+import { CCOPWithUSD } from "@/components/CCOPWithUSD";
 
 // ABIs and Deployed Addresses
 import PiggyBankABI from "../../../lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
@@ -107,6 +108,7 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
   const status = getStatus();
   
   const formatAmount = (amount: bigint) => formatEther(amount).substring(0, 8);
+  const formatAmountNumeric = (amount: bigint) => parseFloat(formatEther(amount));
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-md p-4 sm:p-6 space-y-3 sm:space-y-4 transition-all hover:shadow-lg">
@@ -116,15 +118,19 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
           {status.icon} {status.text}
         </span>
       </div>
-      
+
       {/* --- Main Value Display --- */}
       <div className="text-center bg-slate-50 p-3 sm:p-4 rounded-lg">
         <p className="text-gray-500 text-xs sm:text-sm">{t('dashboard.currentValue')}</p>
-        <p className="font-bold text-lg sm:text-2xl text-gray-800">
-          {isValueLoading
-            ? t('common.loading')
-            : `${formatAmount(typeof currentValue === 'bigint' ? currentValue : 0n)} cCOP`}
-        </p>
+        {isValueLoading ? (
+          <p className="font-bold text-lg sm:text-2xl text-gray-800">{t('common.loading')}</p>
+        ) : (
+          <CCOPWithUSD
+            ccopAmount={formatAmountNumeric(typeof currentValue === 'bigint' ? currentValue : 0n)}
+            format="block"
+            className="text-lg sm:text-2xl"
+          />
+        )}
       </div>
 
       {/* --- UPDATED: Asset Breakdown now includes cGBP --- */}
@@ -230,6 +236,7 @@ function StakingCard({ stake, index }: { stake: StakingPosition; index: number }
   const status = getStatus();
 
   const formatAmount = (amount: bigint) => formatEther(amount).substring(0, 8);
+  const formatAmountNumeric = (amount: bigint) => parseFloat(formatEther(amount));
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-md p-4 sm:p-6 space-y-3 sm:space-y-4 transition-all hover:shadow-lg">
@@ -242,15 +249,22 @@ function StakingCard({ stake, index }: { stake: StakingPosition; index: number }
 
       <div className="text-center bg-slate-50 p-3 sm:p-4 rounded-lg">
         <p className="text-gray-500 text-xs sm:text-sm">{t('dashboard.stakedAmount')}</p>
-        <p className="font-bold text-lg sm:text-2xl text-gray-800">
-          {formatAmount(stake.amount)} cCOP
-        </p>
+        <CCOPWithUSD
+          ccopAmount={formatAmountNumeric(stake.amount)}
+          format="block"
+          className="text-lg sm:text-2xl"
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm pt-2 border-t">
         <div className="space-y-1">
           <p className="text-gray-500">{t('dashboard.earnedReward')}</p>
-          <p className="font-semibold text-gray-800">{formatAmount(stake.reward)} cCOP</p>
+          <CCOPWithUSD
+            ccopAmount={formatAmountNumeric(stake.reward)}
+            format="block"
+            showLabel={true}
+            className="text-sm"
+          />
         </div>
         <div className="space-y-1">
           <p className="text-gray-500">{t('dashboard.duration')}</p>
