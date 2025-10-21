@@ -23,7 +23,7 @@ export const metadata: Metadata = {
       }
     }),
     'fc:frame': JSON.stringify({
-      version: 'next',
+      version: '1',
       imageUrl: 'https://cpiggy.xyz/splash.png',
       button: {
         title: 'Start Saving',
