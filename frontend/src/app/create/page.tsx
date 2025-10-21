@@ -330,37 +330,38 @@ export default function CreatePiggy() {
                     <input id="deposit-amount" type="number" className="w-full border-2 border-gray-200 bg-white/50 rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="100,000" min="0"/>
                     <span className="absolute right-4 top-2.5 text-gray-500 font-medium">cCOP</span>
                 </div>
-                {amount && parseFloat(amount) > 0 && (
-                  <div className="text-sm text-gray-500">
-                    ≈ {formatUSD(convertCOPtoUSD(parseFloat(amount), copUsdRate))}
-                  </div>
-                )}
-                {address && (
-                  <div className="text-sm text-gray-600">
-                    {isBalanceLoading ? (
-                      <span>Loading balance...</span>
-                    ) : (
-                      <span>
-                        Balance: <CCOPWithUSD ccopAmount={formatBalance(ccopBalance as bigint)} />
-                      </span>
-                    )}
-                  </div>
-                )}
+
+                <div className="flex items-center justify-between text-xs sm:text-sm">
+                  {amount && parseFloat(amount) > 0 && (
+                    <span className="text-gray-500">
+                      ≈ {formatUSD(convertCOPtoUSD(parseFloat(amount), copUsdRate))}
+                    </span>
+                  )}
+                  {address && (
+                    <span className="text-gray-600 ml-auto">
+                      {isBalanceLoading ? (
+                        <span>Loading...</span>
+                      ) : (
+                        <span>
+                          Balance: <CCOPWithUSD ccopAmount={formatBalance(ccopBalance as bigint)} />
+                        </span>
+                      )}
+                    </span>
+                  )}
+                </div>
 
                 {/* Insufficient Balance Warning - Diversify */}
                 {hasInsufficientBalance && address && investmentType === 'diversify' && (
-                  <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-2.5 sm:p-3">
-                    <div className="flex items-start gap-2 mb-2">
-                      <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-xs sm:text-sm text-amber-800 font-medium mb-1">
-                          {t('create.insufficientBalanceWarning.title')}
-                        </p>
-                        <p className="text-xs text-amber-700">
-                          {t('create.insufficientBalanceWarning.need')} {formatNumber(parseFloat(amount))} cCOP • {t('create.insufficientBalanceWarning.have')} {formatBalance(ccopBalance as bigint)} cCOP
-                        </p>
-                      </div>
+                  <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-2">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                      <p className="text-xs font-medium text-amber-800">
+                        {t('create.insufficientBalanceWarning.title')}
+                      </p>
                     </div>
+                    <p className="text-xs text-amber-700 mb-2 ml-5">
+                      {t('create.insufficientBalanceWarning.need')} {formatNumber(parseFloat(amount))} • {t('create.insufficientBalanceWarning.have')} {formatBalance(ccopBalance as bigint)} cCOP
+                    </p>
                     <div className="grid grid-cols-2 gap-1.5">
                       <a
                         href="https://app.uniswap.org"
@@ -419,37 +420,38 @@ export default function CreatePiggy() {
                     <input id="fixed-amount" type="number" className="w-full border-2 border-gray-200 bg-white/50 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500" value={fixedAmount} onChange={(e) => setFixedAmount(e.target.value)} placeholder="100,000" min="0"/>
                     <span className="absolute right-3 sm:right-4 top-2.5 text-gray-700 font-medium text-sm sm:text-base">cCOP</span>
                 </div>
-                {fixedAmount && parseFloat(fixedAmount) > 0 && (
-                  <div className="text-sm text-gray-500">
-                    ≈ {formatUSD(convertCOPtoUSD(parseFloat(fixedAmount), copUsdRate))}
-                  </div>
-                )}
-                {address && (
-                  <div className="text-xs sm:text-sm text-gray-600">
-                    {isBalanceLoading ? (
-                      <span>Loading balance...</span>
-                    ) : (
-                      <span>
-                        Balance: <CCOPWithUSD ccopAmount={formatBalance(ccopBalance as bigint)} />
-                      </span>
-                    )}
-                  </div>
-                )}
+
+                <div className="flex items-center justify-between text-xs sm:text-sm">
+                  {fixedAmount && parseFloat(fixedAmount) > 0 && (
+                    <span className="text-gray-500">
+                      ≈ {formatUSD(convertCOPtoUSD(parseFloat(fixedAmount), copUsdRate))}
+                    </span>
+                  )}
+                  {address && (
+                    <span className="text-gray-600 ml-auto">
+                      {isBalanceLoading ? (
+                        <span>Loading...</span>
+                      ) : (
+                        <span>
+                          Balance: <CCOPWithUSD ccopAmount={formatBalance(ccopBalance as bigint)} />
+                        </span>
+                      )}
+                    </span>
+                  )}
+                </div>
 
                 {/* Insufficient Balance Warning - Fixed Terms */}
                 {hasInsufficientBalance && address && investmentType === 'fixed' && (
-                  <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-2.5 sm:p-3">
-                    <div className="flex items-start gap-2 mb-2">
-                      <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-xs sm:text-sm text-amber-800 font-medium mb-1">
-                          {t('create.insufficientBalanceWarning.title')}
-                        </p>
-                        <p className="text-xs text-amber-700">
-                          {t('create.insufficientBalanceWarning.need')} {formatNumber(parseFloat(fixedAmount))} cCOP • {t('create.insufficientBalanceWarning.have')} {formatBalance(ccopBalance as bigint)} cCOP
-                        </p>
-                      </div>
+                  <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-2">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                      <p className="text-xs font-medium text-amber-800">
+                        {t('create.insufficientBalanceWarning.title')}
+                      </p>
                     </div>
+                    <p className="text-xs text-amber-700 mb-2 ml-5">
+                      {t('create.insufficientBalanceWarning.need')} {formatNumber(parseFloat(fixedAmount))} • {t('create.insufficientBalanceWarning.have')} {formatBalance(ccopBalance as bigint)} cCOP
+                    </p>
                     <div className="grid grid-cols-2 gap-1.5">
                       <a
                         href="https://app.uniswap.org"
