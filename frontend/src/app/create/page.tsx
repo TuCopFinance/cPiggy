@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { parseEther, type Address } from "viem";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle, Info, Loader2, Shield, Zap, TrendingUp, Lock } from "lucide-react";
+import { ArrowLeft, CheckCircle, Info, Loader2, Shield, Zap, TrendingUp, Lock, AlertTriangle, ExternalLink } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ConnectButton } from "@/components/ConnectButton";
@@ -260,6 +260,12 @@ export default function CreatePiggy() {
   const isMainTxInProgress = isMainTxPending || !!mainTxHash;
   const isProcessing = isLoading || isApprovalInProgress || isMainTxInProgress;
 
+  // Check if user has insufficient balance
+  const hasInsufficientBalance = useMemo(() => {
+    if (!address || !ccopBalance || parsedActiveAmount === 0n) return false;
+    return parsedActiveAmount > (ccopBalance as bigint);
+  }, [address, ccopBalance, parsedActiveAmount]);
+
   const buttonText = useMemo(() => {
     if (isApprovalInProgress) return t('create.awaitingApproval');
     if (isMainTxInProgress) return t('create.processing');
@@ -439,10 +445,50 @@ export default function CreatePiggy() {
             </>
           )}
 
+          {/* Insufficient Balance Warning */}
+          {hasInsufficientBalance && address && (
+            <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-3 sm:p-4">
+              <div className="flex items-start gap-2 mb-3">
+                <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h4 className="font-semibold text-amber-900 text-sm sm:text-base mb-1">
+                    Insufficient cCOP Balance
+                  </h4>
+                  <p className="text-xs sm:text-sm text-amber-800 mb-2">
+                    You need {formatNumber(parseFloat(activeAmount))} cCOP but only have {formatBalance(ccopBalance as bigint)} cCOP in your wallet.
+                  </p>
+                  <p className="text-xs text-amber-700 font-medium">
+                    Get more cCOP using:
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <a
+                  href="https://app.uniswap.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 bg-pink-600 hover:bg-pink-700 text-white py-2.5 px-4 rounded-lg font-semibold text-xs sm:text-sm transition-all transform hover:scale-[1.02] shadow-md"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  Uniswap
+                </a>
+                <a
+                  href="https://app.squidrouter.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white py-2.5 px-4 rounded-lg font-semibold text-xs sm:text-sm transition-all transform hover:scale-[1.02] shadow-md"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  Squid Router
+                </a>
+              </div>
+            </div>
+          )}
+
           <Button
             type="submit"
             className="w-full bg-pink-600 hover:bg-pink-700 text-white py-3 sm:py-4 text-base sm:text-lg font-bold rounded-lg shadow-lg shadow-pink-500/50 transition-all transform hover:scale-105 disabled:bg-gray-400 disabled:shadow-none"
-            disabled={isProcessing || parsedActiveAmount === 0n}
+            disabled={isProcessing || parsedActiveAmount === 0n || hasInsufficientBalance}
           >
             {isProcessing && <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />}
             {buttonText}

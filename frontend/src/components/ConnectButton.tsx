@@ -7,6 +7,21 @@ import { useState, useEffect } from 'react'
 import { useLanguage } from '@/context/LanguageContext'
 import { useFarcaster } from '@/context/FarcasterContext'
 import { FarcasterConnectButton, useFarcasterWallet } from './FarcasterConnectButton'
+import { useReadContract } from 'wagmi'
+import { type Address, formatEther } from 'viem'
+import deployedAddresses from '../../lib/deployedAddresses.json'
+import { CCOPWithUSD } from './CCOPWithUSD'
+
+// Minimal ERC20 ABI for balance query
+const erc20Abi = [
+  {
+    constant: true,
+    inputs: [{ name: '_owner', type: 'address' }],
+    name: 'balanceOf',
+    outputs: [{ name: 'balance', type: 'uint256' }],
+    type: 'function'
+  }
+] as const;
 
 export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
   const { isConnected, address, embeddedWalletInfo } = useAppKitAccount()
@@ -17,6 +32,26 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
   const { t } = useLanguage()
   const { isFarcasterMiniApp, connectFarcasterWallet, isFarcasterWalletConnected } = useFarcaster()
   const { shouldShowFarcasterUI, isFarcasterWalletConnected: isFCConnected } = useFarcasterWallet()
+
+  const cCOPAddress = deployedAddresses.Tokens.cCOP as Address;
+
+  // Fetch user's cCOP balance
+  const { data: ccopBalance, isLoading: isBalanceLoading } = useReadContract({
+    address: cCOPAddress,
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address && isConnected,
+      refetchInterval: 10000, // Refresh every 10 seconds
+    },
+  });
+
+  // Format balance from bigint to readable number
+  const formatBalance = (balance: bigint | undefined): number => {
+    if (!balance) return 0;
+    return parseFloat(formatEther(balance));
+  };
 
   // Handle client-side mounting to prevent hydration issues
   useEffect(() => {
@@ -107,12 +142,16 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
                 : embeddedWalletInfo?.user?.email || embeddedWalletInfo?.user?.username || formatAddress(address)
               }
             </span>
-            <div className="flex items-center gap-1">
-              <div className="w-1 h-1 bg-green-500 rounded-full"></div>
-              <span className="text-xs text-green-600">
-                {shouldShowFarcasterUI && isFCConnected ? 'Farcaster Connected' : 'Connected'}
-              </span>
-            </div>
+            {isBalanceLoading ? (
+              <span className="text-xs text-gray-400">Loading...</span>
+            ) : (
+              <CCOPWithUSD
+                ccopAmount={formatBalance(ccopBalance as bigint)}
+                format="inline"
+                className="text-xs"
+                showLabel={true}
+              />
+            )}
         </div>
         <Button
           onClick={handleDisconnect}
@@ -153,7 +192,22 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
             </div>
           </div>
         </div>
-        
+
+        {/* Balance Display */}
+        <div className="p-3 bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg mb-3">
+          <p className="text-xs text-gray-600 mb-1">Balance</p>
+          {isBalanceLoading ? (
+            <p className="text-sm text-gray-400">Loading balance...</p>
+          ) : (
+            <CCOPWithUSD
+              ccopAmount={formatBalance(ccopBalance as bigint)}
+              format="block"
+              className="text-base"
+              showLabel={true}
+            />
+          )}
+        </div>
+
         {/* Compact Address Row */}
         <div className="flex items-center justify-between p-2.5 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg mb-3">
           <div className="flex items-center gap-2 flex-1 min-w-0">
