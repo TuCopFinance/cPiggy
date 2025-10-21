@@ -49,10 +49,10 @@ export function CCOPWithUSD({
 
   const usdValue = convertCOPtoUSD(numericAmount, copUsdRate);
 
-  // Format the cCOP amount with commas
-  const formattedCCOP = numericAmount.toLocaleString('en-US', {
+  // Format the cCOP amount with commas (no decimals)
+  const formattedCCOP = Math.floor(numericAmount).toLocaleString('en-US', {
     minimumFractionDigits: 0,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 0
   });
 
   if (format === 'block') {
