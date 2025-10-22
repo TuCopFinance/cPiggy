@@ -50,4 +50,61 @@ The user flow is designed to be as simple as possible:
 - version 1: 0x64f5167cFA3Eb18DebD49F7074AD146AaE983F97
 - version 1.1 (current): 0x765aeb85d160eb221Ab1D94506d6471f795763EC
 
-# This project is a proof-of-concept and should not be used in a production environment without a full security audit.
+## 📚 Documentation
+
+For detailed technical documentation, please visit the [docs](./docs) folder:
+
+- **[claude-context.md](./claude-context.md)** - Complete project context and architecture
+- **[Documentation Index](./docs/readme.md)** - All technical guides and features
+  - [AppKit Features](./docs/appkit-features.md) - Wallet integration features
+  - [Farcaster Testing](./docs/farcaster-testing.md) - Mini App testing guide
+  - [Language Implementation](./docs/language-implementation.md) - i18n guide
+
+## 🛠️ Tech Stack
+
+- **Frontend:** Next.js 15, React 19, TypeScript
+- **Blockchain:** Celo, Ethereum (EVM)
+- **Wallet:** Reown AppKit (WalletConnect v2)
+- **Identity:** Self Protocol (off-chain verification)
+- **Social:** Farcaster Mini App integration
+- **Styling:** Tailwind CSS
+- **i18n:** next-intl (English/Spanish)
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+
+- npm or pnpm
+- Celo wallet with cCOP
+
+### Installation
+
+```bash
+# Clone repository
+git clone https://github.com/TuCopFinance/cPiggy.git
+cd cPiggy
+
+# Install frontend dependencies
+cd frontend
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your values
+
+# Run development server
+npm run dev
+```
+
+### Environment Variables
+
+See [claude-context.md](./claude-context.md) for complete list of required environment variables.
+
+## 🌐 Live Demo
+
+- **Production:** [https://cpiggy.xyz](https://cpiggy.xyz)
+- **Farcaster Mini App:** Available in Warpcast
+
+## ⚠️ Disclaimer
+
+This project is a proof-of-concept and should not be used in a production environment without a full security audit.
