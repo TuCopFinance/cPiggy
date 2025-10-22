@@ -131,9 +131,9 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
   if (compact) {
     // Mini version for top corner
     return (
-      <div className="flex items-center gap-1.5 sm:gap-2 bg-white/95 backdrop-blur-sm rounded-lg p-1.5 sm:p-2 border border-gray-200/50 shadow-sm">
-        <div className="p-0.5 sm:p-1 bg-pink-100 rounded-md">
-          <Wallet className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-pink-600" />
+      <div className="flex items-center gap-1.5 bg-white/95 backdrop-blur-sm rounded-lg px-2 py-1.5 border border-gray-200/50 shadow-sm h-9">
+        <div className="p-0.5 bg-pink-100 rounded-md">
+          <Wallet className="w-3 h-3 text-pink-600" />
         </div>
         <div className="flex flex-col min-w-0 gap-0.5">
             <span className="text-xs font-medium text-gray-800 truncate leading-tight">
@@ -157,9 +157,9 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
           onClick={handleDisconnect}
           variant="ghost"
           size="sm"
-          className="h-5 w-5 sm:h-6 sm:w-6 p-0 hover:bg-red-100 rounded-md flex-shrink-0"
+          className="h-6 w-6 p-0 hover:bg-red-100 rounded-md flex-shrink-0"
         >
-          <LogOut className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-red-600" />
+          <LogOut className="w-3 h-3 text-red-600" />
         </Button>
       </div>
     )

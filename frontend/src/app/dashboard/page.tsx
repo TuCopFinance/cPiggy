@@ -345,23 +345,16 @@ export default function DashboardPage() {
             <ArrowLeft size={16} className="sm:w-5 sm:h-5" />
             <span className="font-medium">{t('common.back')}</span>
           </Link>
-          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 ml-auto">
+          <div className="flex items-center gap-1.5 flex-shrink-0 ml-auto">
             {isConnected && <ConnectButton compact />}
+            <Button variant="outline" size="icon" onClick={handleRefetch} disabled={isLoading} className="h-9 w-9">
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
             {!isFarcasterMiniApp && (
-              <>
-                <Button variant="outline" size="icon" onClick={handleRefetch} disabled={isLoading} className="h-7 w-7 sm:h-8 sm:w-8">
-                  <RefreshCw className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-                </Button>
-                <LanguageSwitcher
-                  currentLocale={currentLocale}
-                  onLocaleChange={setLocale}
-                />
-              </>
-            )}
-            {isFarcasterMiniApp && (
-              <Button variant="outline" size="icon" onClick={handleRefetch} disabled={isLoading} className="h-7 w-7 sm:h-8 sm:w-8">
-                <RefreshCw className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-              </Button>
+              <LanguageSwitcher
+                currentLocale={currentLocale}
+                onLocaleChange={setLocale}
+              />
             )}
           </div>
         </div>
