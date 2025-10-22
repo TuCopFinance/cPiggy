@@ -94,16 +94,44 @@ NEXT_PUBLIC_SELF_ENDPOINT=https://cpiggy.xyz/api/verify
 # Local: NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
+### Environment-Specific Configuration
+
+**Important:** Configure these variables differently per environment:
+
+| Variable | Local | Development | Production |
+|----------|-------|-------------|------------|
+| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | `https://cpiggy-dev.up.railway.app` | `https://cpiggy.xyz` |
+| `NEXT_PUBLIC_SELF_SCOPE` | `cpiggy-dev` | `cpiggy-dev` | `cpiggy-prod` |
+| `NEXT_PUBLIC_SELF_ENDPOINT` | `http://localhost:3000/api/verify` | `https://cpiggy-dev.up.railway.app/api/verify` | `https://cpiggy.xyz/api/verify` |
+
 ### Getting API Keys
 
 1. **Reown Project ID:**
    - Visit [cloud.reown.com](https://cloud.reown.com)
    - Create new project
    - Copy Project ID
+   - Can use same ID for all environments or different IDs per environment
 
 2. **Self Protocol:**
    - Contact Self Protocol for scope setup
-   - Configure verification endpoint
+   - Use different scopes for dev/prod environments
+   - Configure verification endpoint to match your app URL
+
+### Railway Configuration
+
+In Railway dashboard, set environment variables for each service:
+
+**Development Service:**
+```
+NEXT_PUBLIC_APP_URL=https://cpiggy-dev.up.railway.app
+```
+
+**Production Service:**
+```
+NEXT_PUBLIC_APP_URL=https://cpiggy.xyz
+```
+
+This ensures metadata URLs match the actual deployment URL and prevents warnings.
 
 ## 📁 Project Structure
 
