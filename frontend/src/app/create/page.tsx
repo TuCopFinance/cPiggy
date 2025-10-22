@@ -291,7 +291,7 @@ export default function CreatePiggy() {
             <span className="font-medium">{t('common.back')}</span>
           </Link>
           <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
-            {!isFarcasterMiniApp && address && <ConnectButton compact={true} />}
+            {address && <ConnectButton compact={true} />}
             {!isFarcasterMiniApp && <LanguageSwitcher currentLocale={currentLocale} onLocaleChange={setLocale} />}
           </div>
         </div>

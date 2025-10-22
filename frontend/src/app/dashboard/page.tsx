@@ -346,15 +346,22 @@ export default function DashboardPage() {
             <span className="font-medium">{t('common.back')}</span>
           </Link>
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 ml-auto">
-            {!isFarcasterMiniApp && isConnected && <ConnectButton compact />}
-            <Button variant="outline" size="icon" onClick={handleRefetch} disabled={isLoading} className="h-7 w-7 sm:h-8 sm:w-8">
-              <RefreshCw className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-            </Button>
+            {isConnected && <ConnectButton compact />}
             {!isFarcasterMiniApp && (
-              <LanguageSwitcher
-                currentLocale={currentLocale}
-                onLocaleChange={setLocale}
-              />
+              <>
+                <Button variant="outline" size="icon" onClick={handleRefetch} disabled={isLoading} className="h-7 w-7 sm:h-8 sm:w-8">
+                  <RefreshCw className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+                </Button>
+                <LanguageSwitcher
+                  currentLocale={currentLocale}
+                  onLocaleChange={setLocale}
+                />
+              </>
+            )}
+            {isFarcasterMiniApp && (
+              <Button variant="outline" size="icon" onClick={handleRefetch} disabled={isLoading} className="h-7 w-7 sm:h-8 sm:w-8">
+                <RefreshCw className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+              </Button>
             )}
           </div>
         </div>
