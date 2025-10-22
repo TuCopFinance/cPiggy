@@ -11,6 +11,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ConnectButton } from "@/components/ConnectButton";
 import { useCOPUSDRate, convertCOPtoUSD, formatUSD } from "@/hooks/useCOPUSDRate";
 import { CCOPWithUSD } from "@/components/CCOPWithUSD";
+import { useFarcaster } from "@/context/FarcasterContext";
 
 // ABIs and Deployed Addresses
 import PiggyBankABI from "../../../lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
@@ -62,6 +63,7 @@ export default function CreatePiggy() {
   const [fixedDuration, setFixedDuration] = useState(30);
   
   const { t, currentLocale, setLocale } = useLanguage();
+  const { isFarcasterMiniApp } = useFarcaster();
 
   const { address } = useAccount();
   const { rate: copUsdRate, isLoading: isRateLoading } = useCOPUSDRate();
@@ -283,19 +285,19 @@ export default function CreatePiggy() {
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-100 p-2 sm:p-3 pt-16 sm:pt-20">
       {/* Top Navigation Bar */}
       <div className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-gray-200/50 px-2 sm:px-4 py-2 z-50">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-1 sm:gap-2">
+        <div className={`${isFarcasterMiniApp ? 'max-w-[424px]' : 'max-w-4xl'} mx-auto flex items-center justify-between gap-1 sm:gap-2`}>
           <Link href="/" className="flex items-center gap-1 text-gray-600 hover:text-pink-700 transition-colors text-sm sm:text-base flex-shrink-0">
             <ArrowLeft size={16} className="sm:w-5 sm:h-5" />
-            <span className="font-medium hidden sm:inline">{t('common.back')}</span>
+            <span className="font-medium">{t('common.back')}</span>
           </Link>
           <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
-            {address && <ConnectButton compact={true} />}
-            <LanguageSwitcher currentLocale={currentLocale} onLocaleChange={setLocale} />
+            {!isFarcasterMiniApp && address && <ConnectButton compact={true} />}
+            {!isFarcasterMiniApp && <LanguageSwitcher currentLocale={currentLocale} onLocaleChange={setLocale} />}
           </div>
         </div>
       </div>
 
-      <div className="w-full max-w-4xl mx-auto">
+      <div className={`w-full ${isFarcasterMiniApp ? 'max-w-[424px]' : 'max-w-4xl'} mx-auto`}>
         
         {/* Investment Type Selection */}
         <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-3 sm:p-4 mb-4">
