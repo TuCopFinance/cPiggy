@@ -337,7 +337,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-16 sm:pt-20">
+    <div className="min-h-screen bg-slate-50 pt-14 sm:pt-16">
       {/* Top Navigation Bar */}
       <div className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-gray-200/50 px-2 sm:px-4 py-2 z-50">
         <div className={`${isFarcasterMiniApp ? 'max-w-[424px]' : 'max-w-4xl'} mx-auto flex items-center justify-between gap-1 sm:gap-2`}>
@@ -345,8 +345,7 @@ export default function DashboardPage() {
             <ArrowLeft size={16} className="sm:w-5 sm:h-5" />
             <span className="font-medium">{t('common.back')}</span>
           </Link>
-          <h1 className="text-sm sm:text-lg md:text-xl font-bold text-pink-800 truncate px-2">{t('dashboard.title')}</h1>
-          <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 ml-auto">
             {!isFarcasterMiniApp && isConnected && <ConnectButton compact />}
             <Button variant="outline" size="icon" onClick={handleRefetch} disabled={isLoading} className="h-7 w-7 sm:h-8 sm:w-8">
               <RefreshCw className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -362,6 +361,9 @@ export default function DashboardPage() {
       </div>
 
       <div className={`${isFarcasterMiniApp ? 'max-w-[424px]' : 'max-w-4xl'} mx-auto p-3 sm:p-4 md:p-6`}>
+
+        {/* Page Title */}
+        <h1 className="text-2xl sm:text-3xl font-bold text-pink-800 mb-6 text-center">{t('dashboard.title')}</h1>
 
         {!isConnected ? (
           <div className="text-center py-16">

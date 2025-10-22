@@ -135,8 +135,8 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
         <div className="p-0.5 sm:p-1 bg-pink-100 rounded-md">
           <Wallet className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-pink-600" />
         </div>
-        <div className="flex flex-col min-w-0">
-            <span className="text-xs font-medium text-gray-800 truncate">
+        <div className="flex flex-col min-w-0 gap-0.5">
+            <span className="text-xs font-medium text-gray-800 truncate leading-tight">
               {shouldShowFarcasterUI && isFCConnected
                 ? 'Farcaster Wallet'
                 : embeddedWalletInfo?.user?.email || embeddedWalletInfo?.user?.username || formatAddress(address)
@@ -147,7 +147,7 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
             ) : (
               <CCOPWithUSD
                 ccopAmount={formatBalance(ccopBalance as bigint)}
-                format="inline"
+                format="compact"
                 className="text-xs"
                 showLabel={true}
               />

@@ -10,8 +10,8 @@ interface CCOPWithUSDProps {
   className?: string;
   /** Whether to show loading state while fetching rate */
   showLoading?: boolean;
-  /** Format for display: 'inline' or 'block' */
-  format?: 'inline' | 'block';
+  /** Format for display: 'inline' or 'block' or 'compact' */
+  format?: 'inline' | 'block' | 'compact';
   /** Show cCOP label */
   showLabel?: boolean;
 }
@@ -65,6 +65,23 @@ export function CCOPWithUSD({
           <div className="text-sm text-gray-400">Loading rate...</div>
         ) : usdValue !== null ? (
           <div className="text-sm text-gray-500">≈ {formatUSD(usdValue)}</div>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (format === 'compact') {
+    return (
+      <div className={className}>
+        <div className="font-semibold text-gray-800 leading-tight">
+          {formattedCCOP} {showLabel && 'cCOP'}
+        </div>
+        {showLoading && isRateLoading ? (
+          <div className="text-gray-400 text-xs">(...)</div>
+        ) : usdValue !== null ? (
+          <div className="text-gray-500 text-xs">
+            ≈ {formatUSD(usdValue)}
+          </div>
         ) : null}
       </div>
     );
