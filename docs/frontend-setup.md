@@ -74,16 +74,24 @@ The app will be available at `http://localhost:3000`
 Create `.env.local` file in the `frontend/` directory:
 
 ```bash
+# App Configuration
+NEXT_PUBLIC_APP_URL=https://cpiggy.xyz  # Production
+# NEXT_PUBLIC_APP_URL=https://cpiggy-dev.up.railway.app  # Development/Staging
+
 # Reown AppKit (WalletConnect)
 NEXT_PUBLIC_PROJECT_ID=your_reown_project_id
+# NEXT_PUBLIC_PROJECT_ID=5aa426208ed21c5b9a93b4a0eec73d97  # localhost only
 
 # Self Protocol
 NEXT_PUBLIC_SELF_APP_NAME=cPiggyFX
 NEXT_PUBLIC_SELF_SCOPE=cpiggy-prod
 NEXT_PUBLIC_SELF_ENDPOINT=https://cpiggy.xyz/api/verify
 
-# Optional: Development overrides
-# NEXT_PUBLIC_PROJECT_ID=5aa426208ed21c5b9a93b4a0eec73d97 # localhost only
+# Environment-specific URLs
+# Production: NEXT_PUBLIC_APP_URL=https://cpiggy.xyz
+# Staging: NEXT_PUBLIC_APP_URL=https://cpiggy-staging.up.railway.app
+# Development: NEXT_PUBLIC_APP_URL=https://cpiggy-dev.up.railway.app
+# Local: NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 ### Getting API Keys

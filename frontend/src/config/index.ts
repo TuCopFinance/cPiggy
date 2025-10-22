@@ -62,8 +62,12 @@ export const wagmiAdapter = new WagmiAdapter({
       metadata: {
         name: 'cPiggyFX',
         description: 'Diversified FX Piggy Bank on Celo',
-        url: 'https://cpiggy.xyz',
-        icons: ['https://cpiggy.xyz/icon.png']
+        url: typeof window !== 'undefined' 
+          ? window.location.origin 
+          : (process.env.NEXT_PUBLIC_APP_URL || 'https://cpiggy.xyz'),
+        icons: [typeof window !== 'undefined' 
+          ? `${window.location.origin}/icon.png` 
+          : `${process.env.NEXT_PUBLIC_APP_URL || 'https://cpiggy.xyz'}/icon.png`]
       }
     }), // WalletConnect protocol
     miniAppConnector() // Farcaster Mini App connector
