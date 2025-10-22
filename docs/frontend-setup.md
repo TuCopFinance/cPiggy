@@ -80,7 +80,6 @@ NEXT_PUBLIC_APP_URL=https://cpiggy.xyz  # Production
 
 # Reown AppKit (WalletConnect)
 NEXT_PUBLIC_PROJECT_ID=your_reown_project_id
-# NEXT_PUBLIC_PROJECT_ID=5aa426208ed21c5b9a93b4a0eec73d97  # localhost only
 
 # Self Protocol
 NEXT_PUBLIC_SELF_APP_NAME=cPiggyFX

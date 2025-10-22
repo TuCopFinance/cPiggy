@@ -6,10 +6,10 @@ import { injected, walletConnect } from 'wagmi/connectors'
 import { defineChain } from 'viem'
 
 // Get projectId from https://cloud.reown.com
-export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID as string || '5aa426208ed21c5b9a93b4a0eec73d97' // this is a public projectId only to use on localhost
+export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID as string
 
 if (!projectId) {
-  throw new Error('Project ID is not defined')
+  throw new Error('NEXT_PUBLIC_PROJECT_ID is not defined. Please set it in your environment variables.')
 }
 
 // Define Celo Sepolia testnet (new testnet replacing Alfajores)
