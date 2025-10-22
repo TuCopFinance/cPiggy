@@ -94,7 +94,7 @@ npx hardhat compile
 npx hardhat test
 
 # Deploy (testnet)
-npx hardhat run scripts/deploy.ts --network celoAlfajores
+npx hardhat run scripts/deploy.ts --network celoSepolia
 ```
 
 ### Environment Variables
@@ -107,7 +107,7 @@ PRIVATE_KEY=your_private_key_here
 
 # Network URLs
 CELO_RPC_URL=https://forno.celo.org
-ALFAJORES_RPC_URL=https://alfajores-forno.celo-testnet.org
+CELO_SEPOLIA_RPC_URL=https://forno.celo-sepolia.celo-testnet.org
 
 # Block explorer API key (for verification)
 CELOSCAN_API_KEY=your_api_key_here
@@ -176,17 +176,17 @@ Current test suite covers:
 
 ## 🚀 Deployment
 
-### Deploy to Testnet (Alfajores)
+### Deploy to Testnet (Celo Sepolia)
 
 ```bash
 # Compile contracts
 npx hardhat compile
 
-# Deploy to Alfajores testnet
-npx hardhat run scripts/deploy.ts --network celoAlfajores
+# Deploy to Celo Sepolia testnet
+npx hardhat run scripts/deploy.ts --network celoSepolia
 
 # Verify on Celoscan
-npx hardhat verify --network celoAlfajores DEPLOYED_ADDRESS "Constructor" "Args"
+npx hardhat verify --network celoSepolia DEPLOYED_ADDRESS "Constructor" "Args"
 ```
 
 ### Deploy to Mainnet (Celo)
@@ -335,10 +335,10 @@ networks: {
     accounts: [process.env.PRIVATE_KEY],
     chainId: 42220
   },
-  celoAlfajores: {
-    url: process.env.ALFAJORES_RPC_URL,
+  celoSepolia: {
+    url: process.env.CELO_SEPOLIA_RPC_URL,
     accounts: [process.env.PRIVATE_KEY],
-    chainId: 44787
+    chainId: 11142220
   }
 }
 ```
