@@ -103,6 +103,12 @@ export default function CreatePiggy() {
     return formatNumber(balanceInEther);
   };
 
+  // Get balance as number (for calculations)
+  const getBalanceNumber = (balance: bigint | undefined): number => {
+    if (!balance) return 0;
+    return Number(balance) / 1e18;
+  };
+
   const piggyBankAddress = deployedAddresses.PiggyBank as Address;
   const cCOPAddress = deployedAddresses.Tokens.cCOP as Address;
 

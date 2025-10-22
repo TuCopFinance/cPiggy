@@ -19,7 +19,7 @@ const metadata = {
   icons: ['https://cpiggy-tests.up.railway.app/icon.png']
 }
 
-// Create the modal
+// Create the modal with all advanced features
 export const modal = createAppKit({
   adapters: [wagmiAdapter],
   projectId,
@@ -27,7 +27,13 @@ export const modal = createAppKit({
   metadata,
   themeMode: 'light',
   features: {
-    analytics: true // Optional - defaults to your Cloud configuration
+    analytics: true,      // Analytics tracking
+    onramp: true,         // Buy crypto with fiat (solves insufficient balance)
+    swaps: true,          // Token swapping within app
+    email: true,          // Email login for non-crypto users
+    socials: ['google', 'github', 'apple', 'discord'], // Social login options
+    history: true,        // Transaction history in account view
+    // emailShowWallets: true // Show wallet options after email login (optional)
   },
   themeVariables: {
     '--w3m-accent': '#000000',
