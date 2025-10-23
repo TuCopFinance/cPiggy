@@ -48,6 +48,7 @@ The user flow is designed to be as simple as possible:
 ## cPiggyBank Contract history:
 
 - version 1: 0x64f5167cFA3Eb18DebD49F7074AD146AaE983F97
-- version 1.1 (current): 0x765aeb85d160eb221Ab1D94506d6471f795763EC
+- version 1.1: 0x765aeb85d160eb221Ab1D94506d6471f795763EC
+- version 1.2 (current): 0x15a968d1efaCD5773679900D57E11799C4ac01Ce
 
 # This project is a proof-of-concept and should not be used in a production environment without a full security audit.
