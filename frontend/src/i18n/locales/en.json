@@ -68,6 +68,7 @@
     "lockDuration": "Lock Duration",
     "monthlyRate": "Monthly Rate",
     "monthlyInterestRate": "Monthly Interest Rate for {days} days",
+    "periodEfectiveRate": "PeriodEfectiveRate",
     "estReturn": "Est. Return",
     "totalAtMaturity": "Total at Maturity",
     "fixedTermsFeatures": "Fixed Terms Features",
