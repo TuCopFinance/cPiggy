@@ -441,7 +441,7 @@ Current contracts are NOT upgradeable. For upgrades:
 
 ---
 
-**Last Updated:** December 2024  
+**Last Updated:** October 2025  
 **Contract Version:** 1.2  
 **Solidity:** 0.8.19  
 **Network:** Celo Mainnet
