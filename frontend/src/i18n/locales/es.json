@@ -90,6 +90,12 @@
       "insufficientAllowance": "La transacción falló debido a aprobación de tokens insuficiente. Por favor aprueba los tokens primero.",
       "networkError": "Ocurrió un error de red. Por favor verifica tu conexión e inténtalo de nuevo.",
       "checkTransaction": "Ver transacción"
+    },
+    "insufficientBalanceWarning": {
+      "title": "Saldo Insuficiente de cCOP",
+      "need": "Necesitas",
+      "have": "Tienes",
+      "getMore": "Consigue más cCOP usando"
     }
   },
   "dashboard": {

@@ -225,7 +225,7 @@ function getSuggestedAllocation(uint256 totalAmount, bool isSafeMode)
 #### Configuration:
 
 **`config/index.ts`** - Wagmi/AppKit configuration
-- Network: Celo Mainnet + Alfajores Testnet
+- Network: Celo Mainnet + Celo Sepolia Testnet (chainId: 11142220)
 - Connectors: Injected, WalletConnect, Farcaster Mini App
 - Project ID for Reown/WalletConnect
 
