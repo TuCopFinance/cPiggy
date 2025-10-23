@@ -6,10 +6,10 @@ import { injected, walletConnect } from 'wagmi/connectors'
 import { defineChain } from 'viem'
 
 // Get projectId from https://cloud.reown.com
-export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID as string || '5aa426208ed21c5b9a93b4a0eec73d97' // this is a public projectId only to use on localhost
+export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID as string
 
 if (!projectId) {
-  throw new Error('Project ID is not defined')
+  throw new Error('NEXT_PUBLIC_PROJECT_ID is not defined. Please set it in your environment variables.')
 }
 
 // Define Celo Sepolia testnet (new testnet replacing Alfajores)
@@ -62,8 +62,12 @@ export const wagmiAdapter = new WagmiAdapter({
       metadata: {
         name: 'cPiggyFX',
         description: 'Diversified FX Piggy Bank on Celo',
-        url: 'https://cpiggy.xyz',
-        icons: ['https://cpiggy.xyz/icon.png']
+        url: typeof window !== 'undefined' 
+          ? window.location.origin 
+          : (process.env.NEXT_PUBLIC_APP_URL || 'https://cpiggy.xyz'),
+        icons: [typeof window !== 'undefined' 
+          ? `${window.location.origin}/icon.png` 
+          : `${process.env.NEXT_PUBLIC_APP_URL || 'https://cpiggy.xyz'}/icon.png`]
       }
     }), // WalletConnect protocol
     miniAppConnector() // Farcaster Mini App connector

@@ -82,13 +82,13 @@ export function convertCOPtoUSD(copAmount: number, rate: number | null): number 
 }
 
 /**
- * Format USD amount with proper formatting
+ * Format USD amount with ISO international notation (. for thousands, , for decimals)
  * @param usdAmount Amount in USD
- * @returns Formatted string (e.g., "$1,234.56")
+ * @returns Formatted string (e.g., "$1.234,56")
  */
 export function formatUSD(usdAmount: number | null): string {
   if (usdAmount === null) return '...';
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('es-CO', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,

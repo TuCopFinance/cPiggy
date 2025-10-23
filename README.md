@@ -5,49 +5,126 @@
 cPiggyFX is a decentralized savings application built on the Celo blockchain that provides an easy and accessible way for users, particularly in Colombia, to gain exposure to foreign exchange markets. By depositing their Colombian Peso stablecoin (cCOP), users can automatically diversify their savings into US Dollar stablecoins (cUSD) for a fixed period, with the potential to earn returns based on FX rate appreciation.
 
 This project was designed to be a low-friction, user-friendly alternative to complex DeFi tools, making FX savings accessible to everyone.
-🚀 How It Works
 
-The user flow is designed to be as simple as possible:
+## 🚀 How It Works
 
-    Connect Wallet: Users connect their Celo-compatible wallet (e.g., Celo Wallet, MetaMask).
+### 1. **Connect Wallet**
+Users connect their Celo-compatible wallet (MetaMask, WalletConnect, or Farcaster wallet). New users can also sign up with email or social login.
 
-    Self Protocol Integration: In order to use the app, users must have verified accounts on self protocol. We are using off-chain verification.
+### 2. **Verify Identity**
+Users verify their identity through Self Protocol's secure off-chain verification system by scanning a QR code.
 
-    Create a Piggy: The user decides on an amount of cCOP to save and a lock-in duration (e.g., 30, 60, or 90 days).
+### 3. **Create a Piggy**
+Users decide on an amount of cCOP to save and a lock-in duration (30, 60, or 90 days).
 
-    Choose a Mode:
+### 4. **Choose a Strategy**
 
-        Standard Mode: A growth-focused strategy that swaps 40% of the deposit to cUSD, 30% to cEUR and 10% to cGBP.
+**Standard Mode (Growth-focused):**
+- 20% cCOP, 40% cUSD, 30% cEUR, 10% cGBP
+- Higher potential returns through FX exposure
 
-        Safe Mode: A capital-preservation strategy that swaps only 30% of the deposit into cUSD, 20% to cEUR and 10% to cGBP, reducing FX risk.
+**Safe Mode (Capital-preservation):**
+- 40% cCOP, 30% cUSD, 20% cEUR, 10% cGBP
+- Lower FX risk with more cCOP retained
 
-    Lock & Diversify: The smart contract automatically executes the swap on the Mento Protocol, securing the user's diversified position.
+### 5. **Lock & Diversify**
+The smart contract automatically executes swaps on the Mento Protocol, securing the diversified position.
 
-    Track Progress: Users can view their active "piggies" on a dashboard, which shows the current value of their savings in real-time based on live Mento exchange rates.
+### 6. **Track Progress**
+View active "piggies" on the dashboard with real-time value tracking based on live exchange rates.
 
-    Claim: After the lock-in period ends, the user can claim their funds. The contract automatically swaps the cUSD portion back to cCOP and transfers the total amount back to the user's wallet.
+### 7. **Claim Rewards**
+After the lock-in period ends, claim funds. The contract automatically swaps foreign currencies back to cCOP and transfers to the user's wallet.
 
 
-## This  is a MVP foundation. Future versions will include:
+## 🔮 Future Roadmap
 
-   - Multi-Currency Baskets: Re-introducing cREAL, eXOF, and other Mento stablecoins as liquidity allows.
+This is an MVP foundation. Future versions will include:
 
-   - Yield Integration: Staking the locked funds in protocols like cCOPStaking to generate additional yield for the user.
+### Phase 2 Features
+- **Multi-Currency Baskets** - cREAL, eXOF, and other Mento stablecoins
+- **Yield Integration** - Stake locked funds for additional returns
+- **Enhanced Diversification** - More strategy options based on user feedback
 
-   - Gamification: Allowing users to name their piggies or earn NFT-based badges for savings milestones.
+### Phase 3 Features
+- **Gamification** - Named piggies and NFT badges for milestones
+- **Gas Sponsorship** - Sponsored transactions for seamless UX
+- **Social Features** - Savings goals sharing and challenges
 
-   - Gas Abstraction: Sponsoring transaction fees to create an even smoother user experience.
+### Phase 4 Features
+- **Advanced Analytics** - Portfolio insights and projections
+- **Automated Rebalancing** - Smart contract automation
+- **Cross-chain Support** - Expand beyond Celo ecosystem
 
-   - Testing and adding more diversification strategies, seeing what works and provide more strategy for saving money
+## 📜 Smart Contract Versions
 
-## Proof of Ship Season 7 implementations:
+| Version | Address | Status |
+|---------|---------|--------|
+| v1.0 | `0x64f5167cFA3Eb18DebD49F7074AD146AaE983F97` | Deprecated |
+| **v1.1** | `0x765aeb85d160eb221Ab1D94506d6471f795763EC` | ✅ **Active** |
 
-- Added cGBP among the diversified tokens, swap available within app
-- Added 1% developer fee, during user claiming assets back
+[View on Celoscan](https://celoscan.io/address/0x765aeb85d160eb221Ab1D94506d6471f795763EC)
 
-## cPiggyBank Contract history:
+## 📚 Documentation
 
-- version 1: 0x64f5167cFA3Eb18DebD49F7074AD146AaE983F97
-- version 1.1 (current): 0x765aeb85d160eb221Ab1D94506d6471f795763EC
+### Core Documentation
+- **[claude-context.md](./claude-context.md)** - Complete project context and architecture
+- **[Documentation Index](./docs/readme.md)** - All technical guides
 
-# This project is a proof-of-concept and should not be used in a production environment without a full security audit.
+### Setup Guides
+- **[Frontend Setup](./docs/frontend-setup.md)** - Frontend development guide
+- **[Contracts Guide](./docs/contracts-guide.md)** - Smart contracts guide
+
+### Features
+- **[AppKit Features](./docs/appkit-features.md)** - Wallet & payment features
+- **[Farcaster Testing](./docs/farcaster-testing.md)** - Mini App testing
+- **[Language Support](./docs/language-implementation.md)** - i18n guide
+
+## 🛠️ Tech Stack
+
+- **Frontend:** Next.js 15, React 19, TypeScript
+- **Blockchain:** Celo, Ethereum (EVM)
+- **Wallet:** Reown AppKit (WalletConnect v2)
+- **Identity:** Self Protocol (off-chain verification)
+- **Social:** Farcaster Mini App integration
+- **Styling:** Tailwind CSS
+- **i18n:** next-intl (English/Spanish)
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+
+- npm or pnpm
+- Celo wallet with cCOP
+
+### Installation
+
+```bash
+# Clone repository
+git clone https://github.com/TuCopFinance/cPiggy.git
+cd cPiggy
+
+# Install frontend dependencies
+cd frontend
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your values
+
+# Run development server
+npm run dev
+```
+
+### Environment Variables
+
+See [claude-context.md](./claude-context.md) for complete list of required environment variables.
+
+## 🌐 Live Demo
+
+- **Production:** [https://cpiggy.xyz](https://cpiggy.xyz)
+- **Farcaster Mini App:** Available in Warpcast
+
+## ⚠️ Disclaimer
+
+This project is a proof-of-concept and should not be used in a production environment without a full security audit.

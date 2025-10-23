@@ -12,6 +12,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ConnectButton } from "@/components/ConnectButton";
 import { CCOPWithUSD } from "@/components/CCOPWithUSD";
+import { useFarcaster } from "@/context/FarcasterContext";
 
 // ABIs and Deployed Addresses
 import PiggyBankABI from "../../../lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
@@ -296,6 +297,7 @@ export default function DashboardPage() {
   const { address, isConnected } = useAccount();
   const piggyBankAddress = deployedAddresses.PiggyBank as Address;
   const { t, currentLocale, setLocale } = useLanguage();
+  const { isFarcasterMiniApp } = useFarcaster();
 
   // Fetch Piggy data
   const { data: piggies, isLoading: isLoadingPiggies, error: piggiesError, refetch: refetchPiggies } = useReadContract({
@@ -335,25 +337,33 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-3 sm:p-4 md:p-6 lg:p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
-          <Link href="/" className="flex items-center gap-2 text-pink-700 hover:text-pink-900 text-sm sm:text-base">
+    <div className="min-h-screen bg-slate-50 pt-14 sm:pt-16">
+      {/* Top Navigation Bar */}
+      <div className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-gray-200/50 px-2 sm:px-4 py-2 z-50">
+        <div className={`${isFarcasterMiniApp ? 'max-w-[424px]' : 'max-w-4xl'} mx-auto flex items-center justify-between gap-1 sm:gap-2`}>
+          <Link href="/" className="flex items-center gap-1 text-pink-700 hover:text-pink-900 text-sm sm:text-base flex-shrink-0">
             <ArrowLeft size={16} className="sm:w-5 sm:h-5" />
-            {t('common.back')} {t('navigation.home')}
+            <span className="font-medium">{t('common.back')}</span>
           </Link>
-          <h1 className="text-2xl sm:text-3xl font-bold text-pink-800 text-center sm:text-left">{t('dashboard.title')}</h1>
-          <div className="flex items-center justify-center sm:justify-end gap-2 sm:gap-4">
-            <LanguageSwitcher 
-              currentLocale={currentLocale} 
-              onLocaleChange={setLocale} 
-            />
-            <ConnectButton compact />
-            <Button variant="outline" size="icon" onClick={handleRefetch} disabled={isLoading} className="h-8 w-8 sm:h-10 sm:w-10">
-              <RefreshCw className={`w-3 h-3 sm:w-4 sm:h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          <div className="flex items-center gap-1.5 flex-shrink-0 ml-auto">
+            {isConnected && <ConnectButton compact />}
+            <Button variant="outline" size="icon" onClick={handleRefetch} disabled={isLoading} className="h-9 w-9">
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>
+            {!isFarcasterMiniApp && (
+              <LanguageSwitcher
+                currentLocale={currentLocale}
+                onLocaleChange={setLocale}
+              />
+            )}
           </div>
         </div>
+      </div>
+
+      <div className={`${isFarcasterMiniApp ? 'max-w-[424px]' : 'max-w-4xl'} mx-auto p-3 sm:p-4 md:p-6`}>
+
+        {/* Page Title */}
+        <h1 className="text-2xl sm:text-3xl font-bold text-pink-800 mb-6 text-center">{t('dashboard.title')}</h1>
 
         {!isConnected ? (
           <div className="text-center py-16">

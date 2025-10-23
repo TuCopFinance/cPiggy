@@ -24,12 +24,12 @@ export function LanguageSwitcher({ currentLocale, onLocaleChange, className = ''
       <Button
         variant="outline"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border-gray-300 hover:border-gray-400"
+        className="flex items-center gap-1.5 px-2.5 h-9 text-xs border-gray-300 hover:border-gray-400"
       >
-        <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+        <Globe className="w-3.5 h-3.5" />
         <span className="hidden sm:inline">{localeNames[currentLocale]}</span>
         <span className="sm:hidden">{localeFlags[currentLocale]}</span>
-        <ChevronDown className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </Button>
 
       {isOpen && (

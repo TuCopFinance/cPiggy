@@ -90,6 +90,12 @@
       "insufficientAllowance": "Transaction failed due to insufficient token approval. Please approve tokens first.",
       "networkError": "Network error occurred. Please check your connection and try again.",
       "checkTransaction": "Check transaction"
+    },
+    "insufficientBalanceWarning": {
+      "title": "Insufficient cCOP Balance",
+      "need": "Need",
+      "have": "Have",
+      "getMore": "Get more cCOP using"
     }
   },
   "dashboard": {
