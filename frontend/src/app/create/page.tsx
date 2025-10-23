@@ -346,7 +346,7 @@ export default function CreatePiggy() {
                   <div className="grid grid-cols-3 gap-1 sm:gap-2 text-center">
                     <div>
                       <div className="text-sm sm:text-lg font-bold text-green-700">{fixedTermReturns.rate.toFixed(2)}%</div>
-                      <div className="text-xs text-green-600">{t('create.periodReturn')}</div>
+                      <div className="text-xs text-green-600">{t('create.periodEfectiveRate')}</div>
                     </div>
                     <div>
                       <div className="text-sm sm:text-lg font-bold text-green-700">{formatNumber(fixedTermReturns.estReturn)}</div>
