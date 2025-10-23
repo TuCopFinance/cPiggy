@@ -61,9 +61,10 @@ This is an MVP foundation. Future versions will include:
 | Version | Address | Status |
 |---------|---------|--------|
 | v1.0 | `0x64f5167cFA3Eb18DebD49F7074AD146AaE983F97` | Deprecated |
-| **v1.1** | `0x765aeb85d160eb221Ab1D94506d6471f795763EC` | ✅ **Active** |
+| v1.1 | `0x765aeb85d160eb221Ab1D94506d6471f795763EC` | Deprecated |
+| **v1.2** | `0x15a968d1efaCD5773679900D57E11799C4ac01Ce` | ✅ **Active** |
 
-[View on Celoscan](https://celoscan.io/address/0x765aeb85d160eb221Ab1D94506d6471f795763EC)
+[View on Celoscan](https://celoscan.io/address/0x15a968d1efaCD5773679900D57E11799C4ac01Ce)
 
 ## 📚 Documentation
 
