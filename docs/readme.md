@@ -4,10 +4,30 @@ Welcome to the cPiggyFX documentation. This folder contains all technical docume
 
 ## 📖 Documentation Index
 
+### Setup & Development
+
+#### [frontend-setup.md](./frontend-setup.md)
+Complete frontend development guide.
+- Tech stack and dependencies
+- Installation and setup
+- Development workflow
+- Environment variables
+- Testing and deployment
+- Troubleshooting
+
+#### [contracts-guide.md](./contracts-guide.md)
+Smart contracts development and deployment guide.
+- Contract architecture
+- Deployment instructions
+- Testing procedures
+- ABI usage
+- Security considerations
+- Gas optimization
+
 ### Features & Integrations
 
 #### [appkit-features.md](./appkit-features.md)
-Comprehensive guide to all Reown AppKit features implemented.
+Reown AppKit features implementation.
 - On-Ramp (Buy crypto with fiat)
 - Token Swaps
 - Email & Social Login
@@ -16,16 +36,16 @@ Comprehensive guide to all Reown AppKit features implemented.
 - Expected impact metrics
 
 #### [language-implementation.md](./language-implementation.md)
-Internationalization (i18n) implementation details.
-- Multi-language support
+Internationalization (i18n) guide.
+- Multi-language support (EN/ES)
 - Translation management
 - Language detection
-- Implementation guide
+- Implementation details
 
 #### [farcaster-testing.md](./farcaster-testing.md)
-Guide for testing Farcaster Mini App integration.
+Farcaster Mini App testing guide.
 - Pre-deployment checklist
-- Testing steps
+- Testing steps and tools
 - Required endpoints
 - Account association
 - Troubleshooting
@@ -35,26 +55,31 @@ Guide for testing Farcaster Mini App integration.
 ## 🚀 Quick Start
 
 ### For Developers
-1. Read [claude-context.md](../claude-context.md) (in root) for project overview
-2. Check [appkit-features.md](./appkit-features.md) for wallet features
-3. Review environment variables and setup
+1. Start with [claude-context.md](../claude-context.md) (in root) for complete project overview
+2. Frontend setup: [frontend-setup.md](./frontend-setup.md)
+3. Smart contracts: [contracts-guide.md](./contracts-guide.md)
+4. Wallet integration: [appkit-features.md](./appkit-features.md)
 
 ### For Testing
-1. Follow [farcaster-testing.md](./farcaster-testing.md) for Mini App testing
-2. Check language support in [language-implementation.md](./language-implementation.md)
+1. Frontend testing: Follow [frontend-setup.md](./frontend-setup.md) troubleshooting section
+2. Contract testing: See [contracts-guide.md](./contracts-guide.md) testing section
+3. Farcaster testing: [farcaster-testing.md](./farcaster-testing.md)
+4. i18n testing: [language-implementation.md](./language-implementation.md)
 
 ### For Product Managers
-1. Read feature implementations in [appkit-features.md](./appkit-features.md)
-2. Understand user flows and metrics
+1. Feature overview: [appkit-features.md](./appkit-features.md)
+2. User flows: [claude-context.md](../claude-context.md)
+3. Metrics and impact: All docs include impact sections
 
 ---
 
 ## 📋 Documentation Standards
 
 ### File Naming
-- Use descriptive, uppercase names with underscores
+- Use lowercase with hyphens (kebab-case): `appkit-features.md`
 - Add `.md` extension for markdown files
-- Keep names concise but meaningful
+- Keep names descriptive but concise
+- Exception: Root `README.md` stays uppercase (GitHub convention)
 
 ### Content Structure
 - Start with clear title and purpose
@@ -77,10 +102,6 @@ Guide for testing Farcaster Mini App integration.
 - [Main README](../README.md) - Project overview and getting started
 - [claude-context.md](../claude-context.md) - Complete project context and architecture
 
-### Module-Specific
-- [Frontend readme](../frontend/readme.md) - Frontend-specific setup and info
-- [Contracts readme](../Contracts/readme.md) - Smart contracts documentation
-
 ---
 
 ## 📊 Documentation Coverage
@@ -88,12 +109,14 @@ Guide for testing Farcaster Mini App integration.
 | Area | Status | Document |
 |------|--------|----------|
 | Architecture | ✅ Complete | claude-context.md (root) |
+| Frontend Setup | ✅ Complete | frontend-setup.md |
+| Smart Contracts | ✅ Complete | contracts-guide.md |
 | Wallet Features | ✅ Complete | appkit-features.md |
 | Internationalization | ✅ Complete | language-implementation.md |
 | Farcaster Testing | ✅ Complete | farcaster-testing.md |
 | API Documentation | ⏳ Pending | - |
-| Smart Contracts | ⏳ Pending | - |
 | User Guides | ⏳ Pending | - |
+| Security Audit | ⏳ Pending | - |
 
 ---
 

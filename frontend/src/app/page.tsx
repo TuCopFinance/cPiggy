@@ -109,20 +109,29 @@ export default function Home() {
 
   return (
     <MiniAppLayout>
-      <main className="flex min-h-screen flex-col items-center justify-center p-3 sm:p-6">
-        {/* Compact Wallet Info - Top Left (hidden in MiniApp) */}
+      <main className={`flex min-h-screen flex-col items-center justify-center p-3 sm:p-6 ${isConnected && isFarcasterMiniApp ? 'pt-16' : ''}`}>
+        {/* Top Bar for Farcaster */}
+        {isConnected && isFarcasterMiniApp && (
+          <div className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-gray-200/50 px-3 py-2 z-50">
+            <div className="max-w-[424px] mx-auto flex items-center justify-center">
+              <ConnectButton compact={true} />
+            </div>
+          </div>
+        )}
+
+        {/* Compact Wallet Info - Top Left (web only) */}
         {isConnected && !isFarcasterMiniApp && (
           <div className="absolute top-2 left-2 sm:top-4 sm:left-4">
             <ConnectButton compact={true} />
           </div>
         )}
-        
+
         {/* Language Switcher - Top Right (hidden in MiniApp) */}
         {!isFarcasterMiniApp && (
           <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
-            <LanguageSwitcher 
-              currentLocale={currentLocale} 
-              onLocaleChange={setLocale} 
+            <LanguageSwitcher
+              currentLocale={currentLocale}
+              onLocaleChange={setLocale}
             />
           </div>
         )}
