@@ -70,6 +70,9 @@ This is an MVP foundation. Future versions will include:
 ### Core Documentation
 - **[claude-context.md](./claude-context.md)** - Complete project context and architecture
 - **[Documentation Index](./docs/readme.md)** - All technical guides
+- version 1: 0x64f5167cFA3Eb18DebD49F7074AD146AaE983F97
+- version 1.1: 0x765aeb85d160eb221Ab1D94506d6471f795763EC
+- version 1.2 (current): 0x15a968d1efaCD5773679900D57E11799C4ac01Ce
 
 ### Setup Guides
 - **[Frontend Setup](./docs/frontend-setup.md)** - Frontend development guide
