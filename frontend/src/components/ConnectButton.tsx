@@ -131,24 +131,24 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
   if (compact) {
     // Mini version for top corner
     return (
-      <div className="flex items-center gap-1.5 bg-white/95 backdrop-blur-sm rounded-lg px-2 py-1.5 border border-gray-200/50 shadow-sm h-9">
-        <div className="p-0.5 bg-pink-100 rounded-md">
+      <div className="flex items-center gap-1.5 bg-white/95 backdrop-blur-sm rounded-lg px-2.5 py-1 border border-gray-200/50 shadow-sm min-h-[36px]">
+        <div className="p-1 bg-pink-100 rounded-md flex-shrink-0">
           <Wallet className="w-3 h-3 text-pink-600" />
         </div>
-        <div className="flex flex-col min-w-0 gap-0.5">
-            <span className="text-xs font-medium text-gray-800 truncate leading-tight">
+        <div className="flex flex-col gap-0.5 min-w-[100px]">
+            <span className="text-xs font-medium text-gray-800 truncate leading-none">
               {shouldShowFarcasterUI && isFCConnected
                 ? 'Farcaster Wallet'
                 : embeddedWalletInfo?.user?.email || embeddedWalletInfo?.user?.username || formatAddress(address)
               }
             </span>
             {isBalanceLoading ? (
-              <span className="text-xs text-gray-400">Loading...</span>
+              <span className="text-[10px] text-gray-400 leading-none">Loading...</span>
             ) : (
               <CCOPWithUSD
                 ccopAmount={formatBalance(ccopBalance as bigint)}
                 format="compact"
-                className="text-xs"
+                className="text-[10px]"
                 showLabel={true}
               />
             )}

@@ -73,13 +73,13 @@ export function CCOPWithUSD({
   if (format === 'compact') {
     return (
       <div className={className}>
-        <div className="font-semibold text-gray-800 leading-tight">
+        <div className="font-semibold text-gray-800 leading-none whitespace-nowrap">
           {formattedCCOP} {showLabel && 'cCOP'}
         </div>
         {showLoading && isRateLoading ? (
-          <div className="text-gray-400 text-xs">(...)</div>
+          <div className="text-gray-400 leading-none mt-0.5">(...)</div>
         ) : usdValue !== null ? (
-          <div className="text-gray-500 text-xs">
+          <div className="text-gray-500 leading-none mt-0.5 whitespace-nowrap">
             ≈ {formatUSD(usdValue)}
           </div>
         ) : null}
