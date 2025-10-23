@@ -441,7 +441,7 @@ function getRewardsOut() external onlyOwner {
         // Update global state
         totalStakedAmountByUser[msg.sender] -= s.amount;
         stakingPools[s.duration].totalStaked -= s.amount;
-
+       stakingPools[s.duration].totalRewardsPromised -= s.reward; 
         // Transfer funds
         if (developerFee > 0) {
             IERC20(cCOP).transfer(developer, developerFee);
