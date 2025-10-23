@@ -1,0 +1,545 @@
+# cPiggyFX - Project Context Document
+
+## Project Overview
+
+**cPiggyFX** is a decentralized savings application built on the Celo blockchain that provides exposure to foreign exchange markets. Users in Colombia can save in Colombian Peso stablecoin (cCOP) while automatically diversifying into other stablecoins (cUSD, cEUR, cGBP) or earning fixed APY through time-locked staking.
+
+**Tagline:** "Save in cCOP, grow in the world."
+
+## Core Features
+
+### 1. Diversified FX Savings (Piggy Bank)
+- Users deposit cCOP for a fixed lock-in period (30, 60, or 90 days)
+- Two risk modes:
+  - **Safe Mode**: 40% cCOP, 30% cUSD, 20% cEUR, 10% cGBP (lower FX risk)
+  - **Standard Mode**: 20% cCOP, 40% cUSD, 30% cEUR, 10% cGBP (higher growth potential)
+- Automatic swapping via Mento Protocol
+- Real-time value tracking based on live exchange rates
+- 1% developer fee on profits (additional cost to protocol)
+
+### 2. Fixed-Term APY Staking
+- Lock cCOP for guaranteed returns
+- Three duration options with different rates:
+  - **30 days**: 1.25% APY (0.0417% daily)
+  - **60 days**: 1.50% APY (0.0500% daily)
+  - **90 days**: 2.00% APY (0.0667% daily)
+- Pool-based system with maximum capacity limits
+- Compound interest calculations
+- 5% developer fee on earned rewards (additional cost to protocol)
+- Max deposit per wallet: 10,000,000 cCOP
+
+### 3. Self Protocol Integration
+- Off-chain identity verification required to use the app
+- Users must verify through Self Protocol before creating investments
+
+### 4. Farcaster Mini App Support
+- Optimized UI for Farcaster Mini App environment
+- Automatic wallet connection for Farcaster users
+- Responsive design for mobile and desktop
+
+## Technical Architecture
+
+### Smart Contracts (Solidity 0.8.19)
+
+#### Main Contract: `PiggyBank.sol`
+**Location:** `Contracts/contracts/cPiggyBank.sol`
+**Deployed Address:** `0x15a968d1efaCD5773679900D57E11799C4ac01Ce` (Celo Mainnet)
+
+**Key Components:**
+
+1. **State Variables:**
+   - Immutable token addresses (cCOP, cUSD, cEUR, cGBP)
+   - Mento protocol interfaces (Broker, Exchange Provider)
+   - Exchange IDs for swapping pairs
+   - Developer fee recipient address
+
+2. **Diversify Feature Structs:**
+   ```solidity
+   struct Piggy {
+       address owner;
+       uint256 initialAmount;
+       uint256 cCOPAmount;
+       uint256 cUSDAmount;
+       uint256 cEURAmount;
+       uint256 cGBPAmount;
+       uint256 startTime;
+       uint256 duration;
+       bool safeMode;
+       bool claimed;
+   }
+   ```
+
+3. **Staking Feature Structs:**
+   ```solidity
+   struct StakingPool {
+       uint256 totalStaked;
+       uint256 maxTotalStake;
+       uint256 totalRewardsFunded;
+       uint256 totalRewardsPromised;
+       uint256 duration;
+   }
+
+   struct StakingPosition {
+       uint256 amount;
+       uint256 startTime;
+       uint256 duration;
+       uint256 reward;
+       bool claimed;
+   }
+   ```
+
+4. **Main Functions:**
+   - `deposit(amount, lockDays, safeMode)` - Create diversified piggy
+   - `claim(index)` - Claim matured piggy
+   - `stake(amount, duration)` - Create fixed-term stake
+   - `unstake(index)` - Claim matured stake
+   - `fundRewards(amount)` - Owner function to fund staking pools
+   - `getRewardsOut()` - Owner function to withdraw excess funds
+   - `getUserPiggies(user)` - View user's diversified positions
+   - `getUserStakes(user)` - View user's staking positions
+   - `getPiggyValue(user, index)` - Get current value of piggy
+   - `getPoolInfo(duration)` - Get staking pool information
+
+5. **Internal Logic:**
+   - `_executeSwap()` - Handles Mento protocol swaps
+   - Multi-step swap process: cCOP → cUSD → (cEUR/cGBP)
+   - Proportional allocation based on risk mode
+   - Compound interest calculations for staking
+
+#### Supporting Contract: `MentoOracleHandler.sol`
+**Location:** `Contracts/contracts/MentoOracleHandler.sol`
+**Deployed Address:** `0xc0fDe6b032d7a5A1446A73D38Fbe5a6b9D5B62D1`
+
+**Purpose:** Provides allocation strategies for diversification
+
+**Main Function:**
+```solidity
+function getSuggestedAllocation(uint256 totalAmount, bool isSafeMode)
+    returns (uint256 cCOPToKeep, uint256 cCOPForUSD, uint256 cCOPForEUR, uint256 cCOPForGBP)
+```
+
+#### Interfaces: `interfaces.sol`
+**Location:** `Contracts/contracts/interfaces/interfaces.sol`
+
+- `IMentoBroker` - Mento V2 Broker interface for swaps
+- `IERC20` - Standard ERC20 token interface
+
+### Frontend (Next.js 15 + React 19)
+
+**Framework:** Next.js 15.3.3 with App Router
+**Location:** `frontend/`
+
+#### Key Dependencies:
+- **Wallet/Web3:**
+  - `@reown/appkit` (v1.7.15) - Wallet connection
+  - `wagmi` (v2.12.31) - React hooks for Ethereum
+  - `viem` (v2.31.3) - Ethereum utilities
+  - `ethers` (v6.15.0) - Ethereum library
+
+- **Farcaster:**
+  - `@farcaster/miniapp-sdk` (v0.1.9)
+  - `@farcaster/miniapp-wagmi-connector` (v1.0.0)
+
+- **Identity:**
+  - `@self.id/web` (v0.5.0)
+  - `@selfxyz/core` (v1.0.7-beta.1)
+
+- **UI:**
+  - `tailwindcss` (v3.4.17)
+  - `next-intl` (v4.3.4) - Internationalization
+  - `lucide-react` (v0.525.0) - Icons
+
+#### Page Structure:
+
+1. **`/` (Home Page)** - `frontend/src/app/page.tsx`
+   - Wallet connection
+   - Self Protocol verification check
+   - Navigation to create/dashboard
+   - Farcaster Mini App detection and optimization
+
+2. **`/create` (Create Investment)** - `frontend/src/app/create/page.tsx`
+   - Investment type selection (Diversify vs Fixed-Term)
+   - Amount and duration input
+   - Risk mode selection (for diversify)
+   - APY display (for fixed-term)
+   - Two-step transaction: Approve → Deposit/Stake
+   - Transaction status tracking
+
+3. **`/dashboard` (View Investments)** - `frontend/src/app/dashboard/page.tsx`
+   - Lists all user's piggies and stakes
+   - Real-time value updates
+   - Asset breakdown display
+   - Claim/Unstake functionality
+   - Time-until-maturity countdown
+
+4. **`/self` (Verification)** - `frontend/src/app/self/page.tsx`
+   - Self Protocol identity verification
+   - Sets localStorage flag on success
+
+5. **`/demo` (Language Demo)** - `frontend/src/app/demo/page.tsx`
+   - Demonstrates i18n functionality
+
+#### Key Components:
+
+1. **`ConnectButton.tsx`**
+   - Wallet connection UI
+   - Address display in compact mode
+   - Network switching
+
+2. **`FarcasterConnectButton.tsx`**
+   - Specialized connector for Farcaster Mini App
+
+3. **`LanguageSwitcher.tsx`**
+   - Toggle between English/Spanish
+
+4. **`MiniAppLayout.tsx`**
+   - Layout wrapper for Farcaster Mini App
+   - Responsive adjustments
+
+#### Contexts:
+
+1. **`FarcasterContext.tsx`**
+   - Detects Farcaster Mini App environment
+   - Auto-connects Farcaster wallet
+   - Provides SDK access for sharing/actions
+   - Manages `markReady()` lifecycle
+
+2. **`LanguageContext.tsx`**
+   - Manages current locale state
+   - Provides translation function `t(key)`
+   - Auto-detects user language preference
+
+#### Hooks:
+
+1. **`useMiniAppDetection.ts`**
+   - Detects if running in Farcaster Mini App
+   - Multiple detection methods (SDK, user agent, referrer)
+
+2. **`useLanguageDetection.ts`**
+   - Detects user's preferred language
+   - Persists selection to localStorage
+
+3. **`useClientMount.ts`**
+   - Ensures client-side only rendering
+
+#### Configuration:
+
+**`config/index.ts`** - Wagmi/AppKit configuration
+- Network: Celo Mainnet + Alfajores Testnet
+- Connectors: Injected, WalletConnect, Farcaster Mini App
+- Project ID for Reown/WalletConnect
+
+**`lib/deployedAddresses.json`** - Contract addresses and constants
+- All deployed contract addresses
+- Token addresses (cCOP, cUSD, cEUR, cGBP)
+- Mento Exchange IDs
+- Developer address
+
+#### Internationalization (i18n):
+
+**Supported Languages:** English (`en`), Spanish (`es`)
+**Location:** `frontend/src/i18n/locales/`
+
+Translation structure example:
+```json
+{
+  "home": {
+    "title": "cPiggyFX",
+    "subtitle": "Diversified FX Piggy Bank",
+    "createPiggy": "Create Piggy",
+    "viewPiggies": "View My Piggies"
+  },
+  "create": {
+    "title": "Create Investment",
+    "depositAmount": "Deposit Amount",
+    "lockDuration": "Lock Duration"
+  }
+}
+```
+
+### Blockchain Integration
+
+#### Celo Mainnet Addresses:
+
+**Deployed Contracts:**
+- PiggyBank: `0x15a968d1efaCD5773679900D57E11799C4ac01Ce`
+- MentoOracleHandler: `0xc0fDe6b032d7a5A1446A73D38Fbe5a6b9D5B62D1`
+
+**Mento Protocol:**
+- Broker: `0x777A8255cA72412f0d706dc03C9D1987306B4CaD`
+- Exchange Provider: `0x22d9db95E6Ae61c104A7B6F6C78D7993B94ec901`
+
+**Stablecoins:**
+- cCOP: `0x8A567e2aE79CA692Bd748aB832081C45de4041eA`
+- cUSD: `0x765DE816845861e75A25fCA122bb6898B8B1282a`
+- cEUR: `0xD8763CBa276a3738E6DE85b4b3bF5FDed6D6cA73`
+- cGBP: `0xCCF663b1fF11028f0b19058d0f7B674004a40746`
+
+**Exchange IDs:**
+- cCOP/cUSD: `0x1c9378bd0973ff313a599d3effc654ba759f8ccca655ab6d6ce5bd39a212943b`
+- cUSD/cEUR: `0x746455363e8f55d04e0a2cc040d1b348a6c031b336ba6af6ae91515c194929c8`
+- cUSD/cGBP: `0x6c369bfb1598b2f7718671221bc524c84874ad1ed7ba02a61121e7a06722e2ce`
+
+#### Transaction Flow:
+
+**Creating a Diversified Piggy:**
+1. User approves PiggyBank to spend cCOP
+2. User calls `deposit(amount, lockDays, safeMode)`
+3. Contract receives cCOP
+4. Contract swaps portion to cUSD via Mento
+5. Contract swaps portions of cUSD to cEUR and cGBP
+6. Piggy struct stored with all balances
+7. Event `PiggyCreated` emitted
+
+**Claiming a Piggy:**
+1. User calls `claim(index)` after lock period
+2. Contract swaps cEUR → cUSD
+3. Contract swaps cGBP → cUSD
+4. Contract swaps all cUSD → cCOP
+5. Calculate profit and 1% developer fee
+6. Transfer full amount to user + fee to developer
+7. Event `PiggyClaimed` emitted
+
+**Creating a Stake:**
+1. User approves PiggyBank to spend cCOP
+2. User calls `stake(amount, duration)`
+3. Contract calculates reward using compound interest
+4. Contract checks pool capacity and funding
+5. Stake position created
+6. Event `StakeCreated` emitted
+
+**Claiming a Stake:**
+1. User calls `unstake(index)` after lock period
+2. Calculate 5% developer fee on reward
+3. Transfer principal + full reward to user
+4. Transfer fee to developer
+5. Update pool state
+6. Event `StakeClaimed` emitted
+
+## Development Setup
+
+### Smart Contracts:
+
+**Directory:** `Contracts/`
+
+**Setup:**
+```bash
+cd Contracts
+npm install
+```
+
+**Environment Variables (.env):**
+```
+PRIVATE_KEY=<deployer_private_key>
+CELOSCAN_API_KEY=<api_key>
+```
+
+**Commands:**
+- Compile: `npx hardhat compile`
+- Test: `npx hardhat test`
+- Deploy: `npx hardhat run scripts/deploy.ts --network celo`
+
+**Hardhat Configuration:**
+- Solidity Version: 0.8.20
+- Networks: Hardhat (forking Celo), Celo Mainnet
+- Etherscan: Celoscan integration
+
+### Frontend:
+
+**Directory:** `frontend/`
+
+**Setup:**
+```bash
+cd frontend
+npm install
+```
+
+**Environment Variables:**
+```
+NEXT_PUBLIC_PROJECT_ID=<reown_project_id>
+```
+
+**Commands:**
+- Dev: `npm run dev`
+- Build: `npm run build`
+- Start: `npm start`
+- Lint: `npm run lint`
+
+## Key Business Logic
+
+### Fee Structure:
+
+1. **Diversified Piggies:**
+   - 1% fee on profits only
+   - Fee paid by protocol (additional transfer)
+   - User receives full return amount
+   - If loss, no fee charged
+
+2. **Fixed-Term Staking:**
+   - 5% fee on earned rewards
+   - Fee paid by protocol (additional transfer)
+   - User receives principal + full reward
+   - Principal always returned in full
+
+### Staking Pool Economics:
+
+**Pool Capacities:**
+- 30-day pool: 3,200,000,000 cCOP max
+- 60-day pool: 1,157,981,803 cCOP max
+- 90-day pool: 408,443,341 cCOP max
+
+**Reward Distribution (when funding):**
+- 30-day pool: 30% of total funding
+- 60-day pool: 35% of total funding
+- 90-day pool: 35% of total funding
+
+**Interest Calculation:**
+- Uses compound interest formula
+- Pre-calculated multipliers for simplicity:
+  - 30d: 1.0125 (1.25%)
+  - 60d: 1.0302 (3.02% total)
+  - 90d: 1.0612 (6.12% total)
+
+### Risk Modes Allocation:
+
+**Safe Mode (Lower Risk):**
+- 40% stays in cCOP (home currency)
+- 30% swapped to cUSD
+- 20% swapped to cEUR
+- 10% swapped to cGBP
+
+**Standard Mode (Higher Growth):**
+- 20% stays in cCOP
+- 40% swapped to cUSD
+- 30% swapped to cEUR
+- 10% swapped to cGBP
+
+## Security Considerations
+
+1. **Contract Ownership:**
+   - PiggyBank uses OpenZeppelin's Ownable
+   - Owner can fund/withdraw rewards
+   - Owner cannot access user funds
+
+2. **Lock Periods:**
+   - Enforced on-chain via timestamp checks
+   - No early withdrawal mechanism
+
+3. **Swap Safety:**
+   - Uses Mento's `getAmountOut` for minimum amounts
+   - Prevents sandwich attacks
+   - Try-catch for view functions to prevent reverts
+
+4. **Pool Limits:**
+   - Per-wallet limits enforced (10M cCOP)
+   - Pool capacity limits enforced
+   - Rewards must be funded before stakes accepted
+
+## Future Roadmap (from README)
+
+- Multi-currency baskets (cREAL, eXOF)
+- Yield integration (cCOPStaking)
+- Gamification (NFT badges, piggy naming)
+- Gas abstraction (fee sponsorship)
+- Additional diversification strategies
+- Enhanced testing and strategy optimization
+
+## Version History
+
+**Contract Versions:**
+- v1.0: `0x64f5167cFA3Eb18DebD49F7074AD146AaE983F97`
+- v1.1 (current): `0x765aeb85d160eb221Ab1D94506d6471f795763EC`
+
+Note: The address in deployedAddresses.json shows v1.1 deployment.
+
+**Proof of Ship Season 7 Updates:**
+- Added cGBP to diversification strategy
+- Implemented 1% developer fee on profits
+- Added fixed-term staking feature with APY
+
+## Important Notes
+
+⚠️ **This is a proof-of-concept MVP** - Should not be used in production without full security audit.
+
+## Contract ABI Locations
+
+- PiggyBank ABI: `frontend/lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json`
+- MentoOracleHandler ABI: Available in artifacts
+
+## Common Development Patterns
+
+### Reading Contract Data:
+```typescript
+const { data: piggies } = useReadContract({
+  address: piggyBankAddress,
+  abi: PiggyBankABI.abi,
+  functionName: 'getUserPiggies',
+  args: [userAddress],
+});
+```
+
+### Writing to Contract:
+```typescript
+const { writeContractAsync } = useWriteContract();
+await writeContractAsync({
+  address: piggyBankAddress,
+  abi: PiggyBankABI.abi,
+  functionName: 'deposit',
+  args: [amount, duration, safeMode],
+});
+```
+
+### Watching Transactions:
+```typescript
+const { isSuccess } = useWaitForTransactionReceipt({
+  hash: txHash,
+});
+```
+
+## Testing Strategy
+
+- Unit tests for smart contracts in `Contracts/test/`
+- Forking Celo mainnet for realistic testing
+- Mock contracts for Mento protocol (`contracts/mocks/`)
+- Frontend testing via manual QA in development
+
+## Deployment Process
+
+1. Configure environment variables
+2. Run `deploy.ts` script
+3. Script automatically:
+   - Deploys MentoOracleHandler
+   - Deploys PiggyBank with all parameters
+   - Approves initial cCOP allowance
+   - Saves addresses to JSON
+   - Verifies contracts on Celoscan
+
+## Key Technical Decisions
+
+1. **Why two separate features?**
+   - Diversify: For FX exposure and potential appreciation
+   - Staking: For guaranteed fixed returns
+   - Different user risk appetites
+
+2. **Why Mento Protocol?**
+   - Native Celo stablecoin DEX
+   - Deep liquidity
+   - Low slippage
+   - Trusted by Celo ecosystem
+
+3. **Why Self Protocol?**
+   - Required for regulatory compliance
+   - Off-chain verification
+   - Privacy-preserving
+
+4. **Why Farcaster support?**
+   - Growing Web3 social platform
+   - Mobile-first user base
+   - Colombian crypto community presence
+
+5. **Why Next.js 15?**
+   - App Router for better performance
+   - Server components support
+   - Built-in optimization
+
+This context document should provide comprehensive understanding of the cPiggyFX project for development, debugging, and feature additions.

@@ -11,25 +11,27 @@ export const metadata: Metadata = {
   other: {
     'fc:miniapp': JSON.stringify({
       version: '1',
-      image: 'https://cpiggy-tests.up.railway.app/miniapp-image.png',
+      imageUrl: 'https://cpiggy.xyz/splash.png',
       button: {
         title: 'Open cPiggyFX',
         action: {
-          type: 'launch',
+          type: 'launch_miniapp',
           name: 'cPiggyFX',
-          url: 'https://cpiggy-tests.up.railway.app'
+          url: 'https://cpiggy.xyz',
+          splashImageUrl: 'https://cpiggy.xyz/splash.png'
         }
       }
     }),
     'fc:frame': JSON.stringify({
-      version: 'next',
-      image: 'https://cpiggy-tests.up.railway.app/frame-image.png',
+      version: '1',
+      imageUrl: 'https://cpiggy.xyz/splash.png',
       button: {
         title: 'Start Saving',
         action: {
-          type: 'launch',
+          type: 'launch_frame',
           name: 'cPiggyFX',
-          url: 'https://cpiggy-tests.up.railway.app'
+          url: 'https://cpiggy.xyz',
+          splashImageUrl: 'https://cpiggy.xyz/splash.png'
         }
       }
     })

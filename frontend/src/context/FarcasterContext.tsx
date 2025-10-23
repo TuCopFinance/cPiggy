@@ -4,7 +4,9 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
-import { useConnect, useAccount } from 'wagmi';
+import { useConnect, useAccount, useSwitchChain } from 'wagmi';
+import { celo } from 'viem/chains';
+import { useMiniAppDetection } from '@/hooks/useMiniAppDetection';
 
 interface FarcasterContextType {
   isLoaded: boolean;
@@ -23,44 +25,81 @@ const FarcasterContext = createContext<FarcasterContextType | undefined>(undefin
 
 export function FarcasterProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isFarcasterMiniApp, setIsFarcasterMiniApp] = useState(false);
   const [context, setContext] = useState<unknown>(null);
   const [user, setUser] = useState<unknown>(null);
   
   const { connect, connectors } = useConnect();
-  const { isConnected } = useAccount();
+  const { isConnected, chainId } = useAccount();
+  const { switchChain } = useSwitchChain();
+  
+  // Use the improved Mini App detection
+  const { isFarcasterMiniApp, isMiniApp, sdkAvailable, detectionMethod } = useMiniAppDetection();
 
   useEffect(() => {
     const initializeFarcaster = async () => {
       try {
-        // Check if we're running in a Farcaster MiniApp context
-        const isInMiniApp = window.top !== window.self && 
-                           window.location !== window.parent.location;
+        console.log('Farcaster Mini App Detection:', {
+          isFarcasterMiniApp,
+          isMiniApp,
+          sdkAvailable,
+          detectionMethod
+        });
         
-        if (isInMiniApp) {
-          setIsFarcasterMiniApp(true);
-          
-          // Get context from Farcaster
-          const contextData = await sdk.context;
-          setContext(contextData);
-          
-          if ((contextData as any)?.user) {
-            setUser((contextData as any).user);
+        if (isFarcasterMiniApp) {
+          // Get context from Farcaster if SDK is available
+          if (sdkAvailable) {
+            try {
+              const contextData = await sdk.context;
+              setContext(contextData);
+              
+              if ((contextData as any)?.user) {
+                setUser((contextData as any).user);
+              }
+            } catch (error) {
+              console.error('Failed to get Farcaster context:', error);
+            }
           }
           
-          // Don't call ready() here - let the app call it when fully loaded
+          // Debug available connectors
+          console.log('Available connectors:', connectors.map(c => ({
+            id: c.id,
+            name: c.name,
+            type: c.type
+          })));
           
           // Auto-connect Farcaster wallet if in MiniApp and not connected
           if (!isConnected) {
-            const farcasterConnector = connectors.find(
-              connector => connector.id === 'miniApp'
-            );
+            // Try multiple possible connector IDs
+            const possibleIds = ['miniApp', 'farcaster', 'farcaster-miniapp', '@farcaster/miniapp-wagmi-connector', 'farcasterMiniApp'];
+            let farcasterConnector = null;
+            
+            for (const id of possibleIds) {
+              farcasterConnector = connectors.find(connector => connector.id === id);
+              if (farcasterConnector) {
+                console.log('Found Farcaster connector with ID:', id);
+                break;
+              }
+            }
+            
+            // Fallback: look for connector with 'farcaster' in name
+            if (!farcasterConnector) {
+              farcasterConnector = connectors.find(connector => 
+                connector.name.toLowerCase().includes('farcaster') ||
+                connector.name.toLowerCase().includes('mini')
+              );
+              if (farcasterConnector) {
+                console.log('Found Farcaster connector by name:', farcasterConnector.name);
+              }
+            }
+            
             if (farcasterConnector) {
               try {
                 connect({ connector: farcasterConnector });
               } catch (error) {
                 console.error('Auto-connect failed:', error);
               }
+            } else {
+              console.warn('No Farcaster connector found. Available connectors:', connectors.map(c => c.id));
             }
           }
         }
@@ -73,7 +112,7 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
     };
 
     initializeFarcaster();
-  }, [connect, connectors, isConnected]);
+  }, [isFarcasterMiniApp, sdkAvailable, connect, connectors, isConnected, detectionMethod]);
 
   const signIn = async () => {
     if (!isFarcasterMiniApp) return;
@@ -126,16 +165,50 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
   const connectFarcasterWallet = async () => {
     if (!isFarcasterMiniApp) return;
     
-    const farcasterConnector = connectors.find(
-      connector => connector.id === 'miniApp'
-    );
+    // Debug: Log all available connectors
+    console.log('Available connectors in FarcasterContext:', connectors.map(c => ({ id: c.id, name: c.name, type: c.type })));
+    
+    // Try multiple connector IDs
+    const possibleIds = ['miniApp', 'farcaster', 'farcaster-miniapp', '@farcaster/miniapp-wagmi-connector', 'farcasterMiniApp'];
+    let farcasterConnector = null;
+    
+    for (const id of possibleIds) {
+      farcasterConnector = connectors.find(connector => connector.id === id);
+      if (farcasterConnector) {
+        console.log('Found Farcaster connector with ID:', id);
+        break;
+      }
+    }
+    
+    // If not found by ID, try by name
+    if (!farcasterConnector) {
+      farcasterConnector = connectors.find(connector => 
+        connector.name?.toLowerCase().includes('farcaster') ||
+        connector.name?.toLowerCase().includes('miniapp') ||
+        connector.name?.toLowerCase().includes('mini')
+      );
+      if (farcasterConnector) {
+        console.log('Found Farcaster connector by name:', farcasterConnector.name);
+      }
+    }
     
     if (farcasterConnector) {
       try {
-        connect({ connector: farcasterConnector });
+        await connect({ connector: farcasterConnector });
+        
+        // Switch to Celo chain if connected to wrong chain
+        if (isConnected && chainId !== celo.id) {
+          try {
+            await switchChain({ chainId: celo.id });
+          } catch (error) {
+            console.error('Failed to switch to Celo chain:', error);
+          }
+        }
       } catch (error) {
         console.error('Failed to connect Farcaster wallet:', error);
       }
+    } else {
+      console.error('Farcaster connector not found. Available connectors:', connectors.map(c => c.id));
     }
   };
 

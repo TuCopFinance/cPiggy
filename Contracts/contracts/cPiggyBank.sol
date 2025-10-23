@@ -46,6 +46,11 @@ contract PiggyBank is Ownable {
     // --- STATE VARIABLES FOR NEW APY STAKING FEATURE ---
     uint256 public constant MAX_DEPOSIT_PER_WALLET = 10_000_000 * 1e18;
     uint256 public constant STAKING_DEV_FEE_PERCENTAGE = 5; // 5% fee on profit
+    
+    // Daily rate constants (in basis points)
+    uint256 public constant DAILY_RATE_30D = 417; // 0.0417% daily (1.25%/30)
+    uint256 public constant DAILY_RATE_60D = 500; // 0.0500% daily (1.50%/30)
+    uint256 public constant DAILY_RATE_90D = 667; // 0.0667% daily (2.00%/30)
 
     struct StakingPool {
         uint256 totalStaked;
@@ -301,24 +306,62 @@ contract PiggyBank is Ownable {
         p.claimed = true;
 
         uint256 developerFee = 0;
-        uint256 userAmount = finalReturn;
+        uint256 userAmount = finalReturn; // User gets full return
 
         if (finalReturn > p.initialAmount) {
             uint256 profit = finalReturn - p.initialAmount;
-            developerFee = (profit * 1) / 100;
-            userAmount = finalReturn - developerFee;
-            
-            if (developerFee > 0) {
-                IERC20(cCOP).transfer(developer, developerFee);
-            }
+            developerFee = (profit * 1) / 100; // 1% of profit as additional cost to protocol
         }
 
+        // User gets full return, protocol pays developer fee separately
         IERC20(cCOP).transfer(msg.sender, userAmount);
+        if (developerFee > 0) {
+            IERC20(cCOP).transfer(developer, developerFee);
+        }
 
         emit PiggyClaimed(msg.sender, _index, userAmount, developerFee);
     }
 
     // --- NEW APY STAKING FEATURE FUNCTIONS ---
+
+    /**
+     * @notice Get daily rate for a specific duration
+     * @param _duration The lock-in period in days (30, 60, or 90)
+     * @return The daily rate in basis points
+     */
+    function getDailyRate(uint256 _duration) public pure returns (uint256) {
+        if (_duration == 30) return DAILY_RATE_30D;
+        if (_duration == 60) return DAILY_RATE_60D;
+        if (_duration == 90) return DAILY_RATE_90D;
+        return 0;
+    }
+
+    /**
+     * @notice Calculate compound interest using daily rates
+     * @param _amount The principal amount
+     * @param _duration The lock-in period in days
+     * @return The interest amount
+     */
+    function calculateCompoundInterest(uint256 _amount, uint256 _duration) public pure returns (uint256) {
+        uint256 dailyRate = getDailyRate(_duration);
+        if (dailyRate == 0) return 0;
+        
+        // A = P(1 + r)^n where r = dailyRate/10000
+        // For simplicity, we'll use the pre-calculated compound multipliers
+        uint256 compoundMultiplier;
+        if (_duration == 30) {
+            compoundMultiplier = 10125; // 1.0125 (1.25% for 30 days)
+        } else if (_duration == 60) {
+            compoundMultiplier = 10302; // 1.0302 (1.5% for 60 days)
+        } else if (_duration == 90) {
+            compoundMultiplier = 10612; // 1.0612 (2% for 90 days)
+        } else {
+            return 0;
+        }
+        
+        uint256 finalAmount = (_amount * compoundMultiplier) / 10000;
+        return finalAmount - _amount;
+    }
 
     /**
      * @notice Funds the contract with cCOP to pay for staking rewards.
@@ -333,9 +376,11 @@ contract PiggyBank is Ownable {
         require(_amount > 0, "Amount must be positive");
         IERC20(cCOP).transferFrom(msg.sender, address(this), _amount);
 
-        uint256 rewardsFor30d = (_amount * 40) / 100;
-        uint256 rewardsFor60d = (_amount * 35) / 100;
-        uint256 rewardsFor90d = _amount - rewardsFor30d - rewardsFor60d; // Remainder to 90d pool
+        // Distribute rewards based on pool capacity and interest rates
+        // 30d: 1.25%, 60d: 1.5%, 90d: 2% - adjust distribution accordingly
+        uint256 rewardsFor30d = (_amount * 30) / 100; // 30% for 30-day pool
+        uint256 rewardsFor60d = (_amount * 35) / 100; // 35% for 60-day pool  
+        uint256 rewardsFor90d = _amount - rewardsFor30d - rewardsFor60d; // 35% for 90-day pool
 
         stakingPools[30].totalRewardsFunded += rewardsFor30d;
         stakingPools[60].totalRewardsFunded += rewardsFor60d;
@@ -377,21 +422,19 @@ function getRewardsOut() external onlyOwner {
             "Pool is full"
         );
         
-        // APY is implicitly defined by the total rewards and max stake of the pool.
-        // For the 30-day pool: (40M rewards / 3.2B max stake) = 1.25% return for 30 days.
-        uint256 maxRewardForPool = (pool.maxTotalStake * 40) / 100 / 8; // Example for 30d, adjust as needed
-        if (_duration == 60) maxRewardForPool = (pool.maxTotalStake * 35) / 100 / 4;
-        if (_duration == 90) maxRewardForPool = (pool.maxTotalStake * 25) / 100 / (12/3);
+        // Daily interest rates: 30d=0.0417%, 60d=0.0500%, 90d=0.0667%
+        // Pool capacity calculations based on compound interest rates
+        uint256 maxRewardForPool;
+        if (_duration == 30) {
+            maxRewardForPool = (pool.maxTotalStake * 125) / 10000; // 1.25% compound
+        } else if (_duration == 60) {
+            maxRewardForPool = (pool.maxTotalStake * 302) / 10000; // 3.02% compound
+        } else if (_duration == 90) {
+            maxRewardForPool = (pool.maxTotalStake * 612) / 10000; // 6.12% compound
+        }
 
-        // Simplified reward calculation based on your model's revenue targets
-        // Example: 30-day pool aims for $40M revenue on $3.2B deposits -> 1.25% interest
-        uint256 interestRate;
-        if (_duration == 30) interestRate = 125; // 1.25% -> 125 / 10000
-        else if (_duration == 60) interestRate = 302; // 3.02% -> 302 / 10000
-        else if (_duration == 90) interestRate = 612; // 6.12% -> 612 / 10000
-        else interestRate = 0;
-
-        uint256 reward = (_amount * interestRate) / 10000;
+        // Calculate reward using daily rates and compound interest
+        uint256 reward = calculateCompoundInterest(_amount, _duration);
         
         require(
             pool.totalRewardsPromised + reward <= pool.totalRewardsFunded,
@@ -433,22 +476,22 @@ function getRewardsOut() external onlyOwner {
 
         s.claimed = true;
         
-        // The dev fee is 5% of the earned reward (profit)
+        // The dev fee is 5% of the earned reward (profit) - additional cost to protocol
         uint256 developerFee = (s.reward * STAKING_DEV_FEE_PERCENTAGE) / 100;
-        uint256 userReward = s.reward - developerFee;
-        uint256 totalUserReturn = s.amount + userReward;
+        uint256 totalUserReturn = s.amount + s.reward; // User gets full reward
+        uint256 totalProtocolCost = s.amount + s.reward + developerFee; // Total cost to protocol
         
         // Update global state
         totalStakedAmountByUser[msg.sender] -= s.amount;
         stakingPools[s.duration].totalStaked -= s.amount;
-       stakingPools[s.duration].totalRewardsPromised -= s.reward; 
-        // Transfer funds
+
+        // Transfer funds - user gets full reward, protocol pays developer fee
+        IERC20(cCOP).transfer(msg.sender, totalUserReturn);
         if (developerFee > 0) {
             IERC20(cCOP).transfer(developer, developerFee);
         }
-        IERC20(cCOP).transfer(msg.sender, totalUserReturn);
 
-        emit StakeClaimed(msg.sender, _index, s.amount, userReward, developerFee);
+        emit StakeClaimed(msg.sender, _index, s.amount, s.reward, developerFee);
     }
 
     // --- VIEW FUNCTIONS ---

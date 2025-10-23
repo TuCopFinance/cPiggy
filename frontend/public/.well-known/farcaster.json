@@ -1,9 +1,9 @@
 {
   "version": "1",
   "accountAssociation": {
-    "header": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9",
-    "payload": "eyJkb21haW4iOiJjcGlnZ3kueHl6IiwiZmNpZCI6MH0",
-    "signature": "signature_placeholder"
+    "header": "eyJmaWQiOjEzMzE3NjIsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg4MjY1RjEzYzI2M2I5MWUxMDI3YWVFMzcwYzdjNDJjZjEzMmY5QjA2In0",
+    "payload": "eyJkb21haW4iOiJjcGlnZ3kueHl6In0",
+    "signature": "MHhlNzE4MzlhNDY5ODVlMTRiZTc5ZTFjY2E3YmU5ZTgwNDQxNTM5NGNkZDQ3YWVlMmY1YjQ5MjllZjg2MTRhMDYyNjYwYzY2YzUzN2MzMzA5NWVhYWYxNjRhNjlmMjlhMWRjNWRlMTMzYWNkZjg3NDA5MmJlNjA3YTllZGEyMDljOTFi"
   },
   "app": {
     "name": "cPiggyFX",
@@ -11,8 +11,22 @@
     "homeUrl": "https://cpiggy.xyz",
     "iconUrl": "https://cpiggy.xyz/icon.png",
     "splashImageUrl": "https://cpiggy.xyz/splash.png",
+    "buttonTitle": "🚩 Start",
     "webhookUrl": "https://cpiggy.xyz/api/webhook",
     "categories": ["finance", "defi", "savings"],
     "requiredCapabilities": ["wallet.getEthereumProvider", "actions.signIn"]
+  },
+"frame": {
+    "name": "cPiggy",
+    "version": "1",
+    "iconUrl": "https://cpiggy.xyz/icon.png",
+    "homeUrl": "https://cpiggy.xyz",
+    "imageUrl": "https://cpiggy.xyz/image.png",
+    "splashImageUrl": "https://cpiggy.xyz/splash.png",
+    "splashBackgroundColor": "#fbf6fd",
+    "webhookUrl": "https://cpiggy.xyz/api/webhook",
+    "description": "Save in cCOP, grow in the world. Create savings goals with automatic currency diversification on Celo blockchain.",
+    "subtitle": "Diversified FX Piggy Bank",
+    "primaryCategory": "finance"
   }
 }
