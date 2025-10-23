@@ -447,10 +447,11 @@ NEXT_PUBLIC_PROJECT_ID=<reown_project_id>
 ## Version History
 
 **Contract Versions:**
-- v1.0: `0x64f5167cFA3Eb18DebD49F7074AD146AaE983F97`
-- v1.1 (current): `0x765aeb85d160eb221Ab1D94506d6471f795763EC`
+- v1.0: `0x64f5167cFA3Eb18DebD49F7074AD146AaE983F97` (Deprecated)
+- v1.1: `0x765aeb85d160eb221Ab1D94506d6471f795763EC` (Deprecated)
+- v1.2 (current): `0x15a968d1efaCD5773679900D57E11799C4ac01Ce`
 
-Note: The address in deployedAddresses.json shows v1.1 deployment.
+Note: The address in deployedAddresses.json shows v1.2 deployment.
 
 **Proof of Ship Season 7 Updates:**
 - Added cGBP to diversification strategy

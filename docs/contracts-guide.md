@@ -22,10 +22,11 @@ cPiggyFX uses smart contracts written in Solidity to enable:
 | Version | Address | Network | Status |
 |---------|---------|---------|--------|
 | v1.0 | `0x64f5167cFA3Eb18DebD49F7074AD146AaE983F97` | Celo Mainnet | Deprecated |
-| **v1.1** | `0x765aeb85d160eb221Ab1D94506d6471f795763EC` | Celo Mainnet | ✅ **Current** |
+| v1.1 | `0x765aeb85d160eb221Ab1D94506d6471f795763EC` | Celo Mainnet | Deprecated |
+| **v1.2** | `0x15a968d1efaCD5773679900D57E11799C4ac01Ce` | Celo Mainnet | ✅ **Current** |
 
 **Block Explorer:**  
-[View on Celoscan](https://celoscan.io/address/0x765aeb85d160eb221Ab1D94506d6471f795763EC)
+[View on Celoscan](https://celoscan.io/address/0x15a968d1efaCD5773679900D57E11799C4ac01Ce)
 
 ## 💰 Features
 
@@ -217,7 +218,7 @@ import PiggyBankABI from '@/lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.jso
 
 // Use with wagmi/viem
 const contract = {
-  address: '0x765aeb85d160eb221Ab1D94506d6471f795763EC',
+  address: '0x15a968d1efaCD5773679900D57E11799C4ac01Ce',
   abi: PiggyBankABI.abi,
 }
 ```
@@ -440,7 +441,7 @@ Current contracts are NOT upgradeable. For upgrades:
 
 ---
 
-**Last Updated:** October 21, 2025  
-**Contract Version:** 1.1  
+**Last Updated:** October 2025  
+**Contract Version:** 1.2  
 **Solidity:** 0.8.19  
 **Network:** Celo Mainnet
