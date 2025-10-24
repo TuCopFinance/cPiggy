@@ -12,6 +12,8 @@ import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ConnectButton } from "@/components/ConnectButton";
 import { CCOPWithUSD } from "@/components/CCOPWithUSD";
+import { CEURWithUSD } from "@/components/CEURWithUSD";
+import { CGBPWithUSD } from "@/components/CGBPWithUSD";
 import { useFarcaster } from "@/context/FarcasterContext";
 import { formatCOP, formatForeignCurrency, bigIntToNumber } from "@/utils/formatCurrency";
 
@@ -159,11 +161,21 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
         </div>
         <div className="flex justify-between items-center text-xs sm:text-sm">
           <span className="text-gray-500">{t('dashboard.ceurBalance')}</span>
-          <span className="font-medium text-gray-800">{formatForeignAmount(piggy.cEURAmount)}</span>
+          <CEURWithUSD 
+            ceurAmount={bigIntToNumber(piggy.cEURAmount)} 
+            format="inline" 
+            showLabel={false}
+            className="font-medium text-gray-800"
+          />
         </div>
         <div className="flex justify-between items-center text-xs sm:text-sm">
           <span className="text-gray-500">{t('dashboard.cgbpBalance')}</span>
-          <span className="font-medium text-gray-800">{formatForeignAmount(piggy.cGBPAmount)}</span>
+          <CGBPWithUSD 
+            cgbpAmount={bigIntToNumber(piggy.cGBPAmount)} 
+            format="inline" 
+            showLabel={false}
+            className="font-medium text-gray-800"
+          />
         </div>
       </div>
       
