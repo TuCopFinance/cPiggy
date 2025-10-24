@@ -29,9 +29,9 @@ export function CCOPWithUSD({
 }: CCOPWithUSDProps) {
   const { rate: copUsdRate, isLoading: isRateLoading } = useCOPUSDRate();
 
-  // Convert string amount to number, handling commas
+  // Convert string amount to number, handling both commas and dots as thousand separators
   const numericAmount = typeof ccopAmount === 'string'
-    ? parseFloat(ccopAmount.replace(/,/g, ''))
+    ? parseFloat(ccopAmount.replace(/\./g, '').replace(/,/g, '.'))
     : ccopAmount;
 
   // Handle invalid numbers

@@ -364,7 +364,7 @@ export default function CreatePiggy() {
                         <span>Loading...</span>
                       ) : (
                         <span>
-                          Balance: <CCOPWithUSD ccopAmount={formatBalance(ccopBalance as bigint)} />
+                          Balance: <CCOPWithUSD ccopAmount={getBalanceNumber(ccopBalance as bigint)} />
                         </span>
                       )}
                     </span>
@@ -454,7 +454,7 @@ export default function CreatePiggy() {
                         <span>Loading...</span>
                       ) : (
                         <span>
-                          Balance: <CCOPWithUSD ccopAmount={formatBalance(ccopBalance as bigint)} />
+                          Balance: <CCOPWithUSD ccopAmount={getBalanceNumber(ccopBalance as bigint)} />
                         </span>
                       )}
                     </span>
