@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { useEURUSDRate, convertEURtoUSD, formatUSD } from '@/hooks/useEURUSDRate';
-import { formatForeignCurrency } from '@/utils/formatCurrency';
+import { formatTokenAmount } from '@/utils/formatCurrency';
 
 interface CEURWithUSDProps {
-  /** Amount in cEUR (as a number or string) */
+  /** Token balance in cEUR (as a number with full precision for calculations, or string from input) */
   ceurAmount: number | string;
   /** Optional CSS class for the main container */
   className?: string;
@@ -13,13 +13,27 @@ interface CEURWithUSDProps {
   showLoading?: boolean;
   /** Format for display: 'inline' or 'block' or 'compact' */
   format?: 'inline' | 'block' | 'compact';
-  /** Show cEUR label */
+  /** Show cEUR token symbol */
   showLabel?: boolean;
 }
 
 /**
- * Component to display cEUR amount with its USD equivalent
- * Uses Chainlink EUR/USD price feed on Ethereum
+ * Component to display cEUR token balance with its USD equivalent
+ *
+ * About cEUR:
+ * - cEUR is an ERC20 token representing Euros on the blockchain
+ * - This component queries the token balance and formats it for display
+ * - Uses Chainlink EUR/USD oracle to calculate USD equivalent for informative display
+ *
+ * Display Format:
+ * - < 1: 4 decimals
+ * - < 1000: 2 decimals
+ * - >= 1000: 0 decimals
+ * - ISO format: . for thousands, , for decimals
+ *
+ * @example
+ * <CEURWithUSD ceurAmount={850.50} format="inline" />
+ * // Displays: "850,50 cEUR (≈ $920.14)"
  */
 export function CEURWithUSD({
   ceurAmount,
@@ -30,8 +44,8 @@ export function CEURWithUSD({
 }: CEURWithUSDProps) {
   const { rate: eurUsdRate, isLoading: isRateLoading } = useEURUSDRate();
 
-  // Convert string amount to number, handling both commas and dots as thousand separators
-  // IMPORTANT: Keep full precision for calculations, formatting is only for display
+  // Convert string to number if needed
+  // Keep full precision for calculations - formatting is only for display
   const numericAmount = typeof ceurAmount === 'string'
     ? parseFloat(ceurAmount.replace(/\./g, '').replace(/,/g, '.'))
     : ceurAmount;
@@ -49,11 +63,11 @@ export function CEURWithUSD({
     );
   }
 
-  // Calculate USD equivalent using full precision
+  // Calculate USD equivalent using oracle (full precision for calculation)
   const usdValue = convertEURtoUSD(numericAmount, eurUsdRate);
 
-  // Format for display only - maintains full precision for calculations
-  const formattedCEUR = formatForeignCurrency(numericAmount);
+  // Format for display only - maintains full precision internally
+  const formattedCEUR = formatTokenAmount(numericAmount);
 
   if (format === 'block') {
     return (

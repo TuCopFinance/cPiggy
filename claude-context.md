@@ -481,29 +481,171 @@ Note: The address in deployedAddresses.json shows v1.2 deployment.
 - Implemented 1% developer fee on profits (paid by protocol)
 - Added fixed-term staking feature with compound interest APY
 
-## Number Formatting Standards
+## Token Display and Number Formatting Standards
 
-**CRITICAL - ALL NUMBER DISPLAYS MUST USE ISO INTERNATIONAL NOTATION:**
+### Understanding Tokens vs Currencies
 
+**CRITICAL CONCEPT:**
+
+- **cCOP, cUSD, cEUR, cGBP are ERC20 TOKENS**, not currencies
+- They are digital representations of currencies on the blockchain
+- We query token balances from the blockchain (not currency amounts)
+- We format token quantities for display in the UI
+- We use oracles to find USD equivalents for informative display only
+
+**Token Information:**
+```
+cCOP - Colombian Peso token (18 decimals)
+cUSD - US Dollar token (18 decimals)
+cEUR - Euro token (18 decimals)
+cGBP - British Pound token (18 decimals)
+```
+
+### Number Display Format Rules
+
+**CRITICAL - ALL TOKEN DISPLAYS MUST FOLLOW THESE RULES:**
+
+**Display format based on token amount:**
+- **< 1**: 4 decimals (e.g., 0,8523 cCOP)
+- **< 1000**: 2 decimals (e.g., 156,75 cCOP)
+- **>= 1000**: 0 decimals (e.g., 45.678 cCOP)
+
+**Notation standard (ISO international):**
 - **Thousands separator:** `.` (punto/period)
 - **Decimal separator:** `,` (coma/comma)
 
 **Examples:**
-- 3.000 cCOP = three thousand pesos
-- 10.000.000 cCOP = ten million pesos
-- $1.234,56 USD = one thousand two hundred thirty-four dollars and fifty-six cents
+```
+0,8523 cCOP        = less than 1 token (4 decimals)
+156,75 cCOP        = one hundred fifty-six tokens (2 decimals)
+3.000 cCOP         = three thousand tokens (0 decimals)
+10.000.000 cCOP    = ten million tokens (0 decimals)
+```
 
-**Implementation:**
-- Use locale `'de-DE'` in all `toLocaleString()` and `Intl.NumberFormat()` calls
-- NEVER use `'en-US'` (uses comma for thousands, period for decimals)
-- NEVER use `'es-CO'` (also uses period for thousands correctly, but be consistent with de-DE)
-- This app is designed for Colombia, not USA
-- USD values are shown for reference only, but must follow international notation
+**USD equivalent displays:**
+```
+1.234 cCOP (≈ $3,21)
+850,50 cEUR (≈ $920,14)
+```
 
-**Why this matters:**
-- Prevents confusion: 3.000 is clearly three thousand (not 3 with decimals)
-- International standard used in most of the world (Europe, Latin America, etc.)
-- Professional financial notation
+### Implementation Details
+
+**Core utilities location:** `frontend/src/utils/formatCurrency.ts`
+
+**Main function:**
+```typescript
+formatTokenAmount(amount: number): string
+// Returns formatted string for UI display
+// Automatically applies correct decimal places based on amount
+```
+
+**Helper functions:**
+```typescript
+bigIntToNumber(amount: bigint, decimals?: number): number
+// Converts blockchain BigInt to number with FULL PRECISION
+// Used for calculations - DO NOT format this value
+
+numberToBigInt(amount: number, decimals?: number): bigint
+// Converts number back to BigInt for blockchain transactions
+```
+
+**CRITICAL RULES:**
+
+1. **Calculations always use full precision:**
+   ```typescript
+   // ✅ CORRECT
+   const balance = bigIntToNumber(balanceFromContract); // 1234.567891234567
+   const doubled = balance * 2; // Calculate with full precision
+   const display = formatTokenAmount(doubled); // Format only for display
+
+   // ❌ WRONG
+   const display = formatTokenAmount(balance); // "1.234"
+   const doubled = parseFloat(display) * 2; // Lost precision!
+   ```
+
+2. **Formatting is ONLY for UI display:**
+   - Never use formatted strings in calculations
+   - Always keep raw numbers/BigInts for math
+   - Format at the last possible moment (in JSX)
+
+3. **Token components with USD equivalents:**
+   - `<CCOPWithUSD ccopAmount={number} />` - Shows cCOP + USD via COP/USD oracle
+   - `<CEURWithUSD ceurAmount={number} />` - Shows cEUR + USD via EUR/USD oracle
+   - `<CGBPWithUSD cgbpAmount={number} />` - Shows cGBP + USD via GBP/USD oracle
+   - For cUSD: Use 1:1 conversion (1 cUSD = $1 USD)
+
+4. **Locale configuration:**
+   ```typescript
+   // ✅ ALWAYS USE
+   amount.toLocaleString('de-DE', { ... })
+
+   // ❌ NEVER USE
+   amount.toLocaleString('en-US', { ... }) // Wrong separators!
+   amount.toLocaleString('es-CO', { ... }) // Be consistent, use de-DE
+   ```
+
+### Oracle Integration
+
+**Purpose:** Show USD equivalents for informative display
+
+**Available oracles:**
+- COP/USD: Chainlink oracle on Polygon
+- EUR/USD: Chainlink oracle on Ethereum
+- GBP/USD: Chainlink oracle on Ethereum
+- cUSD: Assumed 1:1 with USD (no oracle needed)
+
+**Usage in components:**
+- Token amounts are calculated with full precision
+- Oracle rates are fetched from Chainlink
+- USD equivalents are calculated: `tokenAmount * oracleRate`
+- Both values are formatted for display
+
+**Example flow:**
+```typescript
+// 1. Get token balance from blockchain (BigInt with 18 decimals)
+const balanceBigInt = 1500000000000000000n; // 1.5 tokens
+
+// 2. Convert to number (keep full precision for calculations)
+const balanceNumber = bigIntToNumber(balanceBigInt); // 1.5
+
+// 3. Calculate USD equivalent using oracle
+const copUsdRate = 0.00026; // from oracle
+const usdValue = balanceNumber * copUsdRate; // 0.00039
+
+// 4. Format both values for display
+const displayCOP = formatTokenAmount(balanceNumber); // "1,50"
+const displayUSD = formatUSD(usdValue); // "$0.00"
+```
+
+### Why This Matters
+
+1. **Prevents confusion:** 3.000 clearly means three thousand (not 3 with decimals)
+2. **International standard:** Used in Europe, Latin America, and most of the world
+3. **Professional appearance:** Financial apps should use proper notation
+4. **User expectations:** Colombian users expect this format
+5. **Calculation accuracy:** Full precision maintained until final display
+6. **Token clarity:** Users understand they're dealing with blockchain tokens
+
+### Files Using These Standards
+
+**Utilities:**
+- `frontend/src/utils/formatCurrency.ts` - Core formatting functions
+
+**Components:**
+- `frontend/src/components/CCOPWithUSD.tsx` - cCOP token display
+- `frontend/src/components/CEURWithUSD.tsx` - cEUR token display
+- `frontend/src/components/CGBPWithUSD.tsx` - cGBP token display
+- `frontend/src/components/ConnectButton.tsx` - Wallet balance display
+
+**Pages:**
+- `frontend/src/app/create/page.tsx` - Investment creation
+- `frontend/src/app/dashboard/page.tsx` - Portfolio view
+
+**All these files:**
+- Use `formatTokenAmount()` for display
+- Keep full precision in calculations
+- Show USD equivalents via oracle components
+- Follow ISO international notation
 
 ## Important Notes
 

@@ -12,6 +12,7 @@ import { ConnectButton } from "@/components/ConnectButton";
 import { useCOPUSDRate, convertCOPtoUSD, formatUSD } from "@/hooks/useCOPUSDRate";
 import { CCOPWithUSD } from "@/components/CCOPWithUSD";
 import { useFarcaster } from "@/context/FarcasterContext";
+import { formatTokenAmount, bigIntToNumber } from "@/utils/formatCurrency";
 
 // ABIs and Deployed Addresses
 import PiggyBankABI from "../../../lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
@@ -90,25 +91,24 @@ export default function CreatePiggy() {
   const activeAmount = useMemo(() => investmentType === 'diversify' ? amount : fixedAmount, [investmentType, amount, fixedAmount]);
   const parsedActiveAmount = useMemo(() => parseEther(activeAmount || "0"), [activeAmount]);
 
-  // Format number with proper thousands and decimal separators (ISO international format: . for thousands, , for decimals)
+  // Format token amount for UI display using standard formatting
+  // <1 = 4 decimals, <1000 = 2 decimals, >=1000 = 0 decimals
+  // Note: Calculations use full precision, formatting is only for display
   const formatNumber = (num: number) => {
-    return num.toLocaleString('de-DE', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    });
+    return formatTokenAmount(num);
   };
 
-  // Format balance from bigint to readable string
+  // Convert BigInt token balance to formatted string for display
   const formatBalance = (balance: bigint | undefined) => {
     if (!balance) return '0';
-    const balanceInEther = Number(balance) / 1e18;
-    return formatNumber(balanceInEther);
+    const numericBalance = bigIntToNumber(balance); // Full precision for calculation
+    return formatTokenAmount(numericBalance); // Format only for display
   };
 
-  // Get balance as number (for calculations)
+  // Convert BigInt token balance to number (keeps full precision for calculations)
   const getBalanceNumber = (balance: bigint | undefined): number => {
     if (!balance) return 0;
-    return Number(balance) / 1e18;
+    return bigIntToNumber(balance);
   };
 
   const piggyBankAddress = deployedAddresses.PiggyBank as Address;

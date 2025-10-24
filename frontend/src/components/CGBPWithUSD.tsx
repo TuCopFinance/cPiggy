@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { useGBPUSDRate, convertGBPtoUSD, formatUSD } from '@/hooks/useGBPUSDRate';
-import { formatForeignCurrency } from '@/utils/formatCurrency';
+import { formatTokenAmount } from '@/utils/formatCurrency';
 
 interface CGBPWithUSDProps {
-  /** Amount in cGBP (as a number or string) */
+  /** Token balance in cGBP (as a number with full precision for calculations, or string from input) */
   cgbpAmount: number | string;
   /** Optional CSS class for the main container */
   className?: string;
@@ -13,13 +13,27 @@ interface CGBPWithUSDProps {
   showLoading?: boolean;
   /** Format for display: 'inline' or 'block' or 'compact' */
   format?: 'inline' | 'block' | 'compact';
-  /** Show cGBP label */
+  /** Show cGBP token symbol */
   showLabel?: boolean;
 }
 
 /**
- * Component to display cGBP amount with its USD equivalent
- * Uses Chainlink GBP/USD price feed on Ethereum
+ * Component to display cGBP token balance with its USD equivalent
+ *
+ * About cGBP:
+ * - cGBP is an ERC20 token representing British Pounds on the blockchain
+ * - This component queries the token balance and formats it for display
+ * - Uses Chainlink GBP/USD oracle to calculate USD equivalent for informative display
+ *
+ * Display Format:
+ * - < 1: 4 decimals
+ * - < 1000: 2 decimals
+ * - >= 1000: 0 decimals
+ * - ISO format: . for thousands, , for decimals
+ *
+ * @example
+ * <CGBPWithUSD cgbpAmount={725.80} format="inline" />
+ * // Displays: "725,80 cGBP (≈ $925.42)"
  */
 export function CGBPWithUSD({
   cgbpAmount,
@@ -30,8 +44,8 @@ export function CGBPWithUSD({
 }: CGBPWithUSDProps) {
   const { rate: gbpUsdRate, isLoading: isRateLoading } = useGBPUSDRate();
 
-  // Convert string amount to number, handling both commas and dots as thousand separators
-  // IMPORTANT: Keep full precision for calculations, formatting is only for display
+  // Convert string to number if needed
+  // Keep full precision for calculations - formatting is only for display
   const numericAmount = typeof cgbpAmount === 'string'
     ? parseFloat(cgbpAmount.replace(/\./g, '').replace(/,/g, '.'))
     : cgbpAmount;
@@ -49,11 +63,11 @@ export function CGBPWithUSD({
     );
   }
 
-  // Calculate USD equivalent using full precision
+  // Calculate USD equivalent using oracle (full precision for calculation)
   const usdValue = convertGBPtoUSD(numericAmount, gbpUsdRate);
 
-  // Format for display only - maintains full precision for calculations
-  const formattedCGBP = formatForeignCurrency(numericAmount);
+  // Format for display only - maintains full precision internally
+  const formattedCGBP = formatTokenAmount(numericAmount);
 
   if (format === 'block') {
     return (

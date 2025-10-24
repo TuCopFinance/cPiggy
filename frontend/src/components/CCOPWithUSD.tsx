@@ -2,9 +2,10 @@
 
 import React from 'react';
 import { useCOPUSDRate, convertCOPtoUSD, formatUSD } from '@/hooks/useCOPUSDRate';
+import { formatTokenAmount } from '@/utils/formatCurrency';
 
 interface CCOPWithUSDProps {
-  /** Amount in cCOP (as a number or string) */
+  /** Token balance in cCOP (as a number with full precision for calculations, or string from input) */
   ccopAmount: number | string;
   /** Optional CSS class for the main container */
   className?: string;
@@ -12,13 +13,27 @@ interface CCOPWithUSDProps {
   showLoading?: boolean;
   /** Format for display: 'inline' or 'block' or 'compact' */
   format?: 'inline' | 'block' | 'compact';
-  /** Show cCOP label */
+  /** Show cCOP token symbol */
   showLabel?: boolean;
 }
 
 /**
- * Component to display cCOP amount with its USD equivalent
- * Uses Chainlink COP/USD price feed on Polygon
+ * Component to display cCOP token balance with its USD equivalent
+ *
+ * About cCOP:
+ * - cCOP is an ERC20 token representing Colombian Pesos on the blockchain
+ * - This component queries the token balance and formats it for display
+ * - Uses Chainlink COP/USD oracle to calculate USD equivalent for informative display
+ *
+ * Display Format:
+ * - < 1: 4 decimals
+ * - < 1000: 2 decimals
+ * - >= 1000: 0 decimals
+ * - ISO format: . for thousands, , for decimals
+ *
+ * @example
+ * <CCOPWithUSD ccopAmount={1234.56} format="inline" />
+ * // Displays: "1.234 cCOP (≈ $3.21)"
  */
 export function CCOPWithUSD({
   ccopAmount,
@@ -29,7 +44,8 @@ export function CCOPWithUSD({
 }: CCOPWithUSDProps) {
   const { rate: copUsdRate, isLoading: isRateLoading } = useCOPUSDRate();
 
-  // Convert string amount to number, handling both commas and dots as thousand separators
+  // Convert string to number if needed
+  // Keep full precision for calculations - formatting is only for display
   const numericAmount = typeof ccopAmount === 'string'
     ? parseFloat(ccopAmount.replace(/\./g, '').replace(/,/g, '.'))
     : ccopAmount;
@@ -47,13 +63,11 @@ export function CCOPWithUSD({
     );
   }
 
+  // Calculate USD equivalent using oracle (full precision for calculation)
   const usdValue = convertCOPtoUSD(numericAmount, copUsdRate);
 
-  // Format the cCOP amount (ISO international format: . for thousands, , for decimals)
-  const formattedCCOP = Math.floor(numericAmount).toLocaleString('de-DE', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  });
+  // Format for display only - maintains full precision internally
+  const formattedCCOP = formatTokenAmount(numericAmount);
 
   if (format === 'block') {
     return (
