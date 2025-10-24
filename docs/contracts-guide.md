@@ -56,12 +56,14 @@ Allows users to diversify cCOP into multiple stablecoins with automatic swapping
 
 ### 2. Fixed-Term APY Staking
 
-Lock cCOP for guaranteed returns with compound interest.
+Lock cCOP for guaranteed returns with daily compound interest.
 
-**APY Rates:**
-- **30 days:** 1.25% APY (0.0417% daily)
-- **60 days:** 1.50% APY (0.0500% daily)
-- **90 days:** 2.00% APY (0.0667% daily)
+**Interest Rates:**
+- **30 days:** 1.25% monthly (16.08% EA)
+- **60 days:** 1.5% monthly (19.56% EA)
+- **90 days:** 2% monthly (26.82% EA)
+
+*Note: Interest compounds daily to achieve exact monthly rates. EA = Effective Annual Rate.*
 
 **Limits:**
 - Max deposit per wallet: 10,000,000 cCOP

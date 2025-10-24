@@ -249,18 +249,31 @@ export default function CreatePiggy() {
   // --- NEW: Correct interest calculation based on the smart contract's logic ---
   const fixedTermReturns = useMemo(() => {
     const amountNum = Number(fixedAmount) || 0;
-    if (amountNum <= 0) return { rate: 0, estReturn: 0, total: 0 };
+    if (amountNum <= 0) return { rate: 0, monthlyRate: 0, annualRate: 0, estReturn: 0, total: 0 };
 
-    let interestRateInBasisPoints = 0; // e.g., 125 for 1.25%
-    if (fixedDuration === 30) interestRateInBasisPoints = 125;
-    else if (fixedDuration === 60) interestRateInBasisPoints = 302;
-    else if (fixedDuration === 90) interestRateInBasisPoints = 612;
-    
+    let interestRateInBasisPoints = 0; // Total period return (e.g., 125 for 1.25%)
+    let monthlyRate = 0; // Monthly rate shown to users
+    let annualRate = 0; // Effective Annual Rate (EA)
+
+    if (fixedDuration === 30) {
+      interestRateInBasisPoints = 125;
+      monthlyRate = 1.25;
+      annualRate = 16.08;
+    } else if (fixedDuration === 60) {
+      interestRateInBasisPoints = 302;
+      monthlyRate = 1.5;
+      annualRate = 19.56;
+    } else if (fixedDuration === 90) {
+      interestRateInBasisPoints = 612;
+      monthlyRate = 2.0;
+      annualRate = 26.82;
+    }
+
     const rate = interestRateInBasisPoints / 100;
     const estReturn = (amountNum * interestRateInBasisPoints) / 10000;
     const total = amountNum + estReturn;
-    
-    return { rate, estReturn, total };
+
+    return { rate, monthlyRate, annualRate, estReturn, total };
   }, [fixedAmount, fixedDuration]);
   
 
@@ -498,8 +511,9 @@ export default function CreatePiggy() {
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-2 sm:p-3">
                   <div className="grid grid-cols-3 gap-1 sm:gap-2 text-center">
                     <div>
-                      <div className="text-sm sm:text-lg font-bold text-green-700">{fixedTermReturns.rate.toFixed(2)}%</div>
-                      <div className="text-xs text-green-600">{t('create.periodEfectiveRate')}</div>
+                      <div className="text-sm sm:text-lg font-bold text-green-700">{fixedTermReturns.monthlyRate.toFixed(2)}%</div>
+                      <div className="text-xs text-green-600">{t('create.monthly')}</div>
+                      <div className="text-xs text-green-500 mt-0.5">({fixedTermReturns.annualRate.toFixed(2)}% {t('create.effectiveAnnual')})</div>
                     </div>
                     <div>
                       <div className="text-sm sm:text-lg font-bold text-green-700">{formatNumber(fixedTermReturns.estReturn)}</div>

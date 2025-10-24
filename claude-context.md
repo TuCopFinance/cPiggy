@@ -18,13 +18,13 @@
 - 1% developer fee on profits (additional cost to protocol)
 
 ### 2. Fixed-Term APY Staking
-- Lock cCOP for guaranteed returns
-- Three duration options with different rates:
-  - **30 days**: 1.25% APY (0.0417% daily)
-  - **60 days**: 1.50% APY (0.0500% daily)
-  - **90 days**: 2.00% APY (0.0667% daily)
+- Lock cCOP for guaranteed returns with daily compounding
+- Three duration options with different monthly rates:
+  - **30 days**: 1.25% monthly (16.08% EA)
+  - **60 days**: 1.5% monthly (19.56% EA)
+  - **90 days**: 2% monthly (26.82% EA)
 - Pool-based system with maximum capacity limits
-- Compound interest calculations
+- Daily compound interest calibrated to exact monthly rates
 - 5% developer fee on earned rewards (additional cost to protocol)
 - Max deposit per wallet: 10,000,000 cCOP
 
@@ -394,11 +394,21 @@ NEXT_PUBLIC_PROJECT_ID=<reown_project_id>
 - 90-day pool: 35% of total funding
 
 **Interest Calculation:**
-- Uses compound interest formula
-- Pre-calculated multipliers for simplicity:
-  - 30d: 1.0125 (1.25%)
-  - 60d: 1.0302 (3.02% total)
-  - 90d: 1.0612 (6.12% total)
+- Uses daily compound interest formula: `Final = Principal × (1 + r_daily)^days`
+- Daily rates calibrated to achieve exact monthly targets:
+  - 30d: 1.25% monthly (16.08% EA) = 0.0414% daily compounded
+  - 60d: 1.5% monthly (19.56% EA) = 0.0496% daily compounded
+  - 90d: 2% monthly (26.82% EA) = 0.0660% daily compounded
+- Interest compounds daily for precision and future early withdrawal support
+- Smart contract constants (UD60x18 format):
+  - 30d: 1000414169744566162 (gives exactly 1.25% in 30 days)
+  - 60d: 1000496410253934644 (gives exactly 1.5% per 30 days)
+  - 90d: 1000660305482286662 (gives exactly 2% per 30 days)
+- Example: 10,000,000 cCOP in 90-day pool:
+  - Month 1: 10,200,000 (+200,000)
+  - Month 2: 10,404,000 (+204,000)
+  - Month 3: 10,612,080 (+208,080)
+  - Total interest: 612,080 cCOP (6.1208%)
 
 ### Risk Modes Allocation:
 

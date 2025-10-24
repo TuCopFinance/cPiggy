@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "./MentoOracleHandler.sol";
 import "./interfaces/interfaces.sol";
 import "@openzeppelin/contracts/access/Ownable.sol"; // Import Ownable for managing contract ownership
+import {UD60x18, ud, pow} from "@prb/math/src/UD60x18.sol"; // For daily compound interest calculations
 
 /**
  * @title PiggyBank
@@ -46,11 +47,15 @@ contract PiggyBank is Ownable {
     // --- STATE VARIABLES FOR NEW APY STAKING FEATURE ---
     uint256 public constant MAX_DEPOSIT_PER_WALLET = 10_000_000 * 1e18;
     uint256 public constant STAKING_DEV_FEE_PERCENTAGE = 5; // 5% fee on profit
-    
-    // Daily rate constants (in basis points)
-    uint256 public constant DAILY_RATE_30D = 417; // 0.0417% daily (1.25%/30)
-    uint256 public constant DAILY_RATE_60D = 500; // 0.0500% daily (1.50%/30)
-    uint256 public constant DAILY_RATE_90D = 667; // 0.0667% daily (2.00%/30)
+
+    // Daily compound rates in UD60x18 format, calibrated to achieve exact monthly targets:
+    // 30d pool: 1.25% monthly => (1.0125)^(1/30) per day => 30 days = exactly 1.25%
+    // 60d pool: 1.5% monthly  => (1.015)^(1/30) per day => 60 days = exactly 3.0225%
+    // 90d pool: 2% monthly    => (1.02)^(1/30) per day => 90 days = exactly 6.1208%
+    // Format: (1 + daily_rate) * 1e18
+    uint256 private constant DAILY_RATE_30D_UD60x18 = 1000414169744566162; // Gives exactly 1.25% in 30 days
+    uint256 private constant DAILY_RATE_60D_UD60x18 = 1000496410253934644; // Gives exactly 1.5% per 30 days
+    uint256 private constant DAILY_RATE_90D_UD60x18 = 1000660305482286662; // Gives exactly 2% per 30 days
 
     struct StakingPool {
         uint256 totalStaked;
@@ -325,42 +330,63 @@ contract PiggyBank is Ownable {
     // --- NEW APY STAKING FEATURE FUNCTIONS ---
 
     /**
-     * @notice Get daily rate for a specific duration
+     * @notice Get daily compound rate for a specific pool in UD60x18 format
      * @param _duration The lock-in period in days (30, 60, or 90)
-     * @return The daily rate in basis points
+     * @return The daily rate as (1 + r) in UD60x18 format
      */
-    function getDailyRate(uint256 _duration) public pure returns (uint256) {
-        if (_duration == 30) return DAILY_RATE_30D;
-        if (_duration == 60) return DAILY_RATE_60D;
-        if (_duration == 90) return DAILY_RATE_90D;
+    function getDailyRateUD60x18(uint256 _duration) public pure returns (uint256) {
+        if (_duration == 30) return DAILY_RATE_30D_UD60x18;
+        if (_duration == 60) return DAILY_RATE_60D_UD60x18;
+        if (_duration == 90) return DAILY_RATE_90D_UD60x18;
         return 0;
     }
 
     /**
-     * @notice Calculate compound interest using daily rates
+     * @notice Calculate compound interest using daily compounding
+     * @dev Uses daily compounding where rates are calibrated to achieve exact monthly targets:
+     *      - 30d: 1.25% monthly = compounds daily for 30 days
+     *      - 60d: 1.5% monthly = compounds daily for 60 days
+     *      - 90d: 2% monthly = compounds daily for 90 days
      * @param _amount The principal amount
-     * @param _duration The lock-in period in days
+     * @param _duration The lock-in period in days (30, 60, or 90)
      * @return The interest amount
      */
     function calculateCompoundInterest(uint256 _amount, uint256 _duration) public pure returns (uint256) {
-        uint256 dailyRate = getDailyRate(_duration);
-        if (dailyRate == 0) return 0;
-        
-        // A = P(1 + r)^n where r = dailyRate/10000
-        // For simplicity, we'll use the pre-calculated compound multipliers
-        uint256 compoundMultiplier;
-        if (_duration == 30) {
-            compoundMultiplier = 10125; // 1.0125 (1.25% for 30 days)
-        } else if (_duration == 60) {
-            compoundMultiplier = 10302; // 1.0302 (1.5% for 60 days)
-        } else if (_duration == 90) {
-            compoundMultiplier = 10612; // 1.0612 (2% for 90 days)
-        } else {
-            return 0;
-        }
-        
-        uint256 finalAmount = (_amount * compoundMultiplier) / 10000;
-        return finalAmount - _amount;
+        return calculateInterestForDays(_amount, _duration, _duration);
+    }
+
+    /**
+     * @notice Calculate compound interest for a specific number of days (for early withdrawals)
+     * @dev Uses daily compounding with the pool's calibrated rate
+     *      Formula: A = P * (1 + r_daily)^days
+     *      The daily rate ensures that 30 days = exact monthly rate (1.25%, 1.5%, or 2%)
+     * @param _amount The principal amount
+     * @param _stakingDuration The original staking duration (30, 60, or 90) - determines the daily rate
+     * @param _daysElapsed The actual number of days to calculate interest for
+     * @return The interest amount for the specified days
+     */
+    function calculateInterestForDays(
+        uint256 _amount,
+        uint256 _stakingDuration,
+        uint256 _daysElapsed
+    ) public pure returns (uint256) {
+        uint256 dailyRateUD60x18 = getDailyRateUD60x18(_stakingDuration);
+        if (dailyRateUD60x18 == 0) return 0;
+
+        // Convert to UD60x18 format
+        UD60x18 onePlusDailyRate = ud(dailyRateUD60x18);
+        UD60x18 principal = ud(_amount);
+
+        // Calculate (1 + r)^days
+        UD60x18 exponent = ud(_daysElapsed * 1e18);
+        UD60x18 multiplier = pow(onePlusDailyRate, exponent);
+
+        // Calculate final amount: principal * (1 + r)^days
+        UD60x18 finalAmount = principal.mul(multiplier);
+
+        // Return only the interest (finalAmount - principal)
+        uint256 finalAmountUnwrapped = finalAmount.unwrap();
+        return finalAmountUnwrapped > _amount ? finalAmountUnwrapped - _amount : 0;
     }
 
     /**

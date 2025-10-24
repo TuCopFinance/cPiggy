@@ -68,6 +68,8 @@
     "lockDuration": "Duración del Bloqueo",
     "monthlyRate": "Tasa Mensual",
     "monthlyInterestRate": "Tasa de Interés Mensual para {days} días",
+    "monthly": "Mensual",
+    "effectiveAnnual": "E.A.",
     "estReturn": "Retorno Est.",
     "totalAtMaturity": "Total al Vencimiento",
     "fixedTermsFeatures": "Características de Plazos Fijos",
