@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useGBPUSDRate, convertGBPtoUSD, formatUSD } from '@/hooks/useGBPUSDRate';
+import { formatForeignCurrency } from '@/utils/formatCurrency';
 
 interface CGBPWithUSDProps {
   /** Amount in cGBP (as a number or string) */
@@ -49,11 +50,8 @@ export function CGBPWithUSD({
 
   const usdValue = convertGBPtoUSD(numericAmount, gbpUsdRate);
 
-  // Format the cGBP amount (ISO international format: . for thousands, , for decimals)
-  const formattedCGBP = numericAmount.toLocaleString('de-DE', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
+  // Format the cGBP amount using formatForeignCurrency for proper decimal handling
+  const formattedCGBP = formatForeignCurrency(numericAmount);
 
   if (format === 'block') {
     return (

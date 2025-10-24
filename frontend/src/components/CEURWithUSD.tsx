@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useEURUSDRate, convertEURtoUSD, formatUSD } from '@/hooks/useEURUSDRate';
+import { formatForeignCurrency } from '@/utils/formatCurrency';
 
 interface CEURWithUSDProps {
   /** Amount in cEUR (as a number or string) */
@@ -49,11 +50,8 @@ export function CEURWithUSD({
 
   const usdValue = convertEURtoUSD(numericAmount, eurUsdRate);
 
-  // Format the cEUR amount (ISO international format: . for thousands, , for decimals)
-  const formattedCEUR = numericAmount.toLocaleString('de-DE', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
+  // Format the cEUR amount using formatForeignCurrency for proper decimal handling
+  const formattedCEUR = formatForeignCurrency(numericAmount);
 
   if (format === 'block') {
     return (
