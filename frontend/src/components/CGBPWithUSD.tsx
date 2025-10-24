@@ -31,6 +31,7 @@ export function CGBPWithUSD({
   const { rate: gbpUsdRate, isLoading: isRateLoading } = useGBPUSDRate();
 
   // Convert string amount to number, handling both commas and dots as thousand separators
+  // IMPORTANT: Keep full precision for calculations, formatting is only for display
   const numericAmount = typeof cgbpAmount === 'string'
     ? parseFloat(cgbpAmount.replace(/\./g, '').replace(/,/g, '.'))
     : cgbpAmount;
@@ -48,9 +49,10 @@ export function CGBPWithUSD({
     );
   }
 
+  // Calculate USD equivalent using full precision
   const usdValue = convertGBPtoUSD(numericAmount, gbpUsdRate);
 
-  // Format the cGBP amount using formatForeignCurrency for proper decimal handling
+  // Format for display only - maintains full precision for calculations
   const formattedCGBP = formatForeignCurrency(numericAmount);
 
   if (format === 'block') {

@@ -31,6 +31,7 @@ export function CEURWithUSD({
   const { rate: eurUsdRate, isLoading: isRateLoading } = useEURUSDRate();
 
   // Convert string amount to number, handling both commas and dots as thousand separators
+  // IMPORTANT: Keep full precision for calculations, formatting is only for display
   const numericAmount = typeof ceurAmount === 'string'
     ? parseFloat(ceurAmount.replace(/\./g, '').replace(/,/g, '.'))
     : ceurAmount;
@@ -48,9 +49,10 @@ export function CEURWithUSD({
     );
   }
 
+  // Calculate USD equivalent using full precision
   const usdValue = convertEURtoUSD(numericAmount, eurUsdRate);
 
-  // Format the cEUR amount using formatForeignCurrency for proper decimal handling
+  // Format for display only - maintains full precision for calculations
   const formattedCEUR = formatForeignCurrency(numericAmount);
 
   if (format === 'block') {

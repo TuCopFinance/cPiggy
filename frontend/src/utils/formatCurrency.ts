@@ -1,7 +1,10 @@
 /**
  * Currency Formatting Utilities
  *
- * Standards:
+ * IMPORTANT: These functions are for DISPLAY ONLY. All calculations should use
+ * the raw BigInt values or full precision numbers to maintain accuracy.
+ *
+ * Display Standards:
  * - COP: <1 = 4 decimals, <1000 = 2 decimals, >=1000 = 0 decimals
  * - Foreign currencies (USD, EUR, GBP): <1 = 4 decimals, >=1 = 2 decimals
  * - Uses ISO international format: . for thousands, , for decimals
@@ -78,11 +81,24 @@ export function formatForeignCurrencyWithSymbol(
 }
 
 /**
- * Convert bigint to number for formatting
+ * Convert bigint to number for calculations and formatting
+ * WARNING: This function may lose precision for very large numbers.
+ * For critical calculations, consider using BigInt arithmetic directly.
+ * 
  * @param amount - BigInt amount (typically from blockchain)
  * @param decimals - Number of decimals (default: 18 for most ERC20 tokens)
- * @returns Number value
+ * @returns Number value with full precision for calculations
  */
 export function bigIntToNumber(amount: bigint, decimals: number = 18): number {
   return Number(amount) / Math.pow(10, decimals);
+}
+
+/**
+ * Convert number back to BigInt for blockchain operations
+ * @param amount - Number amount
+ * @param decimals - Number of decimals (default: 18 for most ERC20 tokens)
+ * @returns BigInt value for blockchain operations
+ */
+export function numberToBigInt(amount: number, decimals: number = 18): bigint {
+  return BigInt(Math.floor(amount * Math.pow(10, decimals)));
 }
