@@ -13,7 +13,7 @@ cPiggyFX uses smart contracts written in Solidity to enable:
 
 ### Main Contract: PiggyBank.sol
 
-**Location:** `Contracts/contracts/cPiggyBank.sol`  
+**Location:** `contracts/contracts/cPiggyBank.sol`  
 **Solidity Version:** 0.8.19  
 **License:** MIT
 
@@ -104,7 +104,7 @@ Hardhat
 ### Installation
 
 ```bash
-cd Contracts
+cd contracts
 
 # Install dependencies
 npm install
@@ -121,7 +121,7 @@ npx hardhat run scripts/deploy.ts --network celoSepolia
 
 ### Environment Variables
 
-Create `.env` file in `Contracts/` directory:
+Create `.env` file in `contracts/` directory:
 
 ```bash
 # Private key for deployment
@@ -141,7 +141,7 @@ PIGGYBANK_ADDRESS=0x...
 ## 📁 Project Structure
 
 ```
-Contracts/
+contracts/
 ├── contracts/
 │   ├── cPiggyBank.sol           # Main contract
 │   ├── interfaces/

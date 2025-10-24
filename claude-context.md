@@ -42,7 +42,7 @@
 ### Smart Contracts (Solidity 0.8.19)
 
 #### Main Contract: `PiggyBank.sol`
-**Location:** `Contracts/contracts/cPiggyBank.sol`
+**Location:** `contracts/contracts/cPiggyBank.sol`
 **Deployed Address:** `0x15a968d1efaCD5773679900D57E11799C4ac01Ce` (Celo Mainnet)
 
 **Key Components:**
@@ -107,7 +107,7 @@
    - Compound interest calculations for staking
 
 #### Supporting Contract: `MentoOracleHandler.sol`
-**Location:** `Contracts/contracts/MentoOracleHandler.sol`
+**Location:** `contracts/contracts/MentoOracleHandler.sol`
 **Deployed Address:** `0xc0fDe6b032d7a5A1446A73D38Fbe5a6b9D5B62D1`
 
 **Purpose:** Provides allocation strategies for diversification
@@ -119,7 +119,7 @@ function getSuggestedAllocation(uint256 totalAmount, bool isSafeMode)
 ```
 
 #### Interfaces: `interfaces.sol`
-**Location:** `Contracts/contracts/interfaces/interfaces.sol`
+**Location:** `contracts/contracts/interfaces/interfaces.sol`
 
 - `IMentoBroker` - Mento V2 Broker interface for swaps
 - `IERC20` - Standard ERC20 token interface
@@ -320,11 +320,11 @@ Translation structure example:
 
 ### Smart Contracts:
 
-**Directory:** `Contracts/`
+**Directory:** `contracts/`
 
 **Setup:**
 ```bash
-cd Contracts
+cd contracts
 npm install
 ```
 
@@ -522,7 +522,7 @@ const { isSuccess } = useWaitForTransactionReceipt({
 
 ## Testing Strategy
 
-- Unit tests for smart contracts in `Contracts/test/`
+- Unit tests for smart contracts in `contracts/test/`
 - Forking Celo mainnet for realistic testing
 - Mock contracts for Mento protocol (`contracts/mocks/`)
 - Frontend testing via manual QA in development
