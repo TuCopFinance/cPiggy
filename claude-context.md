@@ -369,17 +369,30 @@ NEXT_PUBLIC_PROJECT_ID=<reown_project_id>
 
 ### Fee Structure:
 
+**IMPORTANT:** Fees are NOT deducted from user returns. The protocol pays developer fees as an additional cost.
+
 1. **Diversified Piggies:**
-   - 1% fee on profits only
-   - Fee paid by protocol (additional transfer)
-   - User receives full return amount
-   - If loss, no fee charged
+   - **User fee:** 0% (users receive 100% of their returns)
+   - **Developer fee:** 1% of profits (paid by protocol as additional transfer)
+   - **How it works:**
+     - User deposits 10M cCOP
+     - Final return: 10.5M cCOP (500K profit)
+     - User receives: 10.5M cCOP (100% of return)
+     - Developer receives: 5K cCOP (1% of 500K profit, paid separately by protocol)
+     - Total protocol cost: 10.505M cCOP
+   - If loss occurs, no fee is charged
 
 2. **Fixed-Term Staking:**
-   - 5% fee on earned rewards
-   - Fee paid by protocol (additional transfer)
-   - User receives principal + full reward
-   - Principal always returned in full
+   - **User fee:** 0% (users receive 100% of promised returns)
+   - **Developer fee:** 5% of earned rewards (paid by protocol as additional transfer)
+   - **How it works:**
+     - User deposits 10M cCOP in 30-day pool
+     - Interest earned: 125K cCOP
+     - User receives: 10,125,000 cCOP (principal + 100% of interest)
+     - Developer receives: 6,250 cCOP (5% of 125K interest, paid separately by protocol)
+     - Total protocol cost: 10,131,250 cCOP
+   - Principal is always returned in full
+   - Promised interest rate is always delivered to user
 
 ### Staking Pool Economics:
 
