@@ -55,8 +55,8 @@ Allows users to diversify cCOP into multiple stablecoins with automatic swapping
 - **User fee:** 0% - Users receive 100% of their returns
 - **Developer fee:** 1% of profits (paid by protocol as additional transfer, not deducted from user)
 - **Example:**
-  - User deposits 10M, gets 10.5M back → User receives all 10.5M
-  - Developer receives 5K (1% of 500K profit) separately from protocol
+  - User deposits 10.000.000, gets 10.500.000 back → User receives all 10.500.000
+  - Developer receives 5.000 (1% of 500.000 profit) separately from protocol
 - Mento protocol swap fees apply during swaps
 
 **Limits:**
@@ -69,9 +69,9 @@ Allows users to diversify cCOP into multiple stablecoins with automatic swapping
 Lock cCOP for guaranteed returns with daily compound interest.
 
 **Interest Rates:**
-- **30 days:** 1.25% monthly (16.08% EA)
-- **60 days:** 1.5% monthly (19.56% EA)
-- **90 days:** 2% monthly (26.82% EA)
+- **30 days:** 1,25% monthly (16,08% EA)
+- **60 days:** 1,5% monthly (19,56% EA)
+- **90 days:** 2% monthly (26,82% EA)
 
 *Note: Interest compounds daily to achieve exact monthly rates. EA = Effective Annual Rate.*
 
@@ -80,11 +80,11 @@ Lock cCOP for guaranteed returns with daily compound interest.
 - **User fee:** 0% - Users receive 100% of promised interest
 - **Developer fee:** 5% of earned rewards (paid by protocol as additional transfer, not deducted from user)
 - **Example:**
-  - User deposits 10M for 30 days
-  - Interest earned: 125K cCOP
+  - User deposits 10.000.000 for 30 days
+  - Interest earned: 125.000 cCOP
   - User receives: 10.125.000 cCOP (principal + 100% interest)
-  - Developer receives: 6.250 cCOP (5% of 125K) separately from protocol
-  - User always gets the promised monthly rate (1.25%, 1.5%, or 2%)
+  - Developer receives: 6.250 cCOP (5% of 125.000) separately from protocol
+  - User always gets the promised monthly rate (1,25%, 1,5%, or 2%)
 
 **Limits:**
 

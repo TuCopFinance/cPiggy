@@ -20,9 +20,9 @@
 ### 2. Fixed-Term APY Staking
 - Lock cCOP for guaranteed returns with daily compounding
 - Three duration options with different monthly rates:
-  - **30 days**: 1.25% monthly (16.08% EA)
-  - **60 days**: 1.5% monthly (19.56% EA)
-  - **90 days**: 2% monthly (26.82% EA)
+- **30 days**: 1,25% monthly (16,08% EA)
+- **60 days**: 1,5% monthly (19,56% EA)
+- **90 days**: 2% monthly (26,82% EA)
 - Pool-based system with maximum capacity limits
 - Daily compound interest calibrated to exact monthly rates
 - 5% developer fee on earned rewards (additional cost to protocol)
@@ -374,23 +374,23 @@ NEXT_PUBLIC_PROJECT_ID=<reown_project_id>
 1. **Diversified Piggies:**
    - **User fee:** 0% (users receive 100% of their returns)
    - **Developer fee:** 1% of profits (paid by protocol as additional transfer)
-   - **How it works:**
-     - User deposits 10M cCOP
-     - Final return: 10.5M cCOP (500K profit)
-     - User receives: 10.5M cCOP (100% of return)
-     - Developer receives: 5K cCOP (1% of 500K profit, paid separately by protocol)
-     - Total protocol cost: 10.505M cCOP
+- **How it works:**
+  - User deposits 10.000.000 cCOP
+  - Final return: 10.500.000 cCOP (500.000 profit)
+  - User receives: 10.500.000 cCOP (100% of return)
+  - Developer receives: 5.000 cCOP (1% of 500.000 profit, paid separately by protocol)
+  - Total protocol cost: 10.505.000 cCOP
    - If loss occurs, no fee is charged
 
 2. **Fixed-Term Staking:**
    - **User fee:** 0% (users receive 100% of promised returns)
    - **Developer fee:** 5% of earned rewards (paid by protocol as additional transfer)
-   - **How it works:**
-     - User deposits 10M cCOP in 30-day pool
-     - Interest earned: 125K cCOP
-     - User receives: 10.125.000 cCOP (principal + 100% of interest)
-     - Developer receives: 6.250 cCOP (5% of 125K interest, paid separately by protocol)
-     - Total protocol cost: 10.131.250 cCOP
+- **How it works:**
+  - User deposits 10.000.000 cCOP in 30-day pool
+  - Interest earned: 125.000 cCOP
+  - User receives: 10.125.000 cCOP (principal + 100% of interest)
+  - Developer receives: 6.250 cCOP (5% of 125.000 interest, paid separately by protocol)
+  - Total protocol cost: 10.131.250 cCOP
    - Principal is always returned in full
    - Promised interest rate is always delivered to user
 
@@ -409,9 +409,9 @@ NEXT_PUBLIC_PROJECT_ID=<reown_project_id>
 **Interest Calculation:**
 - Uses daily compound interest formula: `Final = Principal × (1 + r_daily)^days`
 - Daily rates calibrated to achieve exact monthly targets:
-  - 30d: 1.25% monthly (16.08% EA) = 0.0414% daily compounded
-  - 60d: 1.5% monthly (19.56% EA) = 0.0496% daily compounded
-  - 90d: 2% monthly (26.82% EA) = 0.0660% daily compounded
+- 30d: 1,25% monthly (16,08% EA) = 0,0414% daily compounded
+- 60d: 1,5% monthly (19,56% EA) = 0,0496% daily compounded
+- 90d: 2% monthly (26,82% EA) = 0,0660% daily compounded
 - Interest compounds daily for precision and future early withdrawal support
 - Smart contract constants (UD60x18 format):
   - 30d: 1000414169744566162 (gives exactly 1.25% in 30 days)
