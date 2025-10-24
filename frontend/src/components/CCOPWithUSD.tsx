@@ -49,8 +49,8 @@ export function CCOPWithUSD({
 
   const usdValue = convertCOPtoUSD(numericAmount, copUsdRate);
 
-  // Format the cCOP amount (European format: . for thousands, , for decimals)
-  const formattedCCOP = Math.floor(numericAmount).toLocaleString('es-CO', {
+  // Format the cCOP amount (ISO international format: . for thousands, , for decimals)
+  const formattedCCOP = Math.floor(numericAmount).toLocaleString('de-DE', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   });

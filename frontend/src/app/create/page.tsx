@@ -90,9 +90,9 @@ export default function CreatePiggy() {
   const activeAmount = useMemo(() => investmentType === 'diversify' ? amount : fixedAmount, [investmentType, amount, fixedAmount]);
   const parsedActiveAmount = useMemo(() => parseEther(activeAmount || "0"), [activeAmount]);
 
-  // Format number with proper thousands and decimal separators (European format: . for thousands, , for decimals)
+  // Format number with proper thousands and decimal separators (ISO international format: . for thousands, , for decimals)
   const formatNumber = (num: number) => {
-    return num.toLocaleString('es-CO', {
+    return num.toLocaleString('de-DE', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     });
@@ -348,7 +348,7 @@ export default function CreatePiggy() {
               <div className="space-y-2">
                 <label htmlFor="deposit-amount" className="block font-semibold text-gray-700">1. {t('create.depositAmount')}</label>
                 <div className="relative">
-                    <input id="deposit-amount" type="number" className="w-full border-2 border-gray-200 bg-white/50 rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="100,000" min="0"/>
+                    <input id="deposit-amount" type="number" className="w-full border-2 border-gray-200 bg-white/50 rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="100.000" min="0"/>
                     <span className="absolute right-4 top-2.5 text-gray-500 font-medium">cCOP</span>
                 </div>
 
@@ -438,7 +438,7 @@ export default function CreatePiggy() {
               <div className="space-y-2">
                 <label htmlFor="fixed-amount" className="block font-semibold text-gray-700 text-sm sm:text-base">1. {t('create.depositAmount')}</label>
                 <div className="relative">
-                    <input id="fixed-amount" type="number" className="w-full border-2 border-gray-200 bg-white/50 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500" value={fixedAmount} onChange={(e) => setFixedAmount(e.target.value)} placeholder="100,000" min="0"/>
+                    <input id="fixed-amount" type="number" className="w-full border-2 border-gray-200 bg-white/50 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500" value={fixedAmount} onChange={(e) => setFixedAmount(e.target.value)} placeholder="100.000" min="0"/>
                     <span className="absolute right-3 sm:right-4 top-2.5 text-gray-700 font-medium text-sm sm:text-base">cCOP</span>
                 </div>
 

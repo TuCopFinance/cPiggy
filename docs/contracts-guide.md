@@ -61,7 +61,7 @@ Allows users to diversify cCOP into multiple stablecoins with automatic swapping
 
 **Limits:**
 
-- Max deposit per wallet: 10,000,000 cCOP
+- Max deposit per wallet: 10.000.000 cCOP
 - Pool capacity limits per duration
 
 ### 2. Fixed-Term APY Staking
@@ -82,13 +82,13 @@ Lock cCOP for guaranteed returns with daily compound interest.
 - **Example:**
   - User deposits 10M for 30 days
   - Interest earned: 125K cCOP
-  - User receives: 10,125,000 cCOP (principal + 100% interest)
-  - Developer receives: 6,250 cCOP (5% of 125K) separately from protocol
+  - User receives: 10.125.000 cCOP (principal + 100% interest)
+  - Developer receives: 6.250 cCOP (5% of 125K) separately from protocol
   - User always gets the promised monthly rate (1.25%, 1.5%, or 2%)
 
 **Limits:**
 
-- Max deposit per wallet: 10,000,000 cCOP
+- Max deposit per wallet: 10.000.000 cCOP
 - Pool capacity limits per duration
 
 ## 🔧 Development Setup
@@ -390,9 +390,9 @@ npx hardhat flatten contracts/cPiggyBank.sol > flattened.sol
 
 | Operation | Gas Cost (approx) | In CELO |
 |-----------|-------------------|---------|
-| Create Piggy | ~250,000 | ~$0.01 |
-| Create Fixed Term | ~200,000 | ~$0.008 |
-| Claim | ~180,000 | ~$0.007 |
+| Create Piggy | ~250.000 | ~$0.01 |
+| Create Fixed Term | ~200.000 | ~$0.008 |
+| Claim | ~180.000 | ~$0.007 |
 
 *Note: Gas costs vary with network congestion*
 

@@ -26,7 +26,7 @@
 - Pool-based system with maximum capacity limits
 - Daily compound interest calibrated to exact monthly rates
 - 5% developer fee on earned rewards (additional cost to protocol)
-- Max deposit per wallet: 10,000,000 cCOP
+- Max deposit per wallet: 10.000.000 cCOP
 
 ### 3. Self Protocol Integration
 - Off-chain identity verification required to use the app
@@ -388,18 +388,18 @@ NEXT_PUBLIC_PROJECT_ID=<reown_project_id>
    - **How it works:**
      - User deposits 10M cCOP in 30-day pool
      - Interest earned: 125K cCOP
-     - User receives: 10,125,000 cCOP (principal + 100% of interest)
-     - Developer receives: 6,250 cCOP (5% of 125K interest, paid separately by protocol)
-     - Total protocol cost: 10,131,250 cCOP
+     - User receives: 10.125.000 cCOP (principal + 100% of interest)
+     - Developer receives: 6.250 cCOP (5% of 125K interest, paid separately by protocol)
+     - Total protocol cost: 10.131.250 cCOP
    - Principal is always returned in full
    - Promised interest rate is always delivered to user
 
 ### Staking Pool Economics:
 
 **Pool Capacities:**
-- 30-day pool: 3,200,000,000 cCOP max
-- 60-day pool: 1,157,981,803 cCOP max
-- 90-day pool: 408,443,341 cCOP max
+- 30-day pool: 3.200.000.000 cCOP max
+- 60-day pool: 1.157.981.803 cCOP max
+- 90-day pool: 408.443.341 cCOP max
 
 **Reward Distribution (when funding):**
 - 30-day pool: 30% of total funding
@@ -417,11 +417,11 @@ NEXT_PUBLIC_PROJECT_ID=<reown_project_id>
   - 30d: 1000414169744566162 (gives exactly 1.25% in 30 days)
   - 60d: 1000496410253934644 (gives exactly 1.5% per 30 days)
   - 90d: 1000660305482286662 (gives exactly 2% per 30 days)
-- Example: 10,000,000 cCOP in 90-day pool:
-  - Month 1: 10,200,000 (+200,000)
-  - Month 2: 10,404,000 (+204,000)
-  - Month 3: 10,612,080 (+208,080)
-  - Total interest: 612,080 cCOP (6.1208%)
+- Example: 10.000.000 cCOP in 90-day pool:
+  - Month 1: 10.200.000 (+200.000)
+  - Month 2: 10.404.000 (+204.000)
+  - Month 3: 10.612.080 (+208.080)
+  - Total interest: 612.080 cCOP (6,1208%)
 
 ### Risk Modes Allocation:
 
@@ -476,10 +476,34 @@ NEXT_PUBLIC_PROJECT_ID=<reown_project_id>
 
 Note: The address in deployedAddresses.json shows v1.2 deployment.
 
-**Proof of Ship Season 7 Updates:**
+**Recent Updates (v1.2):**
 - Added cGBP to diversification strategy
-- Implemented 1% developer fee on profits
-- Added fixed-term staking feature with APY
+- Implemented 1% developer fee on profits (paid by protocol)
+- Added fixed-term staking feature with compound interest APY
+
+## Number Formatting Standards
+
+**CRITICAL - ALL NUMBER DISPLAYS MUST USE ISO INTERNATIONAL NOTATION:**
+
+- **Thousands separator:** `.` (punto/period)
+- **Decimal separator:** `,` (coma/comma)
+
+**Examples:**
+- 3.000 cCOP = three thousand pesos
+- 10.000.000 cCOP = ten million pesos
+- $1.234,56 USD = one thousand two hundred thirty-four dollars and fifty-six cents
+
+**Implementation:**
+- Use locale `'de-DE'` in all `toLocaleString()` and `Intl.NumberFormat()` calls
+- NEVER use `'en-US'` (uses comma for thousands, period for decimals)
+- NEVER use `'es-CO'` (also uses period for thousands correctly, but be consistent with de-DE)
+- This app is designed for Colombia, not USA
+- USD values are shown for reference only, but must follow international notation
+
+**Why this matters:**
+- Prevents confusion: 3.000 is clearly three thousand (not 3 with decimals)
+- International standard used in most of the world (Europe, Latin America, etc.)
+- Professional financial notation
 
 ## Important Notes
 

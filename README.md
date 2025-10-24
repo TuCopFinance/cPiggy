@@ -129,6 +129,14 @@ See [claude-context.md](./claude-context.md) for complete list of required envir
 - **Production:** [https://cpiggy.xyz](https://cpiggy.xyz)
 - **Farcaster Mini App:** Available in Warpcast
 
+## 🔢 Number Formatting Standard
+
+**All monetary values use ISO international notation:**
+- **Thousands:** period (`.`) - Example: 3.000 = three thousand
+- **Decimals:** comma (`,`) - Example: 1.234,56 = one thousand point fifty-six
+
+This prevents confusion and follows the standard used in Colombia and most of the world.
+
 ## ⚠️ Disclaimer
 
 This project is a proof-of-concept and should not be used in a production environment without a full security audit.

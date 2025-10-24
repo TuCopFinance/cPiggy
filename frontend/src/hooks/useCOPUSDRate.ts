@@ -88,7 +88,7 @@ export function convertCOPtoUSD(copAmount: number, rate: number | null): number 
  */
 export function formatUSD(usdAmount: number | null): string {
   if (usdAmount === null) return '...';
-  return new Intl.NumberFormat('es-CO', {
+  return new Intl.NumberFormat('de-DE', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,

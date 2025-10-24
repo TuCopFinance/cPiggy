@@ -108,7 +108,13 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
   };
   const status = getStatus();
   
-  const formatAmount = (amount: bigint) => formatEther(amount).substring(0, 8);
+  const formatAmount = (amount: bigint) => {
+    const etherValue = parseFloat(formatEther(amount));
+    return etherValue.toLocaleString('de-DE', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    });
+  };
   const formatAmountNumeric = (amount: bigint) => parseFloat(formatEther(amount));
 
   return (
@@ -236,7 +242,13 @@ function StakingCard({ stake, index }: { stake: StakingPosition; index: number }
   };
   const status = getStatus();
 
-  const formatAmount = (amount: bigint) => formatEther(amount).substring(0, 8);
+  const formatAmount = (amount: bigint) => {
+    const etherValue = parseFloat(formatEther(amount));
+    return etherValue.toLocaleString('de-DE', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    });
+  };
   const formatAmountNumeric = (amount: bigint) => parseFloat(formatEther(amount));
 
   return (
