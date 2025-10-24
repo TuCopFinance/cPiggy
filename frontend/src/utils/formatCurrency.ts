@@ -2,8 +2,8 @@
  * Currency Formatting Utilities
  *
  * Standards:
- * - COP: <1000 = 2 decimals, >=1000 = 0 decimals
- * - Foreign currencies (USD, EUR, GBP): Always 2 decimals
+ * - COP: <1 = 4 decimals, <1000 = 2 decimals, >=1000 = 0 decimals
+ * - Foreign currencies (USD, EUR, GBP): <1 = 4 decimals, >=1 = 2 decimals
  * - Uses ISO international format: . for thousands, , for decimals
  */
 
@@ -13,6 +13,12 @@
  * @returns Formatted string
  */
 export function formatCOP(amount: number): string {
+  if (amount < 1) {
+    return amount.toLocaleString('de-DE', {
+      minimumFractionDigits: 4,
+      maximumFractionDigits: 4
+    });
+  }
   if (amount < 1000) {
     return amount.toLocaleString('de-DE', {
       minimumFractionDigits: 2,
@@ -27,11 +33,17 @@ export function formatCOP(amount: number): string {
 
 /**
  * Format foreign currency amounts (USD, EUR, GBP)
- * Always shows 2 decimal places
+ * <1 = 4 decimals, >=1 = 2 decimals
  * @param amount - The amount in foreign currency
  * @returns Formatted string
  */
 export function formatForeignCurrency(amount: number): string {
+  if (amount < 1) {
+    return amount.toLocaleString('de-DE', {
+      minimumFractionDigits: 4,
+      maximumFractionDigits: 4
+    });
+  }
   return amount.toLocaleString('de-DE', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
