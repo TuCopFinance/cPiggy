@@ -5,7 +5,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAccount, useReadContract, useWriteContract } from "wagmi";
-import { formatEther, type Address } from "viem";
+import { type Address } from "viem";
 import Link from "next/link";
 import { ArrowLeft, PiggyBank, Clock, CheckCircle, RefreshCw, AlertTriangle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
@@ -13,6 +13,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ConnectButton } from "@/components/ConnectButton";
 import { CCOPWithUSD } from "@/components/CCOPWithUSD";
 import { useFarcaster } from "@/context/FarcasterContext";
+import { formatCOP, formatForeignCurrency, bigIntToNumber } from "@/utils/formatCurrency";
 
 // ABIs and Deployed Addresses
 import PiggyBankABI from "../../../lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
@@ -100,22 +101,27 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
     const minutes = Math.floor((seconds % 3600) / 60);
     return `${days}d ${hours}h ${minutes}m ${t('dashboard.left')}`;
   };
-  
+
   const getStatus = () => {
     if (piggy.claimed || claimSuccess) return { text: t('dashboard.status.claimed'), color: "text-green-600", icon: <CheckCircle className="w-4 h-4" /> };
     if (isClaimable) return { text: t('dashboard.status.readyToClaim'), color: "text-blue-600", icon: <PiggyBank className="w-4 h-4" /> };
     return { text: t('dashboard.status.active'), color: "text-yellow-600", icon: <Clock className="w-4 h-4" /> };
   };
   const status = getStatus();
-  
-  const formatAmount = (amount: bigint) => {
-    const etherValue = parseFloat(formatEther(amount));
-    return etherValue.toLocaleString('de-DE', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2
-    });
+
+  // Format COP amounts (cCOP)
+  const formatCOPAmount = (amount: bigint) => {
+    const numericValue = bigIntToNumber(amount);
+    return formatCOP(numericValue);
   };
-  const formatAmountNumeric = (amount: bigint) => parseFloat(formatEther(amount));
+
+  // Format foreign currency amounts (cUSD, cEUR, cGBP)
+  const formatForeignAmount = (amount: bigint) => {
+    const numericValue = bigIntToNumber(amount);
+    return formatForeignCurrency(numericValue);
+  };
+
+  const formatAmountNumeric = (amount: bigint) => bigIntToNumber(amount);
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-md p-4 sm:p-6 space-y-3 sm:space-y-4 transition-all hover:shadow-lg">
@@ -145,19 +151,19 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
         <p className="text-xs sm:text-sm font-semibold text-gray-600">{t('dashboard.assetBreakdown')}</p>
         <div className="flex justify-between items-center text-xs sm:text-sm">
           <span className="text-gray-500">{t('dashboard.ccopBalance')}</span>
-          <span className="font-medium text-gray-800">{formatAmount(piggy.cCOPAmount)}</span>
+          <span className="font-medium text-gray-800">{formatCOPAmount(piggy.cCOPAmount)}</span>
         </div>
         <div className="flex justify-between items-center text-xs sm:text-sm">
           <span className="text-gray-500">{t('dashboard.cusdBalance')}</span>
-          <span className="font-medium text-gray-800">{formatAmount(piggy.cUSDAmount)}</span>
+          <span className="font-medium text-gray-800">{formatForeignAmount(piggy.cUSDAmount)}</span>
         </div>
         <div className="flex justify-between items-center text-xs sm:text-sm">
           <span className="text-gray-500">{t('dashboard.ceurBalance')}</span>
-          <span className="font-medium text-gray-800">{formatAmount(piggy.cEURAmount)}</span>
+          <span className="font-medium text-gray-800">{formatForeignAmount(piggy.cEURAmount)}</span>
         </div>
         <div className="flex justify-between items-center text-xs sm:text-sm">
           <span className="text-gray-500">{t('dashboard.cgbpBalance')}</span>
-          <span className="font-medium text-gray-800">{formatAmount(piggy.cGBPAmount)}</span>
+          <span className="font-medium text-gray-800">{formatForeignAmount(piggy.cGBPAmount)}</span>
         </div>
       </div>
       
@@ -195,7 +201,6 @@ function StakingCard({ stake, index }: { stake: StakingPosition; index: number }
   const { t } = useLanguage();
   const { writeContractAsync } = useWriteContract();
   const piggyBankAddress = deployedAddresses.PiggyBank as Address;
-  const { address } = useAccount();
 
   const [isClaiming, setIsClaiming] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
@@ -242,14 +247,7 @@ function StakingCard({ stake, index }: { stake: StakingPosition; index: number }
   };
   const status = getStatus();
 
-  const formatAmount = (amount: bigint) => {
-    const etherValue = parseFloat(formatEther(amount));
-    return etherValue.toLocaleString('de-DE', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2
-    });
-  };
-  const formatAmountNumeric = (amount: bigint) => parseFloat(formatEther(amount));
+  const formatAmountNumeric = (amount: bigint) => bigIntToNumber(amount);
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-md p-4 sm:p-6 space-y-3 sm:space-y-4 transition-all hover:shadow-lg">
