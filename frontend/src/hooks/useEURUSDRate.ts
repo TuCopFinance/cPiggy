@@ -4,7 +4,7 @@ import { base } from 'viem/chains';
 // Chainlink EUR/USD Price Feed on Base Mainnet
 // https://data.chain.link/feeds/base/mainnet/eur-usd
 // Used as reference price for cEUR/USD conversion
-const EUR_USD_FEED_ADDRESS = '0xc5C8E77B397E531B8EC06BFb0048328B30E9eCfB' as const;
+const EUR_USD_FEED_ADDRESS = '0xc91D87E81faB8f93699ECf7Ee9B44D11e1D53F0F' as const;
 
 // Chainlink Aggregator ABI (minimal for reading price)
 const AGGREGATOR_ABI = [

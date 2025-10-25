@@ -4,7 +4,7 @@ import { celo } from 'viem/chains';
 // Chainlink cUSD/USD Price Feed on Celo Mainnet
 // https://data.chain.link/feeds/celo/mainnet/cusd-usd
 // Used for displaying cUSD token amounts in USD
-const CUSD_USD_FEED_ADDRESS = '0x022F9dCC73C5Fb43F2b4eF2EF9ad3eDD1D853946' as const;
+const CUSD_USD_FEED_ADDRESS = '0xe38A27BE4E7d866327e09736F3C570F256FFd048' as const;
 
 // Chainlink Aggregator ABI (minimal for reading price)
 const AGGREGATOR_ABI = [

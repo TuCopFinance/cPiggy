@@ -4,7 +4,7 @@ import { celo } from 'viem/chains';
 // Chainlink COP/USD Price Feed on Celo Mainnet
 // https://data.chain.link/feeds/celo/mainnet/cop-usd
 // Used for displaying cCOP token amounts in USD
-const COP_USD_FEED_ADDRESS = '0x023c18f4b9b75a0D18219126C2c5ad75235EE320' as const;
+const COP_USD_FEED_ADDRESS = '0x97b770B0200CCe161907a9cbe0C6B177679f8F7C' as const;
 
 // Chainlink Aggregator ABI (minimal for reading price)
 const AGGREGATOR_ABI = [

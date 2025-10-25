@@ -604,22 +604,22 @@ For EUR/USD and GBP/USD, we must query oracles from Base network since these fee
 
 - **Celo Mainnet:**
   - **cUSD/USD** - Directly tracks cUSD token price
-    - Contract: `0x022F9dCC73C5Fb43F2b4eF2EF9ad3eDD1D853946`
+    - Contract: `0xe38A27BE4E7d866327e09736F3C570F256FFd048`
     - [Chainlink cUSD/USD Feed](https://data.chain.link/feeds/celo/mainnet/cusd-usd)
 
 **FX Reference Rates** (no direct token oracles available):
 
 - **Celo Mainnet:**
   - **COP/USD** - Used as reference for cCOP token
-    - Contract: `0x023c18f4b9b75a0D18219126C2c5ad75235EE320`
+    - Contract: `0x97b770B0200CCe161907a9cbe0C6B177679f8F7C`
     - [Chainlink COP/USD Feed](https://data.chain.link/feeds/celo/mainnet/cop-usd)
 
 - **Base Mainnet:**
   - **EUR/USD** - Used as reference for cEUR token
-    - Contract: `0xc5C8E77B397E531B8EC06BFb0048328B30E9eCfB`
+    - Contract: `0xc91D87E81faB8f93699ECf7Ee9B44D11e1D53F0F`
     - [Chainlink EUR/USD Feed](https://data.chain.link/feeds/base/mainnet/eur-usd)
   - **GBP/USD** - Used as reference for cGBP token
-    - Contract: `0x91FAB41F5f3bE955963a986366edAcff1aaeaa83`
+    - Contract: `0xCceA6576904C118037695eB71195a5425E69Fa15`
     - [Chainlink GBP/USD Feed](https://data.chain.link/feeds/base/mainnet/gbp-usd)
 
 **Implementation Details:**

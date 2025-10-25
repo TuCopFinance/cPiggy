@@ -4,7 +4,7 @@ import { base } from 'viem/chains';
 // Chainlink GBP/USD Price Feed on Base Mainnet
 // https://data.chain.link/feeds/base/mainnet/gbp-usd
 // Used as reference price for cGBP/USD conversion
-const GBP_USD_FEED_ADDRESS = '0x91FAB41F5f3bE955963a986366edAcff1aaeaa83' as const;
+const GBP_USD_FEED_ADDRESS = '0xCceA6576904C118037695eB71195a5425E69Fa15' as const;
 
 // Chainlink Aggregator ABI (minimal for reading price)
 const AGGREGATOR_ABI = [
