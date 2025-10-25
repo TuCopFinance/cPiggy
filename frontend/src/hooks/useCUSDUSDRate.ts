@@ -1,10 +1,10 @@
 import { useReadContract } from 'wagmi';
-import { base } from 'viem/chains';
+import { celo } from 'viem/chains';
 
-// Chainlink EUR/USD Price Feed on Base Mainnet
-// https://data.chain.link/feeds/base/mainnet/eur-usd
-// Used as reference price for cEUR/USD conversion
-const EUR_USD_FEED_ADDRESS = '0xc5C8E77B397E531B8EC06BFb0048328B30E9eCfB' as const;
+// Chainlink cUSD/USD Price Feed on Celo Mainnet
+// https://data.chain.link/feeds/celo/mainnet/cusd-usd
+// Used for displaying cUSD token amounts in USD
+const CUSD_USD_FEED_ADDRESS = '0x022F9dCC73C5Fb43F2b4eF2EF9ad3eDD1D853946' as const;
 
 // Chainlink Aggregator ABI (minimal for reading price)
 const AGGREGATOR_ABI = [
@@ -31,17 +31,18 @@ const AGGREGATOR_ABI = [
 ] as const;
 
 /**
- * Hook to fetch the current EUR/USD exchange rate from Chainlink on Base
- * Used as reference price for displaying cEUR token amounts in USD
- * Returns the rate as a number (e.g., 1.08 means 1 EUR = 1.08 USD)
+ * Hook to fetch the current cUSD/USD exchange rate from Chainlink on Celo
+ * Used for displaying cUSD token amounts in USD
+ * Returns the rate as a number (e.g., 0.998 means 1 cUSD ≈ 0.998 USD)
+ * Note: cUSD is designed to maintain 1:1 parity with USD, but may have slight variations
  */
-export function useEURUSDRate() {
+export function useCUSDUSDRate() {
   // Fetch the latest price data
   const { data: priceData, isLoading: isPriceLoading } = useReadContract({
-    address: EUR_USD_FEED_ADDRESS,
+    address: CUSD_USD_FEED_ADDRESS,
     abi: AGGREGATOR_ABI,
     functionName: 'latestRoundData',
-    chainId: base.id,
+    chainId: celo.id,
     query: {
       refetchInterval: 60000, // Refresh every minute
       staleTime: 30000, // Consider data stale after 30 seconds
@@ -50,10 +51,10 @@ export function useEURUSDRate() {
 
   // Fetch decimals
   const { data: decimals, isLoading: isDecimalsLoading } = useReadContract({
-    address: EUR_USD_FEED_ADDRESS,
+    address: CUSD_USD_FEED_ADDRESS,
     abi: AGGREGATOR_ABI,
     functionName: 'decimals',
-    chainId: base.id,
+    chainId: celo.id,
     query: {
       staleTime: Infinity, // Decimals never change
     },
@@ -74,14 +75,14 @@ export function useEURUSDRate() {
 }
 
 /**
- * Convert EUR amount to USD
- * @param eurAmount Amount in EUR
- * @param rate EUR/USD exchange rate
+ * Convert cUSD amount to USD
+ * @param cusdAmount Amount in cUSD token
+ * @param rate cUSD/USD exchange rate from oracle
  * @returns USD amount
  */
-export function convertEURtoUSD(eurAmount: number, rate: number | null): number | null {
-  if (rate === null || eurAmount === 0) return null;
-  return eurAmount * rate;
+export function convertCUSDtoUSD(cusdAmount: number, rate: number | null): number | null {
+  if (rate === null || cusdAmount === 0) return null;
+  return cusdAmount * rate;
 }
 
 /**

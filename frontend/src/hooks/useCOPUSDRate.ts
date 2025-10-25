@@ -1,8 +1,10 @@
 import { useReadContract } from 'wagmi';
-import { polygon } from 'viem/chains';
+import { celo } from 'viem/chains';
 
-// Chainlink COP/USD Price Feed on Polygon Mainnet
-const COP_USD_FEED_ADDRESS = '0xfAA9147190c2C2cc5B8387B4f49016bDB3380572' as const;
+// Chainlink COP/USD Price Feed on Celo Mainnet
+// https://data.chain.link/feeds/celo/mainnet/cop-usd
+// Used for displaying cCOP token amounts in USD
+const COP_USD_FEED_ADDRESS = '0x023c18f4b9b75a0D18219126C2c5ad75235EE320' as const;
 
 // Chainlink Aggregator ABI (minimal for reading price)
 const AGGREGATOR_ABI = [
@@ -29,7 +31,8 @@ const AGGREGATOR_ABI = [
 ] as const;
 
 /**
- * Hook to fetch the current COP/USD exchange rate from Chainlink on Polygon
+ * Hook to fetch the current COP/USD exchange rate from Chainlink on Celo
+ * Used for displaying cCOP token amounts in USD
  * Returns the rate as a number (e.g., 0.00025 means 1 COP = 0.00025 USD)
  */
 export function useCOPUSDRate() {
@@ -38,7 +41,7 @@ export function useCOPUSDRate() {
     address: COP_USD_FEED_ADDRESS,
     abi: AGGREGATOR_ABI,
     functionName: 'latestRoundData',
-    chainId: polygon.id,
+    chainId: celo.id,
     query: {
       refetchInterval: 60000, // Refresh every minute
       staleTime: 30000, // Consider data stale after 30 seconds
@@ -50,7 +53,7 @@ export function useCOPUSDRate() {
     address: COP_USD_FEED_ADDRESS,
     abi: AGGREGATOR_ABI,
     functionName: 'decimals',
-    chainId: polygon.id,
+    chainId: celo.id,
     query: {
       staleTime: Infinity, // Decimals never change
     },

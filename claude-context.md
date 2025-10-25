@@ -586,19 +586,88 @@ numberToBigInt(amount: number, decimals?: number): bigint
 
 ### Oracle Integration
 
-**Purpose:** Show USD equivalents for informative display
+**Purpose:** Show USD equivalents for informative display using real-time Chainlink price feeds
 
-**Available oracles:**
-- COP/USD: Chainlink oracle on Polygon
-- EUR/USD: Chainlink oracle on Ethereum
-- GBP/USD: Chainlink oracle on Ethereum
-- cUSD: Assumed 1:1 with USD (no oracle needed)
+**Why we use oracles:**
+
+cPiggyFX is deployed on Celo and works with multiple Mento stablecoins (cCOP, cUSD, cEUR, cGBP). To provide users with informative USD equivalents of their token balances, we need real-time price data. However, not all required oracles are available on Celo:
+
+- **cUSD** has a direct token oracle on Celo
+- **COP/USD** FX rate oracle is available on Celo
+- **EUR/USD and GBP/USD** FX rate oracles are NOT available on Celo
+
+For EUR/USD and GBP/USD, we must query oracles from Base network since these feeds don't exist on Celo. Additionally, since there are no direct oracles for cCOP, cEUR, and cGBP tokens, we use their respective **FX reference rates** (COP/USD, EUR/USD, GBP/USD) as approximate price feeds.
+
+**Chainlink Oracles Configuration:**
+
+**Direct Token Oracles:**
+
+- **Celo Mainnet:**
+  - **cUSD/USD** - Directly tracks cUSD token price
+    - Contract: `0x022F9dCC73C5Fb43F2b4eF2EF9ad3eDD1D853946`
+    - [Chainlink cUSD/USD Feed](https://data.chain.link/feeds/celo/mainnet/cusd-usd)
+
+**FX Reference Rates** (no direct token oracles available):
+
+- **Celo Mainnet:**
+  - **COP/USD** - Used as reference for cCOP token
+    - Contract: `0x023c18f4b9b75a0D18219126C2c5ad75235EE320`
+    - [Chainlink COP/USD Feed](https://data.chain.link/feeds/celo/mainnet/cop-usd)
+
+- **Base Mainnet:**
+  - **EUR/USD** - Used as reference for cEUR token
+    - Contract: `0xc5C8E77B397E531B8EC06BFb0048328B30E9eCfB`
+    - [Chainlink EUR/USD Feed](https://data.chain.link/feeds/base/mainnet/eur-usd)
+  - **GBP/USD** - Used as reference for cGBP token
+    - Contract: `0x91FAB41F5f3bE955963a986366edAcff1aaeaa83`
+    - [Chainlink GBP/USD Feed](https://data.chain.link/feeds/base/mainnet/gbp-usd)
+
+**Implementation Details:**
+
+- **Hooks Location:** `frontend/src/hooks/use[TOKEN]USDRate.ts`
+  - `useCOPUSDRate.ts` - Fetches COP/USD rate from Celo
+  - `useCUSDUSDRate.ts` - Fetches cUSD/USD rate from Celo
+  - `useEURUSDRate.ts` - Fetches EUR/USD rate from Base
+  - `useGBPUSDRate.ts` - Fetches GBP/USD rate from Base
+
+- **Components Location:** `frontend/src/components/[TOKEN]WithUSD.tsx`
+  - `CCOPWithUSD.tsx` - Displays cCOP with USD equivalent
+  - `CUSDWithUSD.tsx` - Displays cUSD with USD equivalent
+  - `CEURWithUSD.tsx` - Displays cEUR with USD equivalent
+  - `CGBPWithUSD.tsx` - Displays cGBP with USD equivalent
+
+**Oracle Query Settings:**
+- Refresh interval: 60 seconds (1 minute)
+- Stale time: 30 seconds
+- Decimals: Fetched once per oracle (cached indefinitely)
 
 **Usage in components:**
 - Token amounts are calculated with full precision
-- Oracle rates are fetched from Chainlink
+- Oracle rates are fetched from Chainlink via `useReadContract` from wagmi
 - USD equivalents are calculated: `tokenAmount * oracleRate`
-- Both values are formatted for display
+- Both values are formatted for display using `formatTokenAmount()` and `formatUSD()`
+
+**Why different networks?**
+
+**Direct Token Oracles:**
+
+- **Celo:**
+  - cUSD/USD - Directly tracks cUSD token price
+
+**FX Reference Rates** (no direct token oracles available):
+
+- **Celo:**
+  - COP/USD - Used as reference for cCOP token
+
+- **Base:**
+  - EUR/USD - Used as reference for cEUR token
+  - GBP/USD - Used as reference for cGBP token
+
+**Why Base for EUR/USD and GBP/USD?**
+
+Base provides reliable, frequently updated FX reference rates with lower query costs compared to Ethereum mainnet.
+
+**Note:** FX reference rates provide approximate USD equivalents for display purposes only. The actual token amounts remain precise and unaffected by oracle values.
 
 **Example flow:**
 ```typescript

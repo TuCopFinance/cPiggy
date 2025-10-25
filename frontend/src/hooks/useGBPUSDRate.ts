@@ -1,8 +1,10 @@
 import { useReadContract } from 'wagmi';
-import { mainnet } from 'viem/chains';
+import { base } from 'viem/chains';
 
-// Chainlink GBP/USD Price Feed on Ethereum Mainnet
-const GBP_USD_FEED_ADDRESS = '0x5c0Ab2d9b5a7ed9f470386e82BB36A3613cDd4b5' as const;
+// Chainlink GBP/USD Price Feed on Base Mainnet
+// https://data.chain.link/feeds/base/mainnet/gbp-usd
+// Used as reference price for cGBP/USD conversion
+const GBP_USD_FEED_ADDRESS = '0x91FAB41F5f3bE955963a986366edAcff1aaeaa83' as const;
 
 // Chainlink Aggregator ABI (minimal for reading price)
 const AGGREGATOR_ABI = [
@@ -29,7 +31,8 @@ const AGGREGATOR_ABI = [
 ] as const;
 
 /**
- * Hook to fetch the current GBP/USD exchange rate from Chainlink on Ethereum
+ * Hook to fetch the current GBP/USD exchange rate from Chainlink on Base
+ * Used as reference price for displaying cGBP token amounts in USD
  * Returns the rate as a number (e.g., 1.25 means 1 GBP = 1.25 USD)
  */
 export function useGBPUSDRate() {
@@ -38,7 +41,7 @@ export function useGBPUSDRate() {
     address: GBP_USD_FEED_ADDRESS,
     abi: AGGREGATOR_ABI,
     functionName: 'latestRoundData',
-    chainId: mainnet.id,
+    chainId: base.id,
     query: {
       refetchInterval: 60000, // Refresh every minute
       staleTime: 30000, // Consider data stale after 30 seconds
@@ -50,7 +53,7 @@ export function useGBPUSDRate() {
     address: GBP_USD_FEED_ADDRESS,
     abi: AGGREGATOR_ABI,
     functionName: 'decimals',
-    chainId: mainnet.id,
+    chainId: base.id,
     query: {
       staleTime: Infinity, // Decimals never change
     },

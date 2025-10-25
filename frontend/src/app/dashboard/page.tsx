@@ -12,10 +12,11 @@ import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ConnectButton } from "@/components/ConnectButton";
 import { CCOPWithUSD } from "@/components/CCOPWithUSD";
+import { CUSDWithUSD } from "@/components/CUSDWithUSD";
 import { CEURWithUSD } from "@/components/CEURWithUSD";
 import { CGBPWithUSD } from "@/components/CGBPWithUSD";
 import { useFarcaster } from "@/context/FarcasterContext";
-import { formatTokenAmount, bigIntToNumber } from "@/utils/formatCurrency";
+import { bigIntToNumber } from "@/utils/formatCurrency";
 
 // ABIs and Deployed Addresses
 import PiggyBankABI from "../../../lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
@@ -111,15 +112,6 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
   };
   const status = getStatus();
 
-  // Convert BigInt token balance to formatted string for UI display
-  // Applies to all tokens: cCOP, cUSD, cEUR, cGBP
-  // <1 = 4 decimals, <1000 = 2 decimals, >=1000 = 0 decimals
-  // Note: Calculations use full precision, formatting is only for display
-  const formatAmount = (amount: bigint) => {
-    const numericValue = bigIntToNumber(amount); // Full precision
-    return formatTokenAmount(numericValue); // Format only for display
-  };
-
   // Convert BigInt token balance to number (keeps full precision for calculations)
   const formatAmountNumeric = (amount: bigint) => bigIntToNumber(amount);
 
@@ -154,32 +146,35 @@ function PiggyCard({ piggy, index }: { piggy: Piggy; index: number }) {
           <CCOPWithUSD
             ccopAmount={bigIntToNumber(piggy.cCOPAmount)}
             format="inline"
-            showLabel={false}
-            className="font-medium text-gray-800"
+            showLabel={true}
+            className="text-xs"
           />
         </div>
         <div className="flex justify-between items-center text-xs sm:text-sm">
           <span className="text-gray-500">{t('dashboard.cusdBalance')}</span>
-          <span className="font-medium text-gray-800">
-            {formatAmount(piggy.cUSDAmount)} <span className="text-gray-500 text-xs ml-1">(≈ ${formatAmount(piggy.cUSDAmount)})</span>
-          </span>
+          <CUSDWithUSD
+            cusdAmount={bigIntToNumber(piggy.cUSDAmount)}
+            format="inline"
+            showLabel={true}
+            className="text-xs"
+          />
         </div>
         <div className="flex justify-between items-center text-xs sm:text-sm">
           <span className="text-gray-500">{t('dashboard.ceurBalance')}</span>
-          <CEURWithUSD 
-            ceurAmount={bigIntToNumber(piggy.cEURAmount)} 
-            format="inline" 
-            showLabel={false}
-            className="font-medium text-gray-800"
+          <CEURWithUSD
+            ceurAmount={bigIntToNumber(piggy.cEURAmount)}
+            format="inline"
+            showLabel={true}
+            className="text-xs"
           />
         </div>
         <div className="flex justify-between items-center text-xs sm:text-sm">
           <span className="text-gray-500">{t('dashboard.cgbpBalance')}</span>
-          <CGBPWithUSD 
-            cgbpAmount={bigIntToNumber(piggy.cGBPAmount)} 
-            format="inline" 
-            showLabel={false}
-            className="font-medium text-gray-800"
+          <CGBPWithUSD
+            cgbpAmount={bigIntToNumber(piggy.cGBPAmount)}
+            format="inline"
+            showLabel={true}
+            className="text-xs"
           />
         </div>
       </div>
