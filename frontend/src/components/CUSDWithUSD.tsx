@@ -43,7 +43,12 @@ export function CUSDWithUSD({
   format = 'inline',
   showLabel = true
 }: CUSDWithUSDProps) {
-  const { rate: cusdUsdRate, isLoading: isRateLoading } = useCUSDUSDRate();
+  const { rate: cusdUsdRate, isLoading: isRateLoading, error } = useCUSDUSDRate();
+
+  // Log errors for debugging
+  if (error && typeof window !== 'undefined') {
+    console.error('cUSD Oracle Error:', error);
+  }
 
   // Convert string to number if needed
   // Keep full precision for calculations - formatting is only for display

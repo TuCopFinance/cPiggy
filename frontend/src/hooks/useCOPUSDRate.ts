@@ -80,7 +80,8 @@ export function useCOPUSDRate() {
  * @returns USD amount
  */
 export function convertCOPtoUSD(copAmount: number, rate: number | null): number | null {
-  if (rate === null || copAmount === 0) return null;
+  if (rate === null) return null;
+  if (copAmount === 0) return 0;
   return copAmount * rate;
 }
 

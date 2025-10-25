@@ -80,7 +80,8 @@ export function useEURUSDRate() {
  * @returns USD amount
  */
 export function convertEURtoUSD(eurAmount: number, rate: number | null): number | null {
-  if (rate === null || eurAmount === 0) return null;
+  if (rate === null) return null;
+  if (eurAmount === 0) return 0;
   return eurAmount * rate;
 }
 

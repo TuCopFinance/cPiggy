@@ -38,7 +38,7 @@ const AGGREGATOR_ABI = [
  */
 export function useCUSDUSDRate() {
   // Fetch the latest price data
-  const { data: priceData, isLoading: isPriceLoading } = useReadContract({
+  const { data: priceData, isLoading: isPriceLoading, error: priceError } = useReadContract({
     address: CUSD_USD_FEED_ADDRESS,
     abi: AGGREGATOR_ABI,
     functionName: 'latestRoundData',
@@ -50,7 +50,7 @@ export function useCUSDUSDRate() {
   });
 
   // Fetch decimals
-  const { data: decimals, isLoading: isDecimalsLoading } = useReadContract({
+  const { data: decimals, isLoading: isDecimalsLoading, error: decimalsError } = useReadContract({
     address: CUSD_USD_FEED_ADDRESS,
     abi: AGGREGATOR_ABI,
     functionName: 'decimals',
@@ -71,6 +71,7 @@ export function useCUSDUSDRate() {
     rate,
     isLoading,
     rawData: priceData,
+    error: priceError || decimalsError,
   };
 }
 
@@ -81,7 +82,8 @@ export function useCUSDUSDRate() {
  * @returns USD amount
  */
 export function convertCUSDtoUSD(cusdAmount: number, rate: number | null): number | null {
-  if (rate === null || cusdAmount === 0) return null;
+  if (rate === null) return null;
+  if (cusdAmount === 0) return 0;
   return cusdAmount * rate;
 }
 

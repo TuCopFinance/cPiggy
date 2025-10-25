@@ -80,7 +80,8 @@ export function useGBPUSDRate() {
  * @returns USD amount
  */
 export function convertGBPtoUSD(gbpAmount: number, rate: number | null): number | null {
-  if (rate === null || gbpAmount === 0) return null;
+  if (rate === null) return null;
+  if (gbpAmount === 0) return 0;
   return gbpAmount * rate;
 }
 

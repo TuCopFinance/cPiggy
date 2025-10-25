@@ -15,6 +15,7 @@ import { CCOPWithUSD } from "@/components/CCOPWithUSD";
 import { CUSDWithUSD } from "@/components/CUSDWithUSD";
 import { CEURWithUSD } from "@/components/CEURWithUSD";
 import { CGBPWithUSD } from "@/components/CGBPWithUSD";
+import { OracleDebug } from "@/components/OracleDebug";
 import { useFarcaster } from "@/context/FarcasterContext";
 import { bigIntToNumber } from "@/utils/formatCurrency";
 
@@ -436,6 +437,9 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Debug component - remove in production */}
+      {process.env.NODE_ENV === 'development' && <OracleDebug />}
     </div>
   );
 }
