@@ -8,9 +8,10 @@ import { useLanguage } from '@/context/LanguageContext'
 import { useFarcaster } from '@/context/FarcasterContext'
 import { FarcasterConnectButton, useFarcasterWallet } from './FarcasterConnectButton'
 import { useReadContract } from 'wagmi'
-import { type Address, formatEther } from 'viem'
+import { type Address } from 'viem'
 import deployedAddresses from '../../lib/deployedAddresses.json'
 import { CCOPWithUSD } from './CCOPWithUSD'
+import { bigIntToNumber } from '@/utils/formatCurrency'
 
 // Minimal ERC20 ABI for balance query
 const erc20Abi = [
@@ -47,10 +48,10 @@ export const ConnectButton = ({ compact = false }: { compact?: boolean }) => {
     },
   });
 
-  // Format balance from bigint to readable number
+  // Convert BigInt token balance to number (keeps full precision for calculations)
   const formatBalance = (balance: bigint | undefined): number => {
     if (!balance) return 0;
-    return parseFloat(formatEther(balance));
+    return bigIntToNumber(balance);
   };
 
   // Handle client-side mounting to prevent hydration issues

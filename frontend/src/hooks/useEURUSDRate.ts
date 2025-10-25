@@ -1,10 +1,10 @@
 import { useReadContract } from 'wagmi';
-import { celo } from 'viem/chains';
+import { base } from 'viem/chains';
 
-// Chainlink COP/USD Price Feed on Celo Mainnet
-// https://data.chain.link/feeds/celo/mainnet/cop-usd
-// Used for displaying cCOP token amounts in USD
-const COP_USD_FEED_ADDRESS = '0x97b770B0200CCe161907a9cbe0C6B177679f8F7C' as const;
+// Chainlink EUR/USD Price Feed on Base Mainnet
+// https://data.chain.link/feeds/base/mainnet/eur-usd
+// Used as reference price for cEUR/USD conversion
+const EUR_USD_FEED_ADDRESS = '0xc91D87E81faB8f93699ECf7Ee9B44D11e1D53F0F' as const;
 
 // Chainlink Aggregator ABI (minimal for reading price)
 const AGGREGATOR_ABI = [
@@ -31,17 +31,17 @@ const AGGREGATOR_ABI = [
 ] as const;
 
 /**
- * Hook to fetch the current COP/USD exchange rate from Chainlink on Celo
- * Used for displaying cCOP token amounts in USD
- * Returns the rate as a number (e.g., 0.00025 means 1 COP = 0.00025 USD)
+ * Hook to fetch the current EUR/USD exchange rate from Chainlink on Base
+ * Used as reference price for displaying cEUR token amounts in USD
+ * Returns the rate as a number (e.g., 1.08 means 1 EUR = 1.08 USD)
  */
-export function useCOPUSDRate() {
+export function useEURUSDRate() {
   // Fetch the latest price data
   const { data: priceData, isLoading: isPriceLoading } = useReadContract({
-    address: COP_USD_FEED_ADDRESS,
+    address: EUR_USD_FEED_ADDRESS,
     abi: AGGREGATOR_ABI,
     functionName: 'latestRoundData',
-    chainId: celo.id,
+    chainId: base.id,
     query: {
       refetchInterval: 60000, // Refresh every minute
       staleTime: 30000, // Consider data stale after 30 seconds
@@ -50,10 +50,10 @@ export function useCOPUSDRate() {
 
   // Fetch decimals
   const { data: decimals, isLoading: isDecimalsLoading } = useReadContract({
-    address: COP_USD_FEED_ADDRESS,
+    address: EUR_USD_FEED_ADDRESS,
     abi: AGGREGATOR_ABI,
     functionName: 'decimals',
-    chainId: celo.id,
+    chainId: base.id,
     query: {
       staleTime: Infinity, // Decimals never change
     },
@@ -74,15 +74,15 @@ export function useCOPUSDRate() {
 }
 
 /**
- * Convert COP amount to USD
- * @param copAmount Amount in COP
- * @param rate COP/USD exchange rate
+ * Convert EUR amount to USD
+ * @param eurAmount Amount in EUR
+ * @param rate EUR/USD exchange rate
  * @returns USD amount
  */
-export function convertCOPtoUSD(copAmount: number, rate: number | null): number | null {
+export function convertEURtoUSD(eurAmount: number, rate: number | null): number | null {
   if (rate === null) return null;
-  if (copAmount === 0) return 0;
-  return copAmount * rate;
+  if (eurAmount === 0) return 0;
+  return eurAmount * rate;
 }
 
 /**

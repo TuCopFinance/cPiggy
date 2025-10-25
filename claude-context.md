@@ -18,15 +18,15 @@
 - 1% developer fee on profits (additional cost to protocol)
 
 ### 2. Fixed-Term APY Staking
-- Lock cCOP for guaranteed returns
-- Three duration options with different rates:
-  - **30 days**: 1.25% APY (0.0417% daily)
-  - **60 days**: 1.50% APY (0.0500% daily)
-  - **90 days**: 2.00% APY (0.0667% daily)
+- Lock cCOP for guaranteed returns with daily compounding
+- Three duration options with different monthly rates:
+- **30 days**: 1,25% monthly (16,08% EA)
+- **60 days**: 1,5% monthly (19,56% EA)
+- **90 days**: 2% monthly (26,82% EA)
 - Pool-based system with maximum capacity limits
-- Compound interest calculations
+- Daily compound interest calibrated to exact monthly rates
 - 5% developer fee on earned rewards (additional cost to protocol)
-- Max deposit per wallet: 10,000,000 cCOP
+- Max deposit per wallet: 10.000.000 cCOP
 
 ### 3. Self Protocol Integration
 - Off-chain identity verification required to use the app
@@ -42,7 +42,7 @@
 ### Smart Contracts (Solidity 0.8.19)
 
 #### Main Contract: `PiggyBank.sol`
-**Location:** `Contracts/contracts/cPiggyBank.sol`
+**Location:** `contracts/contracts/cPiggyBank.sol`
 **Deployed Address:** `0x15a968d1efaCD5773679900D57E11799C4ac01Ce` (Celo Mainnet)
 
 **Key Components:**
@@ -107,7 +107,7 @@
    - Compound interest calculations for staking
 
 #### Supporting Contract: `MentoOracleHandler.sol`
-**Location:** `Contracts/contracts/MentoOracleHandler.sol`
+**Location:** `contracts/contracts/MentoOracleHandler.sol`
 **Deployed Address:** `0xc0fDe6b032d7a5A1446A73D38Fbe5a6b9D5B62D1`
 
 **Purpose:** Provides allocation strategies for diversification
@@ -119,7 +119,7 @@ function getSuggestedAllocation(uint256 totalAmount, bool isSafeMode)
 ```
 
 #### Interfaces: `interfaces.sol`
-**Location:** `Contracts/contracts/interfaces/interfaces.sol`
+**Location:** `contracts/contracts/interfaces/interfaces.sol`
 
 - `IMentoBroker` - Mento V2 Broker interface for swaps
 - `IERC20` - Standard ERC20 token interface
@@ -320,11 +320,11 @@ Translation structure example:
 
 ### Smart Contracts:
 
-**Directory:** `Contracts/`
+**Directory:** `contracts/`
 
 **Setup:**
 ```bash
-cd Contracts
+cd contracts
 npm install
 ```
 
@@ -369,24 +369,37 @@ NEXT_PUBLIC_PROJECT_ID=<reown_project_id>
 
 ### Fee Structure:
 
+**IMPORTANT:** Fees are NOT deducted from user returns. The protocol pays developer fees as an additional cost.
+
 1. **Diversified Piggies:**
-   - 1% fee on profits only
-   - Fee paid by protocol (additional transfer)
-   - User receives full return amount
-   - If loss, no fee charged
+   - **User fee:** 0% (users receive 100% of their returns)
+   - **Developer fee:** 1% of profits (paid by protocol as additional transfer)
+- **How it works:**
+  - User deposits 10.000.000 cCOP
+  - Final return: 10.500.000 cCOP (500.000 profit)
+  - User receives: 10.500.000 cCOP (100% of return)
+  - Developer receives: 5.000 cCOP (1% of 500.000 profit, paid separately by protocol)
+  - Total protocol cost: 10.505.000 cCOP
+   - If loss occurs, no fee is charged
 
 2. **Fixed-Term Staking:**
-   - 5% fee on earned rewards
-   - Fee paid by protocol (additional transfer)
-   - User receives principal + full reward
-   - Principal always returned in full
+   - **User fee:** 0% (users receive 100% of promised returns)
+   - **Developer fee:** 5% of earned rewards (paid by protocol as additional transfer)
+- **How it works:**
+  - User deposits 10.000.000 cCOP in 30-day pool
+  - Interest earned: 125.000 cCOP
+  - User receives: 10.125.000 cCOP (principal + 100% of interest)
+  - Developer receives: 6.250 cCOP (5% of 125.000 interest, paid separately by protocol)
+  - Total protocol cost: 10.131.250 cCOP
+   - Principal is always returned in full
+   - Promised interest rate is always delivered to user
 
 ### Staking Pool Economics:
 
 **Pool Capacities:**
-- 30-day pool: 3,200,000,000 cCOP max
-- 60-day pool: 1,157,981,803 cCOP max
-- 90-day pool: 408,443,341 cCOP max
+- 30-day pool: 3.200.000.000 cCOP max
+- 60-day pool: 1.157.981.803 cCOP max
+- 90-day pool: 408.443.341 cCOP max
 
 **Reward Distribution (when funding):**
 - 30-day pool: 30% of total funding
@@ -394,11 +407,21 @@ NEXT_PUBLIC_PROJECT_ID=<reown_project_id>
 - 90-day pool: 35% of total funding
 
 **Interest Calculation:**
-- Uses compound interest formula
-- Pre-calculated multipliers for simplicity:
-  - 30d: 1.0125 (1.25%)
-  - 60d: 1.0302 (3.02% total)
-  - 90d: 1.0612 (6.12% total)
+- Uses daily compound interest formula: `Final = Principal × (1 + r_daily)^days`
+- Daily rates calibrated to achieve exact monthly targets:
+- 30d: 1,25% monthly (16,08% EA) = 0,0414% daily compounded
+- 60d: 1,5% monthly (19,56% EA) = 0,0496% daily compounded
+- 90d: 2% monthly (26,82% EA) = 0,0660% daily compounded
+- Interest compounds daily for precision and future early withdrawal support
+- Smart contract constants (UD60x18 format):
+  - 30d: 1000414169744566162 (gives exactly 1.25% in 30 days)
+  - 60d: 1000496410253934644 (gives exactly 1.5% per 30 days)
+  - 90d: 1000660305482286662 (gives exactly 2% per 30 days)
+- Example: 10.000.000 cCOP in 90-day pool:
+  - Month 1: 10.200.000 (+200.000)
+  - Month 2: 10.404.000 (+204.000)
+  - Month 3: 10.612.080 (+208.080)
+  - Total interest: 612.080 cCOP (6,1208%)
 
 ### Risk Modes Allocation:
 
@@ -453,10 +476,245 @@ NEXT_PUBLIC_PROJECT_ID=<reown_project_id>
 
 Note: The address in deployedAddresses.json shows v1.2 deployment.
 
-**Proof of Ship Season 7 Updates:**
+**Recent Updates (v1.2):**
 - Added cGBP to diversification strategy
-- Implemented 1% developer fee on profits
-- Added fixed-term staking feature with APY
+- Implemented 1% developer fee on profits (paid by protocol)
+- Added fixed-term staking feature with compound interest APY
+
+## Token Display and Number Formatting Standards
+
+### Understanding Tokens vs Currencies
+
+**CRITICAL CONCEPT:**
+
+- **cCOP, cUSD, cEUR, cGBP are ERC20 TOKENS**, not currencies
+- They are digital representations of currencies on the blockchain
+- We query token balances from the blockchain (not currency amounts)
+- We format token quantities for display in the UI
+- We use oracles to find USD equivalents for informative display only
+
+**Token Information:**
+```
+cCOP - Colombian Peso token (18 decimals)
+cUSD - US Dollar token (18 decimals)
+cEUR - Euro token (18 decimals)
+cGBP - British Pound token (18 decimals)
+```
+
+### Number Display Format Rules
+
+**CRITICAL - ALL TOKEN DISPLAYS MUST FOLLOW THESE RULES:**
+
+**Display format based on token amount:**
+- **< 1**: 4 decimals (e.g., 0,8523 cCOP)
+- **< 1000**: 2 decimals (e.g., 156,75 cCOP)
+- **>= 1000**: 0 decimals (e.g., 45.678 cCOP)
+
+**Notation standard (ISO international):**
+- **Thousands separator:** `.` (punto/period)
+- **Decimal separator:** `,` (coma/comma)
+
+**Examples:**
+```
+0,8523 cCOP        = less than 1 token (4 decimals)
+156,75 cCOP        = one hundred fifty-six tokens (2 decimals)
+3.000 cCOP         = three thousand tokens (0 decimals)
+10.000.000 cCOP    = ten million tokens (0 decimals)
+```
+
+**USD equivalent displays:**
+```
+1.234 cCOP (≈ $3,21)
+850,50 cEUR (≈ $920,14)
+```
+
+### Implementation Details
+
+**Core utilities location:** `frontend/src/utils/formatCurrency.ts`
+
+**Main function:**
+```typescript
+formatTokenAmount(amount: number): string
+// Returns formatted string for UI display
+// Automatically applies correct decimal places based on amount
+```
+
+**Helper functions:**
+```typescript
+bigIntToNumber(amount: bigint, decimals?: number): number
+// Converts blockchain BigInt to number with FULL PRECISION
+// Used for calculations - DO NOT format this value
+
+numberToBigInt(amount: number, decimals?: number): bigint
+// Converts number back to BigInt for blockchain transactions
+```
+
+**CRITICAL RULES:**
+
+1. **Calculations always use full precision:**
+   ```typescript
+   // ✅ CORRECT
+   const balance = bigIntToNumber(balanceFromContract); // 1234.567891234567
+   const doubled = balance * 2; // Calculate with full precision
+   const display = formatTokenAmount(doubled); // Format only for display
+
+   // ❌ WRONG
+   const display = formatTokenAmount(balance); // "1.234"
+   const doubled = parseFloat(display) * 2; // Lost precision!
+   ```
+
+2. **Formatting is ONLY for UI display:**
+   - Never use formatted strings in calculations
+   - Always keep raw numbers/BigInts for math
+   - Format at the last possible moment (in JSX)
+
+3. **Token components with USD equivalents:**
+   - `<CCOPWithUSD ccopAmount={number} />` - Shows cCOP + USD via COP/USD oracle
+   - `<CEURWithUSD ceurAmount={number} />` - Shows cEUR + USD via EUR/USD oracle
+   - `<CGBPWithUSD cgbpAmount={number} />` - Shows cGBP + USD via GBP/USD oracle
+   - For cUSD: Use 1:1 conversion (1 cUSD = $1 USD)
+
+4. **Locale configuration:**
+   ```typescript
+   // ✅ ALWAYS USE
+   amount.toLocaleString('de-DE', { ... })
+
+   // ❌ NEVER USE
+   amount.toLocaleString('en-US', { ... }) // Wrong separators!
+   amount.toLocaleString('es-CO', { ... }) // Be consistent, use de-DE
+   ```
+
+### Oracle Integration
+
+**Purpose:** Show USD equivalents for informative display using real-time Chainlink price feeds
+
+**Why we use oracles:**
+
+cPiggyFX is deployed on Celo and works with multiple Mento stablecoins (cCOP, cUSD, cEUR, cGBP). To provide users with informative USD equivalents of their token balances, we need real-time price data. However, not all required oracles are available on Celo:
+
+- **cUSD** has a direct token oracle on Celo
+- **COP/USD** FX rate oracle is available on Celo
+- **EUR/USD and GBP/USD** FX rate oracles are NOT available on Celo
+
+For EUR/USD and GBP/USD, we must query oracles from Base network since these feeds don't exist on Celo. Additionally, since there are no direct oracles for cCOP, cEUR, and cGBP tokens, we use their respective **FX reference rates** (COP/USD, EUR/USD, GBP/USD) as approximate price feeds.
+
+**Chainlink Oracles Configuration:**
+
+**Direct Token Oracles:**
+
+- **Celo Mainnet:**
+  - **cUSD/USD** - Directly tracks cUSD token price
+    - Contract: `0xe38A27BE4E7d866327e09736F3C570F256FFd048`
+    - [Chainlink cUSD/USD Feed](https://data.chain.link/feeds/celo/mainnet/cusd-usd)
+
+**FX Reference Rates** (no direct token oracles available):
+
+- **Celo Mainnet:**
+  - **COP/USD** - Used as reference for cCOP token
+    - Contract: `0x97b770B0200CCe161907a9cbe0C6B177679f8F7C`
+    - [Chainlink COP/USD Feed](https://data.chain.link/feeds/celo/mainnet/cop-usd)
+
+- **Base Mainnet:**
+  - **EUR/USD** - Used as reference for cEUR token
+    - Contract: `0xc91D87E81faB8f93699ECf7Ee9B44D11e1D53F0F`
+    - [Chainlink EUR/USD Feed](https://data.chain.link/feeds/base/mainnet/eur-usd)
+  - **GBP/USD** - Used as reference for cGBP token
+    - Contract: `0xCceA6576904C118037695eB71195a5425E69Fa15`
+    - [Chainlink GBP/USD Feed](https://data.chain.link/feeds/base/mainnet/gbp-usd)
+
+**Implementation Details:**
+
+- **Hooks Location:** `frontend/src/hooks/use[TOKEN]USDRate.ts`
+  - `useCOPUSDRate.ts` - Fetches COP/USD rate from Celo
+  - `useCUSDUSDRate.ts` - Fetches cUSD/USD rate from Celo
+  - `useEURUSDRate.ts` - Fetches EUR/USD rate from Base
+  - `useGBPUSDRate.ts` - Fetches GBP/USD rate from Base
+
+- **Components Location:** `frontend/src/components/[TOKEN]WithUSD.tsx`
+  - `CCOPWithUSD.tsx` - Displays cCOP with USD equivalent
+  - `CUSDWithUSD.tsx` - Displays cUSD with USD equivalent
+  - `CEURWithUSD.tsx` - Displays cEUR with USD equivalent
+  - `CGBPWithUSD.tsx` - Displays cGBP with USD equivalent
+
+**Oracle Query Settings:**
+- Refresh interval: 60 seconds (1 minute)
+- Stale time: 30 seconds
+- Decimals: Fetched once per oracle (cached indefinitely)
+
+**Usage in components:**
+- Token amounts are calculated with full precision
+- Oracle rates are fetched from Chainlink via `useReadContract` from wagmi
+- USD equivalents are calculated: `tokenAmount * oracleRate`
+- Both values are formatted for display using `formatTokenAmount()` and `formatUSD()`
+
+**Why different networks?**
+
+**Direct Token Oracles:**
+
+- **Celo:**
+  - cUSD/USD - Directly tracks cUSD token price
+
+**FX Reference Rates** (no direct token oracles available):
+
+- **Celo:**
+  - COP/USD - Used as reference for cCOP token
+
+- **Base:**
+  - EUR/USD - Used as reference for cEUR token
+  - GBP/USD - Used as reference for cGBP token
+
+**Why Base for EUR/USD and GBP/USD?**
+
+Base provides reliable, frequently updated FX reference rates with lower query costs compared to Ethereum mainnet.
+
+**Note:** FX reference rates provide approximate USD equivalents for display purposes only. The actual token amounts remain precise and unaffected by oracle values.
+
+**Example flow:**
+```typescript
+// 1. Get token balance from blockchain (BigInt with 18 decimals)
+const balanceBigInt = 1500000000000000000n; // 1.5 tokens
+
+// 2. Convert to number (keep full precision for calculations)
+const balanceNumber = bigIntToNumber(balanceBigInt); // 1.5
+
+// 3. Calculate USD equivalent using oracle
+const copUsdRate = 0.00026; // from oracle
+const usdValue = balanceNumber * copUsdRate; // 0.00039
+
+// 4. Format both values for display
+const displayCOP = formatTokenAmount(balanceNumber); // "1,50"
+const displayUSD = formatUSD(usdValue); // "$0.00"
+```
+
+### Why This Matters
+
+1. **Prevents confusion:** 3.000 clearly means three thousand (not 3 with decimals)
+2. **International standard:** Used in Europe, Latin America, and most of the world
+3. **Professional appearance:** Financial apps should use proper notation
+4. **User expectations:** Colombian users expect this format
+5. **Calculation accuracy:** Full precision maintained until final display
+6. **Token clarity:** Users understand they're dealing with blockchain tokens
+
+### Files Using These Standards
+
+**Utilities:**
+- `frontend/src/utils/formatCurrency.ts` - Core formatting functions
+
+**Components:**
+- `frontend/src/components/CCOPWithUSD.tsx` - cCOP token display
+- `frontend/src/components/CEURWithUSD.tsx` - cEUR token display
+- `frontend/src/components/CGBPWithUSD.tsx` - cGBP token display
+- `frontend/src/components/ConnectButton.tsx` - Wallet balance display
+
+**Pages:**
+- `frontend/src/app/create/page.tsx` - Investment creation
+- `frontend/src/app/dashboard/page.tsx` - Portfolio view
+
+**All these files:**
+- Use `formatTokenAmount()` for display
+- Keep full precision in calculations
+- Show USD equivalents via oracle components
+- Follow ISO international notation
 
 ## Important Notes
 
@@ -499,7 +757,7 @@ const { isSuccess } = useWaitForTransactionReceipt({
 
 ## Testing Strategy
 
-- Unit tests for smart contracts in `Contracts/test/`
+- Unit tests for smart contracts in `contracts/test/`
 - Forking Celo mainnet for realistic testing
 - Mock contracts for Mento protocol (`contracts/mocks/`)
 - Frontend testing via manual QA in development
