@@ -1,10 +1,10 @@
 import { useReadContract } from 'wagmi';
 import { celo } from 'viem/chains';
 
-// Chainlink COP/USD Price Feed on Celo Mainnet
-// https://data.chain.link/feeds/celo/mainnet/cop-usd
-// Used for displaying cCOP token amounts in USD
-const COP_USD_FEED_ADDRESS = '0x97b770B0200CCe161907a9cbe0C6B177679f8F7C' as const;
+// Chainlink cUSD/USD Price Feed on Celo Mainnet
+// https://data.chain.link/feeds/celo/mainnet/cusd-usd
+// Used for displaying cUSD token amounts in USD
+const CUSD_USD_FEED_ADDRESS = '0xe38A27BE4E7d866327e09736F3C570F256FFd048' as const;
 
 // Chainlink Aggregator ABI (minimal for reading price)
 const AGGREGATOR_ABI = [
@@ -31,14 +31,15 @@ const AGGREGATOR_ABI = [
 ] as const;
 
 /**
- * Hook to fetch the current COP/USD exchange rate from Chainlink on Celo
- * Used for displaying cCOP token amounts in USD
- * Returns the rate as a number (e.g., 0.00025 means 1 COP = 0.00025 USD)
+ * Hook to fetch the current cUSD/USD exchange rate from Chainlink on Celo
+ * Used for displaying cUSD token amounts in USD
+ * Returns the rate as a number (e.g., 0.998 means 1 cUSD ≈ 0.998 USD)
+ * Note: cUSD is designed to maintain 1:1 parity with USD, but may have slight variations
  */
-export function useCOPUSDRate() {
+export function useCUSDUSDRate() {
   // Fetch the latest price data
-  const { data: priceData, isLoading: isPriceLoading } = useReadContract({
-    address: COP_USD_FEED_ADDRESS,
+  const { data: priceData, isLoading: isPriceLoading, error: priceError } = useReadContract({
+    address: CUSD_USD_FEED_ADDRESS,
     abi: AGGREGATOR_ABI,
     functionName: 'latestRoundData',
     chainId: celo.id,
@@ -49,8 +50,8 @@ export function useCOPUSDRate() {
   });
 
   // Fetch decimals
-  const { data: decimals, isLoading: isDecimalsLoading } = useReadContract({
-    address: COP_USD_FEED_ADDRESS,
+  const { data: decimals, isLoading: isDecimalsLoading, error: decimalsError } = useReadContract({
+    address: CUSD_USD_FEED_ADDRESS,
     abi: AGGREGATOR_ABI,
     functionName: 'decimals',
     chainId: celo.id,
@@ -70,19 +71,20 @@ export function useCOPUSDRate() {
     rate,
     isLoading,
     rawData: priceData,
+    error: priceError || decimalsError,
   };
 }
 
 /**
- * Convert COP amount to USD
- * @param copAmount Amount in COP
- * @param rate COP/USD exchange rate
+ * Convert cUSD amount to USD
+ * @param cusdAmount Amount in cUSD token
+ * @param rate cUSD/USD exchange rate from oracle
  * @returns USD amount
  */
-export function convertCOPtoUSD(copAmount: number, rate: number | null): number | null {
+export function convertCUSDtoUSD(cusdAmount: number, rate: number | null): number | null {
   if (rate === null) return null;
-  if (copAmount === 0) return 0;
-  return copAmount * rate;
+  if (cusdAmount === 0) return 0;
+  return cusdAmount * rate;
 }
 
 /**

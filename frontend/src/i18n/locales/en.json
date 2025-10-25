@@ -69,6 +69,8 @@
     "monthlyRate": "Monthly Rate",
     "monthlyInterestRate": "Monthly Interest Rate for {days} days",
     "periodEfectiveRate": "PeriodEfectiveRate",
+    "monthly": "Monthly",
+    "effectiveAnnual": "E.A.",
     "estReturn": "Est. Return",
     "totalAtMaturity": "Total at Maturity",
     "fixedTermsFeatures": "Fixed Terms Features",

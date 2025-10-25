@@ -129,6 +129,77 @@ See [claude-context.md](./claude-context.md) for complete list of required envir
 - **Production:** [https://cpiggy.xyz](https://cpiggy.xyz)
 - **Farcaster Mini App:** Available in Warpcast
 
+## 🔢 Number Formatting Standard
+
+**All monetary values use ISO international notation:**
+- **Thousands:** period (`.`) - Example: 3.000 = three thousand
+- **Decimals:** comma (`,`) - Example: 1.234,56 = one thousand point fifty-six
+
+This prevents confusion and follows the standard used in Colombia and most of the world.
+
+**Token Amount Display Rules:**
+
+- **< 1:** 4 decimals (e.g., 0,8523)
+- **< 1000:** 2 decimals (e.g., 156,75)
+- **≥ 1000:** 0 decimals (e.g., 45.678)
+
+**Important:** Formatting is for display only. All calculations maintain full precision.
+
+## 📊 Oracle Integration
+
+cPiggyFX uses Chainlink Price Feeds to display USD equivalents of token balances. These values are informative only and do not affect the actual token amounts stored in smart contracts.
+
+**Why we use oracles:**
+
+cPiggyFX is deployed on Celo and works with multiple Mento stablecoins (cCOP, cUSD, cEUR, cGBP). To provide users with informative USD equivalents of their token balances, we need real-time price data. However, not all required oracles are available on Celo:
+
+- **cUSD** has a direct token oracle on Celo
+- **COP/USD** FX rate oracle is available on Celo
+- **EUR/USD and GBP/USD** FX rate oracles are NOT available on Celo
+
+For EUR/USD and GBP/USD, we must query oracles from Base network since these feeds don't exist on Celo. Additionally, since there are no direct oracles for cCOP, cEUR, and cGBP tokens, we use their respective **FX reference rates** (COP/USD, EUR/USD, GBP/USD) as approximate price feeds.
+
+### Oracle Configuration
+
+**Direct Token Oracles:**
+
+- **Celo Mainnet:**
+  - **cUSD/USD** - Directly tracks cUSD token price
+    - Contract: `0xe38A27BE4E7d866327e09736F3C570F256FFd048`
+    - [Chainlink cUSD/USD Feed](https://data.chain.link/feeds/celo/mainnet/cusd-usd)
+
+**FX Reference Rates** (no direct token oracles available):
+
+- **Celo Mainnet:**
+  - **COP/USD** - Used as reference for cCOP token
+    - Contract: `0x97b770B0200CCe161907a9cbe0C6B177679f8F7C`
+    - [Chainlink COP/USD Feed](https://data.chain.link/feeds/celo/mainnet/cop-usd)
+
+- **Base Mainnet:**
+  - **EUR/USD** - Used as reference for cEUR token
+    - Contract: `0xc91D87E81faB8f93699ECf7Ee9B44D11e1D53F0F`
+    - [Chainlink EUR/USD Feed](https://data.chain.link/feeds/base/mainnet/eur-usd)
+  - **GBP/USD** - Used as reference for cGBP token
+    - Contract: `0xCceA6576904C118037695eB71195a5425E69Fa15`
+    - [Chainlink GBP/USD Feed](https://data.chain.link/feeds/base/mainnet/gbp-usd)
+
+**Why Base for EUR/USD and GBP/USD?**
+
+Base provides reliable, frequently updated FX reference rates with lower query costs compared to Ethereum mainnet.
+
+**Note:** FX reference rates provide approximate USD equivalents for display purposes only.
+
+### Implementation Details
+
+Oracle data is fetched via custom React hooks that query Chainlink contracts:
+
+- Hooks: `useCOPUSDRate`, `useCUSDUSDRate`, `useEURUSDRate`, `useGBPUSDRate`
+- Components: `CCOPWithUSD`, `CUSDWithUSD`, `CEURWithUSD`, `CGBPWithUSD`
+- Refresh interval: 60 seconds
+- Stale time: 30 seconds
+
+For complete oracle implementation details, see [claude-context.md](./claude-context.md).
+
 ## ⚠️ Disclaimer
 
 This project is a proof-of-concept and should not be used in a production environment without a full security audit.

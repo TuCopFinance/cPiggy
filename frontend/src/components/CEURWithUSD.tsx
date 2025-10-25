@@ -1,29 +1,29 @@
 'use client';
 
 import React from 'react';
-import { useCOPUSDRate, convertCOPtoUSD, formatUSD } from '@/hooks/useCOPUSDRate';
+import { useEURUSDRate, convertEURtoUSD, formatUSD } from '@/hooks/useEURUSDRate';
 import { formatTokenAmount } from '@/utils/formatCurrency';
 
-interface CCOPWithUSDProps {
-  /** Token balance in cCOP (as a number with full precision for calculations, or string from input) */
-  ccopAmount: number | string;
+interface CEURWithUSDProps {
+  /** Token balance in cEUR (as a number with full precision for calculations, or string from input) */
+  ceurAmount: number | string;
   /** Optional CSS class for the main container */
   className?: string;
   /** Whether to show loading state while fetching rate */
   showLoading?: boolean;
   /** Format for display: 'inline' or 'block' or 'compact' */
   format?: 'inline' | 'block' | 'compact';
-  /** Show cCOP token symbol */
+  /** Show cEUR token symbol */
   showLabel?: boolean;
 }
 
 /**
- * Component to display cCOP token balance with its USD equivalent
+ * Component to display cEUR token balance with its USD equivalent
  *
- * About cCOP:
- * - cCOP is an ERC20 token representing Colombian Pesos on the blockchain
+ * About cEUR:
+ * - cEUR is an ERC20 token representing Euros on the blockchain
  * - This component queries the token balance and formats it for display
- * - Uses Chainlink COP/USD oracle to calculate USD equivalent for informative display
+ * - Uses Chainlink EUR/USD oracle to calculate USD equivalent for informative display
  *
  * Display Format:
  * - < 1: 4 decimals
@@ -32,48 +32,48 @@ interface CCOPWithUSDProps {
  * - ISO format: . for thousands, , for decimals
  *
  * @example
- * <CCOPWithUSD ccopAmount={1234.56} format="inline" />
- * // Displays: "1.234 cCOP (≈ $3.21)"
+ * <CEURWithUSD ceurAmount={850.50} format="inline" />
+ * // Displays: "850,50 cEUR (≈ $920.14)"
  */
-export function CCOPWithUSD({
-  ccopAmount,
+export function CEURWithUSD({
+  ceurAmount,
   className = '',
   showLoading = true,
   format = 'inline',
   showLabel = true
-}: CCOPWithUSDProps) {
-  const { rate: copUsdRate, isLoading: isRateLoading } = useCOPUSDRate();
+}: CEURWithUSDProps) {
+  const { rate: eurUsdRate, isLoading: isRateLoading } = useEURUSDRate();
 
   // Convert string to number if needed
   // Keep full precision for calculations - formatting is only for display
-  const numericAmount = typeof ccopAmount === 'string'
-    ? parseFloat(ccopAmount.replace(/\./g, '').replace(/,/g, '.'))
-    : ccopAmount;
+  const numericAmount = typeof ceurAmount === 'string'
+    ? parseFloat(ceurAmount.replace(/\./g, '').replace(/,/g, '.'))
+    : ceurAmount;
 
   // Handle invalid numbers
   if (isNaN(numericAmount) || !isFinite(numericAmount)) {
     return format === 'block' ? (
       <div className={className}>
-        <div className="font-semibold text-gray-800">0 {showLabel && 'cCOP'}</div>
+        <div className="font-semibold text-gray-800">0 {showLabel && 'cEUR'}</div>
       </div>
     ) : (
       <span className={className}>
-        <span className="font-semibold text-gray-800">0 {showLabel && 'cCOP'}</span>
+        <span className="font-semibold text-gray-800">0 {showLabel && 'cEUR'}</span>
       </span>
     );
   }
 
   // Calculate USD equivalent using oracle (full precision for calculation)
-  const usdValue = convertCOPtoUSD(numericAmount, copUsdRate);
+  const usdValue = convertEURtoUSD(numericAmount, eurUsdRate);
 
   // Format for display only - maintains full precision internally
-  const formattedCCOP = formatTokenAmount(numericAmount);
+  const formattedCEUR = formatTokenAmount(numericAmount);
 
   if (format === 'block') {
     return (
       <div className={className}>
         <div className="font-bold text-gray-800">
-          {formattedCCOP} {showLabel && 'cCOP'}
+          {formattedCEUR} {showLabel && 'cEUR'}
         </div>
         {showLoading && isRateLoading ? (
           <div className="text-sm text-gray-400">Loading rate...</div>
@@ -88,7 +88,7 @@ export function CCOPWithUSD({
     return (
       <div className={className}>
         <div className="font-semibold text-gray-800 leading-none whitespace-nowrap">
-          {formattedCCOP} {showLabel && 'cCOP'}
+          {formattedCEUR} {showLabel && 'cEUR'}
         </div>
         {showLoading && isRateLoading ? (
           <div className="text-gray-400 leading-none mt-0.5">(...)</div>
@@ -105,7 +105,7 @@ export function CCOPWithUSD({
   return (
     <span className={className}>
       <span className="font-semibold text-gray-800">
-        {formattedCCOP} {showLabel && 'cCOP'}
+        {formattedCEUR} {showLabel && 'cEUR'}
       </span>
       {showLoading && isRateLoading ? (
         <span className="text-gray-400 ml-1 text-sm">(...)</span>

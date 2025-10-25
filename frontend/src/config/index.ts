@@ -1,5 +1,5 @@
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { celo, polygon } from '@reown/appkit/networks'
+import { celo, base } from '@reown/appkit/networks'
 import type { AppKitNetwork } from '@reown/appkit/networks'
 import { farcasterMiniApp as miniAppConnector } from '@farcaster/miniapp-wagmi-connector'
 import { injected, walletConnect } from 'wagmi/connectors'
@@ -45,10 +45,10 @@ const isFarcasterMiniApp = typeof window !== 'undefined' && (
 
 // Farcaster wallet doesn't support testnets - only include mainnet for Farcaster
 // Otherwise include both mainnet and Celo Sepolia testnet
-// Note: Polygon is included for reading Chainlink price feeds (read-only, not for transactions)
+// Note: Base is included for reading Chainlink EUR/USD and GBP/USD price feeds (read-only, not for transactions)
 export const networks = isFarcasterMiniApp
-  ? [celo, polygon] as [AppKitNetwork, ...AppKitNetwork[]]
-  : [celo, celoSepolia as AppKitNetwork, polygon] as [AppKitNetwork, ...AppKitNetwork[]]
+  ? [celo, base] as [AppKitNetwork, ...AppKitNetwork[]]
+  : [celo, celoSepolia as AppKitNetwork, base] as [AppKitNetwork, ...AppKitNetwork[]]
 
 //Set up the Wagmi Adapter (Config) with both Farcaster and standard connectors
 export const wagmiAdapter = new WagmiAdapter({

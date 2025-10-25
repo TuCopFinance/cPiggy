@@ -13,7 +13,7 @@ cPiggyFX uses smart contracts written in Solidity to enable:
 
 ### Main Contract: PiggyBank.sol
 
-**Location:** `Contracts/contracts/cPiggyBank.sol`  
+**Location:** `contracts/contracts/cPiggyBank.sol`  
 **Solidity Version:** 0.8.19  
 **License:** MIT
 
@@ -51,24 +51,45 @@ Allows users to diversify cCOP into multiple stablecoins with automatic swapping
 **Lock Periods:** 30, 60, or 90 days
 
 **Fees:**
-- 1% developer fee on profits (at claim time)
-- Mento protocol swap fees apply
+
+- **User fee:** 0% - Users receive 100% of their returns
+- **Developer fee:** 1% of profits (paid by protocol as additional transfer, not deducted from user)
+- **Example:**
+  - User deposits 10.000.000, gets 10.500.000 back → User receives all 10.500.000
+  - Developer receives 5.000 (1% of 500.000 profit) separately from protocol
+- Mento protocol swap fees apply during swaps
+
+**Limits:**
+
+- Max deposit per wallet: 10.000.000 cCOP
+- Pool capacity limits per duration
 
 ### 2. Fixed-Term APY Staking
 
-Lock cCOP for guaranteed returns with compound interest.
+Lock cCOP for guaranteed returns with daily compound interest.
 
-**APY Rates:**
-- **30 days:** 1.25% APY (0.0417% daily)
-- **60 days:** 1.50% APY (0.0500% daily)
-- **90 days:** 2.00% APY (0.0667% daily)
+**Interest Rates:**
+- **30 days:** 1,25% monthly (16,08% EA)
+- **60 days:** 1,5% monthly (19,56% EA)
+- **90 days:** 2% monthly (26,82% EA)
 
-**Limits:**
-- Max deposit per wallet: 10,000,000 cCOP
-- Pool capacity limits per duration
+*Note: Interest compounds daily to achieve exact monthly rates. EA = Effective Annual Rate.*
 
 **Fees:**
-- 5% fee on earned rewards
+
+- **User fee:** 0% - Users receive 100% of promised interest
+- **Developer fee:** 5% of earned rewards (paid by protocol as additional transfer, not deducted from user)
+- **Example:**
+  - User deposits 10.000.000 for 30 days
+  - Interest earned: 125.000 cCOP
+  - User receives: 10.125.000 cCOP (principal + 100% interest)
+  - Developer receives: 6.250 cCOP (5% of 125.000) separately from protocol
+  - User always gets the promised monthly rate (1,25%, 1,5%, or 2%)
+
+**Limits:**
+
+- Max deposit per wallet: 10.000.000 cCOP
+- Pool capacity limits per duration
 
 ## 🔧 Development Setup
 
@@ -83,7 +104,7 @@ Hardhat
 ### Installation
 
 ```bash
-cd Contracts
+cd contracts
 
 # Install dependencies
 npm install
@@ -100,7 +121,7 @@ npx hardhat run scripts/deploy.ts --network celoSepolia
 
 ### Environment Variables
 
-Create `.env` file in `Contracts/` directory:
+Create `.env` file in `contracts/` directory:
 
 ```bash
 # Private key for deployment
@@ -120,7 +141,7 @@ PIGGYBANK_ADDRESS=0x...
 ## 📁 Project Structure
 
 ```
-Contracts/
+contracts/
 ├── contracts/
 │   ├── cPiggyBank.sol           # Main contract
 │   ├── interfaces/
@@ -369,9 +390,9 @@ npx hardhat flatten contracts/cPiggyBank.sol > flattened.sol
 
 | Operation | Gas Cost (approx) | In CELO |
 |-----------|-------------------|---------|
-| Create Piggy | ~250,000 | ~$0.01 |
-| Create Fixed Term | ~200,000 | ~$0.008 |
-| Claim | ~180,000 | ~$0.007 |
+| Create Piggy | ~250.000 | ~$0.01 |
+| Create Fixed Term | ~200.000 | ~$0.008 |
+| Claim | ~180.000 | ~$0.007 |
 
 *Note: Gas costs vary with network congestion*
 

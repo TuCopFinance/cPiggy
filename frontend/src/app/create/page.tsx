@@ -12,6 +12,7 @@ import { ConnectButton } from "@/components/ConnectButton";
 import { useCOPUSDRate, convertCOPtoUSD, formatUSD } from "@/hooks/useCOPUSDRate";
 import { CCOPWithUSD } from "@/components/CCOPWithUSD";
 import { useFarcaster } from "@/context/FarcasterContext";
+import { formatTokenAmount, bigIntToNumber } from "@/utils/formatCurrency";
 
 // ABIs and Deployed Addresses
 import PiggyBankABI from "../../../lib/artifacts/contracts/cPiggyBank.sol/PiggyBank.json";
@@ -90,25 +91,24 @@ export default function CreatePiggy() {
   const activeAmount = useMemo(() => investmentType === 'diversify' ? amount : fixedAmount, [investmentType, amount, fixedAmount]);
   const parsedActiveAmount = useMemo(() => parseEther(activeAmount || "0"), [activeAmount]);
 
-  // Format number with proper thousands and decimal separators (European format: . for thousands, , for decimals)
+  // Format token amount for UI display using standard formatting
+  // <1 = 4 decimals, <1000 = 2 decimals, >=1000 = 0 decimals
+  // Note: Calculations use full precision, formatting is only for display
   const formatNumber = (num: number) => {
-    return num.toLocaleString('es-CO', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    });
+    return formatTokenAmount(num);
   };
 
-  // Format balance from bigint to readable string
+  // Convert BigInt token balance to formatted string for display
   const formatBalance = (balance: bigint | undefined) => {
     if (!balance) return '0';
-    const balanceInEther = Number(balance) / 1e18;
-    return formatNumber(balanceInEther);
+    const numericBalance = bigIntToNumber(balance); // Full precision for calculation
+    return formatTokenAmount(numericBalance); // Format only for display
   };
 
-  // Get balance as number (for calculations)
+  // Convert BigInt token balance to number (keeps full precision for calculations)
   const getBalanceNumber = (balance: bigint | undefined): number => {
     if (!balance) return 0;
-    return Number(balance) / 1e18;
+    return bigIntToNumber(balance);
   };
 
   const piggyBankAddress = deployedAddresses.PiggyBank as Address;
@@ -249,18 +249,31 @@ export default function CreatePiggy() {
   // --- NEW: Correct interest calculation based on the smart contract's logic ---
   const fixedTermReturns = useMemo(() => {
     const amountNum = Number(fixedAmount) || 0;
-    if (amountNum <= 0) return { rate: 0, estReturn: 0, total: 0 };
+    if (amountNum <= 0) return { rate: 0, monthlyRate: 0, annualRate: 0, estReturn: 0, total: 0 };
 
-    let interestRateInBasisPoints = 0; // e.g., 125 for 1.25%
-    if (fixedDuration === 30) interestRateInBasisPoints = 125;
-    else if (fixedDuration === 60) interestRateInBasisPoints = 302;
-    else if (fixedDuration === 90) interestRateInBasisPoints = 612;
-    
+    let interestRateInBasisPoints = 0; // Total period return (e.g., 125 for 1.25%)
+    let monthlyRate = 0; // Monthly rate shown to users
+    let annualRate = 0; // Effective Annual Rate (EA)
+
+    if (fixedDuration === 30) {
+      interestRateInBasisPoints = 125;
+      monthlyRate = 1.25;
+      annualRate = 16.08;
+    } else if (fixedDuration === 60) {
+      interestRateInBasisPoints = 302;
+      monthlyRate = 1.5;
+      annualRate = 19.56;
+    } else if (fixedDuration === 90) {
+      interestRateInBasisPoints = 612;
+      monthlyRate = 2.0;
+      annualRate = 26.82;
+    }
+
     const rate = interestRateInBasisPoints / 100;
     const estReturn = (amountNum * interestRateInBasisPoints) / 10000;
     const total = amountNum + estReturn;
-    
-    return { rate, estReturn, total };
+
+    return { rate, monthlyRate, annualRate, estReturn, total };
   }, [fixedAmount, fixedDuration]);
   
 
@@ -335,7 +348,7 @@ export default function CreatePiggy() {
               <div className="space-y-2">
                 <label htmlFor="deposit-amount" className="block font-semibold text-gray-700">1. {t('create.depositAmount')}</label>
                 <div className="relative">
-                    <input id="deposit-amount" type="number" className="w-full border-2 border-gray-200 bg-white/50 rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="100,000" min="0"/>
+                    <input id="deposit-amount" type="number" className="w-full border-2 border-gray-200 bg-white/50 rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="100.000" min="0"/>
                     <span className="absolute right-4 top-2.5 text-gray-500 font-medium">cCOP</span>
                 </div>
 
@@ -351,7 +364,7 @@ export default function CreatePiggy() {
                         <span>Loading...</span>
                       ) : (
                         <span>
-                          Balance: <CCOPWithUSD ccopAmount={formatBalance(ccopBalance as bigint)} />
+                          Balance: <CCOPWithUSD ccopAmount={getBalanceNumber(ccopBalance as bigint)} />
                         </span>
                       )}
                     </span>
@@ -425,7 +438,7 @@ export default function CreatePiggy() {
               <div className="space-y-2">
                 <label htmlFor="fixed-amount" className="block font-semibold text-gray-700 text-sm sm:text-base">1. {t('create.depositAmount')}</label>
                 <div className="relative">
-                    <input id="fixed-amount" type="number" className="w-full border-2 border-gray-200 bg-white/50 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500" value={fixedAmount} onChange={(e) => setFixedAmount(e.target.value)} placeholder="100,000" min="0"/>
+                    <input id="fixed-amount" type="number" className="w-full border-2 border-gray-200 bg-white/50 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500" value={fixedAmount} onChange={(e) => setFixedAmount(e.target.value)} placeholder="100.000" min="0"/>
                     <span className="absolute right-3 sm:right-4 top-2.5 text-gray-700 font-medium text-sm sm:text-base">cCOP</span>
                 </div>
 
@@ -441,7 +454,7 @@ export default function CreatePiggy() {
                         <span>Loading...</span>
                       ) : (
                         <span>
-                          Balance: <CCOPWithUSD ccopAmount={formatBalance(ccopBalance as bigint)} />
+                          Balance: <CCOPWithUSD ccopAmount={getBalanceNumber(ccopBalance as bigint)} />
                         </span>
                       )}
                     </span>
@@ -498,8 +511,9 @@ export default function CreatePiggy() {
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-2 sm:p-3">
                   <div className="grid grid-cols-3 gap-1 sm:gap-2 text-center">
                     <div>
-                      <div className="text-sm sm:text-lg font-bold text-green-700">{fixedTermReturns.rate.toFixed(2)}%</div>
-                      <div className="text-xs text-green-600">{t('create.periodEfectiveRate')}</div>
+                      <div className="text-sm sm:text-lg font-bold text-green-700">{fixedTermReturns.monthlyRate.toFixed(2)}%</div>
+                      <div className="text-xs text-green-600">{t('create.monthly')}</div>
+                      <div className="text-xs text-green-500 mt-0.5">({fixedTermReturns.annualRate.toFixed(2)}% {t('create.effectiveAnnual')})</div>
                     </div>
                     <div>
                       <div className="text-sm sm:text-lg font-bold text-green-700">{formatNumber(fixedTermReturns.estReturn)}</div>
