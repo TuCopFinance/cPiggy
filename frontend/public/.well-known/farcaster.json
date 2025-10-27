@@ -7,7 +7,7 @@
   },
   "app": {
     "name": "cPiggyFX",
-    "description": "Diversified FX Piggy Bank - Save in cCOP, grow in the world. Create savings goals with automatic currency diversification on Celo blockchain.",
+    "description": "Diversified FX Piggy Bank - Save in cCOP, grow in the world.",
     "homeUrl": "https://cpiggy.xyz",
     "iconUrl": "https://cpiggy.xyz/icon.png",
     "splashImageUrl": "https://cpiggy.xyz/splash.png",
@@ -25,7 +25,7 @@
     "splashImageUrl": "https://cpiggy.xyz/splash.png",
     "splashBackgroundColor": "#fbf6fd",
     "webhookUrl": "https://cpiggy.xyz/api/webhook",
-    "description": "Save in cCOP, grow in the world. Create savings goals with automatic currency diversification on Celo blockchain.",
+    "description": "Save in cCOP, grow in the world.",
     "subtitle": "Diversified FX Piggy Bank",
     "primaryCategory": "finance"
   }

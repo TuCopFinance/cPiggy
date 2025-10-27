@@ -156,7 +156,11 @@
     "connectWallet": "Please connect your wallet to continue",
     "openingApp": "Opening Self app...",
     "ifNotOpened": "If the app doesn't open automatically:",
-    "openManually": "Open Self App"
+    "openManually": "Open Self App",
+    "readyToVerify": "Ready to Verify",
+    "tapToOpen": "Tap the button below to open Self app and complete verification",
+    "openSelfApp": "Open Self App to Verify",
+    "returnAfter": "Return here after verification completes"
   },
   "footer": {
     "poweredBy": "Powered by Celo",

@@ -89,16 +89,22 @@ function VerificationPage() {
   useEffect(() => {
     if (!userId || !isPolling) return;
 
+    console.log("🔄 Starting verification polling for userId:", userId);
+
     const checkVerificationStatus = async () => {
       try {
+        // Normalize userId to lowercase to match backend storage
+        const normalizedUserId = userId.toLowerCase();
+
         const response = await fetch('/api/verify/status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId }),
+          body: JSON.stringify({ userId: normalizedUserId }),
         });
 
         if (response.ok) {
           const data = await response.json();
+          console.log("📊 Polling response:", data);
           if (data.verified) {
             console.log("✅ Verification detected via polling!");
             handleSuccessfulVerification();
@@ -109,11 +115,15 @@ function VerificationPage() {
       }
     };
 
+    // Check immediately
+    checkVerificationStatus();
+
     // Poll every 3 seconds
     const interval = setInterval(checkVerificationStatus, 3000);
 
     // Stop polling after 5 minutes
     const timeout = setTimeout(() => {
+      console.log("⏱️ Polling timeout reached");
       setIsPolling(false);
       clearInterval(interval);
     }, 300000);
@@ -131,17 +141,12 @@ function VerificationPage() {
     router.push('/');
   };
 
-  // Auto-open Self app on mobile devices
+  // Auto-open Self app on mobile devices (disabled for Farcaster webview compatibility)
+  // Farcaster blocks automatic redirects, so we rely on manual button click
   useEffect(() => {
     if (universalLink && isMobile && userId) {
-      console.log("📱 Mobile detected - Auto-opening Self app with link:", universalLink);
-
-      // Small delay to ensure page has loaded
-      const timer = setTimeout(() => {
-        window.location.href = universalLink;
-      }, 500);
-
-      return () => clearTimeout(timer);
+      console.log("📱 Mobile detected - Link ready:", universalLink);
+      console.log("🔍 User must manually click button to open Self app (Farcaster security)");
     }
   }, [universalLink, isMobile, userId]);
 
@@ -180,16 +185,20 @@ function VerificationPage() {
             <ConnectButton />
           </div>
         ) : isMobile && universalLink ? (
-          <div className="h-64 flex flex-col items-center justify-center gap-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <p className="text-gray-600 text-lg">{t('verification.openingApp') || 'Opening Self app...'}</p>
-            <p className="text-gray-500 text-sm">{t('verification.ifNotOpened') || "If the app doesn't open automatically:"}</p>
+          <div className="h-64 flex flex-col items-center justify-center gap-6">
+            <p className="text-gray-700 text-xl font-semibold">{t('verification.readyToVerify') || 'Ready to Verify'}</p>
+            <p className="text-gray-600 text-base px-4">{t('verification.tapToOpen') || 'Tap the button below to open Self app and complete verification'}</p>
             <a
               href={universalLink}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              onClick={() => {
+                console.log("🚀 User clicked to open Self app");
+                setIsPolling(true);
+              }}
+              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105"
             >
-              {t('verification.openManually') || 'Open Self App'}
+              {t('verification.openSelfApp') || 'Open Self App to Verify'}
             </a>
+            <p className="text-gray-500 text-xs">{t('verification.returnAfter') || 'Return here after verification completes'}</p>
           </div>
         ) : selfApp ? (
           <div className="flex justify-center">

@@ -149,7 +149,11 @@
     "connectWallet": "Por favor conecta tu billetera para continuar",
     "openingApp": "Abriendo app Self...",
     "ifNotOpened": "Si la app no se abre automáticamente:",
-    "openManually": "Abrir App Self"
+    "openManually": "Abrir App Self",
+    "readyToVerify": "Listo para Verificar",
+    "tapToOpen": "Toca el botón a continuación para abrir la app Self y completar la verificación",
+    "openSelfApp": "Abrir App Self para Verificar",
+    "returnAfter": "Regresa aquí después de completar la verificación"
   },
   "footer": {
     "poweredBy": "Impulsado por Celo",
