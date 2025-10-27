@@ -136,7 +136,19 @@ export default function Home() {
           </div>
         )}
         
-        <div className={`w-full ${isFarcasterMiniApp ? 'max-w-sm' : 'max-w-xl'} mx-auto bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-4 ${isFarcasterMiniApp ? 'sm:p-6' : 'sm:p-8 md:p-12'} text-center`}>
+        <div className={`w-full ${isFarcasterMiniApp ? 'max-w-sm' : 'max-w-xl'} mx-auto bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-4 ${isFarcasterMiniApp ? 'sm:p-6' : 'sm:p-8 md:p-12'} text-center relative`}>
+          {/* Farcaster Version Badge */}
+          {isFarcasterMiniApp && (
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+              <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-2">
+                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.5 6h-13C4.67 6 4 6.67 4 7.5v9c0 .83.67 1.5 1.5 1.5H9v3h6v-3h3.5c.83 0 1.5-.67 1.5-1.5v-9c0-.83-.67-1.5-1.5-1.5z"/>
+                </svg>
+                <span>Farcaster Version</span>
+              </div>
+            </div>
+          )}
+
           <Image
             src={cPiggyLogo}
             alt="cPiggyFX Logo"

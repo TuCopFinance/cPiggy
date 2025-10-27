@@ -55,36 +55,87 @@ function VerificationPage() {
   useEffect(() => {
     const checkIfMobile = () => {
       const userAgent = navigator.userAgent.toLowerCase();
-      const isMobileDevice = /android|iphone|ipad|ipod/i.test(userAgent);
 
-      // Check for Farcaster mobile app or MiniApp context
+      // 1. TRUE MOBILE DETECTION (most reliable)
+      const isMobileUserAgent = /android|iphone|ipad|ipod/i.test(userAgent);
+
+      // 2. Touch device detection
+      const hasTouchScreen = 'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0 ||
+        (navigator as any).msMaxTouchPoints > 0;
+
+      // 3. Check for Farcaster mobile app or MiniApp context
       const isInFarcaster = /farcaster/i.test(userAgent);
 
-      // Check if running in Farcaster MiniApp iframe
+      // 4. Check if running in Farcaster MiniApp iframe
       const isInIframe = window.self !== window.top;
 
-      // Check for Farcaster SDK availability
+      // 5. Check for Farcaster SDK availability
       const hasFarcasterSDK = typeof window !== 'undefined' &&
         (window as any).fc !== undefined;
 
-      // Check viewport size (MiniApps are typically mobile-sized)
-      const isSmallViewport = window.innerWidth <= 768;
+      // 6. Check viewport size
+      const windowWidth = window.innerWidth;
+      const isNarrowViewport = windowWidth < 600; // True mobile size
+      const isSmallViewport = windowWidth <= 768; // Tablet/small desktop
 
-      const isFarcasterContext = isInFarcaster || hasFarcasterSDK ||
-        (isInIframe && isSmallViewport);
+      // 7. Detect mobile via screen orientation API
+      const hasOrientation = typeof screen.orientation !== 'undefined' ||
+        typeof (window as any).orientation !== 'undefined';
 
-      console.log("📱 Device detection:", {
-        isMobileDevice,
-        isInFarcaster,
-        hasFarcasterSDK,
-        isInIframe,
+      // SIMPLE DECISION LOGIC
+      // Show BUTTON (not QR) in these cases:
+      // 1. Mobile device (phone/tablet)
+      // 2. Farcaster native app MiniApp (mobile)
+      // 3. Any touch device with narrow viewport
+
+      const isTrueMobile = isMobileUserAgent ||
+        (hasTouchScreen && isNarrowViewport) ||
+        hasOrientation;
+
+      const isFarcasterMiniApp = isInIframe && hasFarcasterSDK;
+      const isFarcasterNativeMobile = isFarcasterMiniApp &&
+        (isMobileUserAgent || isNarrowViewport);
+
+      // DECISION: Use mobile UI if:
+      // - True mobile device OR
+      // - Farcaster native app on mobile
+      const shouldUseMobileUI = isTrueMobile || isFarcasterNativeMobile;
+
+      if (isFarcasterNativeMobile) {
+        console.log("🎭 Farcaster Native Mobile App detected - using mobile UI with button");
+      }
+
+      // Enhanced logging for debugging
+      console.log("📱 ENHANCED MOBILE DETECTION:", {
+        // Primary signals
+        isMobileUserAgent,
+        hasTouchScreen,
+        hasOrientation,
+        // Viewport
+        windowWidth,
+        isNarrowViewport,
         isSmallViewport,
-        isFarcasterContext,
-        userAgent
+        // Farcaster
+        isInFarcaster,
+        isInIframe,
+        hasFarcasterSDK,
+        isFarcasterMiniApp,
+        isFarcasterNativeMobile,
+        // Result
+        isTrueMobile,
+        shouldUseMobileUI,
+        decision: shouldUseMobileUI ? "🔘 BUTTON" : "📱 QR CODE",
+        // Raw data
+        userAgent,
+        fcObject: (window as any).fc
       });
 
-      // Treat Farcaster MiniApp as mobile
-      const shouldUseMobileUI = isMobileDevice || isFarcasterContext;
+      // CRITICAL: Show alert on mobile for debugging
+      if (isMobileUserAgent && !shouldUseMobileUI) {
+        alert(`⚠️ DETECTION ISSUE!\nisMobileUserAgent: ${isMobileUserAgent}\nshouldUseMobileUI: ${shouldUseMobileUI}\nWidth: ${windowWidth}px`);
+      }
+
       setIsMobile(shouldUseMobileUI);
 
       return shouldUseMobileUI;
@@ -275,11 +326,28 @@ function VerificationPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-green-50 via-teal-50 to-cyan-100 p-3 sm:p-6">
+      {/* DEBUG INFO - Remove after fixing */}
+      {typeof window !== 'undefined' && (
+        <div className="absolute top-16 left-2 bg-red-500 text-white text-xs p-2 rounded z-50 max-w-xs overflow-auto max-h-32">
+          <div className="font-bold mb-1">🐛 DEBUG</div>
+          <div>Mobile UI: {isMobile ? "✅ YES" : "❌ NO"}</div>
+          <div>Width: {window.innerWidth}px</div>
+          <div>Touch: {'ontouchstart' in window ? '✅' : '❌'}</div>
+          <div>iframe: {window.self !== window.top ? '✅' : '❌'}</div>
+          <div>UA: {
+            navigator.userAgent.includes('iPhone') ? '📱 iPhone' :
+            navigator.userAgent.includes('Android') ? '📱 Android' :
+            navigator.userAgent.includes('iPad') ? '📱 iPad' :
+            '💻 Desktop'
+          }</div>
+        </div>
+      )}
+
       {/* Language Switcher - Top Right */}
       <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
-        <LanguageSwitcher 
-          currentLocale={currentLocale} 
-          onLocaleChange={setLocale} 
+        <LanguageSwitcher
+          currentLocale={currentLocale}
+          onLocaleChange={setLocale}
         />
       </div>
       
@@ -299,7 +367,8 @@ function VerificationPage() {
             <p className="text-gray-600 text-lg">{t('verification.connectWallet') || 'Please connect your wallet to continue'}</p>
             <ConnectButton />
           </div>
-        ) : isMobile && universalLink ? (
+        ) : isMobile && selfApp ? (
+          /* MOBILE UI - Show button instead of QR */
           <div className="h-64 flex flex-col items-center justify-center gap-6">
             {isReturningFromSelf ? (
               <>
@@ -307,7 +376,7 @@ function VerificationPage() {
                 <p className="text-gray-700 text-xl font-semibold">{t('verification.checkingStatus') || 'Checking verification status...'}</p>
                 <p className="text-gray-500 text-sm">{t('verification.pleaseWait') || 'Please wait while we verify your identity'}</p>
               </>
-            ) : (
+            ) : universalLink ? (
               <>
                 <p className="text-gray-700 text-xl font-semibold">{t('verification.readyToVerify') || 'Ready to Verify'}</p>
                 <p className="text-gray-600 text-base px-4">{t('verification.tapToOpen') || 'Tap the button below to open Self app and complete verification'}</p>
@@ -324,9 +393,12 @@ function VerificationPage() {
                 </a>
                 <p className="text-gray-500 text-xs">{t('verification.returnAfter') || 'Return here after verification completes'}</p>
               </>
+            ) : (
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             )}
           </div>
         ) : selfApp ? (
+          /* DESKTOP UI - Show QR code */
           <div className="flex justify-center">
             <SelfQRcodeWrapper
               selfApp={selfApp}
