@@ -160,7 +160,9 @@
     "readyToVerify": "Ready to Verify",
     "tapToOpen": "Tap the button below to open Self app and complete verification",
     "openSelfApp": "Open Self App to Verify",
-    "returnAfter": "Return here after verification completes"
+    "returnAfter": "Return here after verification completes",
+    "checkingStatus": "Checking verification status...",
+    "pleaseWait": "Please wait while we verify your identity"
   },
   "footer": {
     "poweredBy": "Powered by Celo",

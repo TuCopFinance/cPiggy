@@ -153,7 +153,9 @@
     "readyToVerify": "Listo para Verificar",
     "tapToOpen": "Toca el botón a continuación para abrir la app Self y completar la verificación",
     "openSelfApp": "Abrir App Self para Verificar",
-    "returnAfter": "Regresa aquí después de completar la verificación"
+    "returnAfter": "Regresa aquí después de completar la verificación",
+    "checkingStatus": "Verificando estado...",
+    "pleaseWait": "Por favor espera mientras verificamos tu identidad"
   },
   "footer": {
     "poweredBy": "Impulsado por Celo",
