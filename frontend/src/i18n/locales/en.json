@@ -152,7 +152,11 @@
     "verifying": "Verifying...",
     "verificationComplete": "Verification Complete!",
     "verificationFailed": "Verification Failed",
-    "tryAgain": "Try Again"
+    "tryAgain": "Try Again",
+    "connectWallet": "Please connect your wallet to continue",
+    "openingApp": "Opening Self app...",
+    "ifNotOpened": "If the app doesn't open automatically:",
+    "openManually": "Open Self App"
   },
   "footer": {
     "poweredBy": "Powered by Celo",

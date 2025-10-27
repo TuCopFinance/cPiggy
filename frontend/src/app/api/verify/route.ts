@@ -6,6 +6,7 @@ import {
   AllIds,
   DefaultConfigStore,
 } from '@selfxyz/core';
+import { verificationStore } from './status/route';
 
 // 1. DEFINE YOUR VERIFICATION REQUIREMENTS
 //    This object MUST EXACTLY MATCH your frontend's `disclosures` object.
@@ -71,6 +72,15 @@ export async function POST(req: NextRequest) {
     // Check if verification was successful
     if (result.isValidDetails.isValid) {
       console.log("✅ Verification successful!");
+
+      // Store verification status for polling (mobile apps)
+      const normalizedUserId = userContextData.toLowerCase();
+      verificationStore.set(normalizedUserId, {
+        verified: true,
+        timestamp: Date.now(),
+      });
+      console.log(`✅ User ${normalizedUserId} marked as verified in store`);
+
       return NextResponse.json({
         status: "success",
         result: true,

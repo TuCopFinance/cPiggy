@@ -145,7 +145,11 @@
     "verifying": "Verificando...",
     "verificationComplete": "¡Verificación Completada!",
     "verificationFailed": "Verificación Fallida",
-    "tryAgain": "Intentar de Nuevo"
+    "tryAgain": "Intentar de Nuevo",
+    "connectWallet": "Por favor conecta tu billetera para continuar",
+    "openingApp": "Abriendo app Self...",
+    "ifNotOpened": "Si la app no se abre automáticamente:",
+    "openManually": "Abrir App Self"
   },
   "footer": {
     "poweredBy": "Impulsado por Celo",
