@@ -44,9 +44,6 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   transpilePackages: ['@reown/appkit', '@reown/appkit-adapter-wagmi'],
-  experimental: {
-    esmExternals: false,
-  },
 };
 
 export default nextConfig;
