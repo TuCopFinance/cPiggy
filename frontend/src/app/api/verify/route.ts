@@ -43,19 +43,32 @@ export async function POST(req: NextRequest) {
   const userAgent = req.headers.get('user-agent') || 'unknown';
   const referer = req.headers.get('referer') || 'unknown';
   const origin = req.headers.get('origin') || 'unknown';
+  const contentType = req.headers.get('content-type') || 'unknown';
 
   console.log("📱 Request Context:", {
     requestId,
     userAgent,
     referer,
     origin,
+    contentType,
     isMobile: /mobile|android|iphone/i.test(userAgent),
     isFarcaster: /farcaster/i.test(userAgent)
   });
 
+  // Try to read raw body first for debugging
+  let rawBody;
+  try {
+    rawBody = await req.text();
+    console.log(`📄 [${requestId}] Raw request body (first 500 chars):`, rawBody.substring(0, 500));
+    console.log(`📏 [${requestId}] Body length:`, rawBody.length);
+  } catch (error) {
+    console.error(`❌ [${requestId}] Failed to read raw body:`, error);
+    return NextResponse.json({ message: "Could not read request body" }, { status: 400 });
+  }
+
   let requestBody;
   try {
-    requestBody = await req.json();
+    requestBody = JSON.parse(rawBody);
     // Log key parts without exposing sensitive data
     console.log(`📦 [${requestId}] Request payload received:`, {
       hasAttestationId: !!requestBody.attestationId,
@@ -65,7 +78,8 @@ export async function POST(req: NextRequest) {
       attestationIdPreview: requestBody.attestationId?.substring(0, 10) + '...'
     });
   } catch (error) {
-    console.error(`❌ [${requestId}] Failed to parse request body:`, error);
+    console.error(`❌ [${requestId}] Failed to parse JSON:`, error);
+    console.error(`📄 [${requestId}] Raw body that failed:`, rawBody);
     return NextResponse.json({ message: "Invalid JSON in request body" }, { status: 400 });
   }
 

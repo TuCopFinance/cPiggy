@@ -29,8 +29,22 @@
 - Max deposit per wallet: 10.000.000 cCOP
 
 ### 3. Self Protocol Integration
-- Off-chain identity verification required to use the app
+- **Purpose:** Off-chain identity verification required to use the app
+- **Documentation:** https://docs.self.xyz/
+- **GitHub:** https://github.com/selfxyz/self
+- **Playground Example:** https://github.com/selfxyz/playground
+- **NPM Packages:**
+  - `@selfxyz/core@1.1.0-beta.7` - Backend verification (Node >=22 <23)
+  - `@selfxyz/qrcode@1.0.15` - Frontend QR/button component (Node >=22 <23)
 - Users must verify through Self Protocol before creating investments
+- Verification flow:
+  1. Frontend shows QR code (desktop) or button (mobile)
+  2. User scans/clicks and completes passport verification in Self app
+  3. Proof sent to backend endpoint `/api/verify`
+  4. Backend verifies proof using `SelfBackendVerifier`
+  5. Status stored in verification-store for polling
+  6. Frontend polls `/api/verify/status` until verified
+  7. Redirects to home on success
 
 ### 4. Farcaster Mini App Support
 - Optimized UI for Farcaster Mini App environment
@@ -315,6 +329,65 @@ Translation structure example:
 4. Transfer fee to developer
 5. Update pool state
 6. Event `StakeClaimed` emitted
+
+## Railway Deployment Configuration
+
+**IMPORTANT:** Railway is configured to deploy from the `frontend/` directory, NOT from the project root.
+
+### Deployment Directory
+- **Root Directory in Railway:** `frontend/`
+- All configuration files must be in `frontend/` directory
+- Railway runs commands from `frontend/` context
+
+### Node.js Version Requirements
+- **Required Version:** Node 22.x (for Self Protocol compatibility)
+- **Configuration Files:**
+  - `frontend/.nvmrc` - Contains `22`
+  - `frontend/package.json` - Has `engines` field specifying Node >=22.0.0 <23.0.0
+- Railway automatically detects and uses Node 22 from these files
+
+### Build & Start Commands
+- **Build:** `npm run build` (executes `next build`)
+- **Start:** `npm start` (executes `next start`)
+- Railway automatically detects these from package.json scripts
+
+### Environment Variables (Railway)
+Required environment variables must be set in Railway dashboard:
+- `NEXT_PUBLIC_SELF_SCOPE` - Your Self Protocol app scope
+- `NEXT_PUBLIC_SELF_ENDPOINT` - Verification endpoint URL (e.g., https://cpiggy.xyz/api/verify)
+- `NEXT_PUBLIC_PROJECT_ID` - Reown/WalletConnect project ID
+- Other Next.js and wallet-related variables as needed
+
+### Monitoring Railway Logs
+To debug Self Protocol verification in Railway:
+1. Go to Railway dashboard → Select frontend service → Logs tab
+2. Look for emoji-prefixed logs:
+   - 🔐 Verification request start
+   - 📱 Request context (UA, referer, origin, content-type)
+   - 📄 Raw request body
+   - 📦 Parsed request payload
+   - ✅ Verification successful
+   - 💾 User marked as verified
+   - ❌ Errors with details
+3. Use request IDs to trace complete verification flows
+
+### Common Railway Deployment Issues
+
+**"Invalid JSON in request body":**
+- Check raw body in Railway logs
+- Verify Content-Type header is application/json
+- Ensure Node 22 is being used (check build logs)
+- Confirm Self package versions are compatible
+
+**Node version mismatch:**
+- Verify `.nvmrc` exists in `frontend/` directory
+- Check `engines` field in `frontend/package.json`
+- Railway build logs should show "Using Node v22.x"
+
+**Build failures:**
+- Ensure all dependencies are in `frontend/package.json`
+- Check Railway build logs for specific errors
+- Verify environment variables are set correctly
 
 ## Development Setup
 
