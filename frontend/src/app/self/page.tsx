@@ -83,24 +83,23 @@ function VerificationPage() {
       const hasOrientation = typeof screen.orientation !== 'undefined' ||
         typeof (window as any).orientation !== 'undefined';
 
-      // SIMPLE DECISION LOGIC
-      // Show BUTTON (not QR) in these cases:
-      // 1. Mobile device (phone/tablet)
-      // 2. Farcaster native app MiniApp (mobile)
-      // 3. Any touch device with narrow viewport
+      // STRICT DECISION LOGIC
+      // Desktop detection: NO touch + Desktop UA = always desktop (show QR)
+      const isDefinitelyDesktop = !hasTouchScreen && !isMobileUserAgent;
 
-      const isTrueMobile = isMobileUserAgent ||
-        (hasTouchScreen && isNarrowViewport) ||
-        hasOrientation;
+      // Mobile detection: Mobile UA OR (touch + narrow viewport)
+      const isTrueMobile = isMobileUserAgent || (hasTouchScreen && isNarrowViewport);
 
+      // Farcaster MiniApp detection
       const isFarcasterMiniApp = isInIframe && hasFarcasterSDK;
-      const isFarcasterNativeMobile = isFarcasterMiniApp &&
-        (isMobileUserAgent || isNarrowViewport);
 
-      // DECISION: Use mobile UI if:
-      // - True mobile device OR
-      // - Farcaster native app on mobile
-      const shouldUseMobileUI = isTrueMobile || isFarcasterNativeMobile;
+      // Only consider Farcaster iframe as "mobile" if it has mobile signals
+      const isFarcasterNativeMobile = isFarcasterMiniApp && isMobileUserAgent;
+
+      // FINAL DECISION: Use mobile UI (button) ONLY if:
+      // 1. NOT definitely desktop AND
+      // 2. Has true mobile signals
+      const shouldUseMobileUI = !isDefinitelyDesktop && isTrueMobile;
 
       if (isFarcasterNativeMobile) {
         console.log("🎭 Farcaster Native Mobile App detected - using mobile UI with button");
@@ -122,7 +121,8 @@ function VerificationPage() {
         hasFarcasterSDK,
         isFarcasterMiniApp,
         isFarcasterNativeMobile,
-        // Result
+        // Decision factors
+        isDefinitelyDesktop,
         isTrueMobile,
         shouldUseMobileUI,
         decision: shouldUseMobileUI ? "🔘 BUTTON" : "📱 QR CODE",
