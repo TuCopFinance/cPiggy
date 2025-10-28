@@ -156,12 +156,22 @@ function VerificationPage() {
       // DEBUGGING: Log the userId being used
       console.log("👤 Using userId:", userId);
 
-      // Build callback URL for mobile deep linking
-      const callbackUrl = typeof window !== 'undefined'
-        ? `${window.location.origin}/self?callback=true`
-        : 'https://cpiggy.xyz/self?callback=true';
+      // Use the SAME mobile detection as QR vs Button logic
+      // If showing button (isMobile=true), need callback
+      // If showing QR (isMobile=false), NO callback needed
+      const shouldUseCallback = isMobile;
 
-      console.log("🔗 Callback URL:", callbackUrl);
+      // Build callback URL only for mobile contexts
+      const callbackUrl = shouldUseCallback && typeof window !== 'undefined'
+        ? `${window.location.origin}/self?callback=true`
+        : undefined;
+
+      console.log("🔗 Callback decision (aligned with UI):", {
+        isMobile,
+        shouldUseCallback,
+        callbackUrl: callbackUrl ? 'YES' : 'NO',
+        uiMode: isMobile ? 'BUTTON' : 'QR CODE'
+      });
 
       // Detect if in Farcaster context for custom message
       const isInFarcaster = typeof window !== 'undefined' && (
@@ -187,7 +197,7 @@ function VerificationPage() {
         endpointType: "https",
         userIdType: "hex",
         userDefinedData: verificationMessage,
-        deeplinkCallback: callbackUrl, // Add callback for mobile
+        ...(callbackUrl && { deeplinkCallback: callbackUrl }), // Only add callback for mobile
         disclosures: {
           excludedCountries: []
         }
@@ -326,7 +336,7 @@ function VerificationPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-green-50 via-teal-50 to-cyan-100 p-3 sm:p-6">
-      {/* DEBUG INFO - Remove after fixing */}
+      {/* DEBUG INFO - Uncomment if needed for debugging mobile detection
       {typeof window !== 'undefined' && (
         <div className="absolute top-16 left-2 bg-red-500 text-white text-xs p-2 rounded z-50 max-w-xs overflow-auto max-h-32">
           <div className="font-bold mb-1">🐛 DEBUG</div>
@@ -342,6 +352,7 @@ function VerificationPage() {
           }</div>
         </div>
       )}
+      */}
 
       {/* Language Switcher - Top Right */}
       <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
