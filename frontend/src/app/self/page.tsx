@@ -156,23 +156,6 @@ function VerificationPage() {
       // DEBUGGING: Log the userId being used
       console.log("👤 Using userId:", userId);
 
-      // Use the SAME mobile detection as QR vs Button logic
-      // If showing button (isMobile=true), need callback
-      // If showing QR (isMobile=false), NO callback needed
-      const shouldUseCallback = isMobile;
-
-      // Build callback URL only for mobile contexts
-      const callbackUrl = shouldUseCallback && typeof window !== 'undefined'
-        ? `${window.location.origin}/self?callback=true`
-        : undefined;
-
-      console.log("🔗 Callback decision (aligned with UI):", {
-        isMobile,
-        shouldUseCallback,
-        callbackUrl: callbackUrl ? 'YES' : 'NO',
-        uiMode: isMobile ? 'BUTTON' : 'QR CODE'
-      });
-
       // Detect if in Farcaster context for custom message
       const isInFarcaster = typeof window !== 'undefined' && (
         /farcaster/i.test(navigator.userAgent.toLowerCase()) ||
@@ -180,10 +163,35 @@ function VerificationPage() {
         window.self !== window.top
       );
 
+      // Use the SAME mobile detection as QR vs Button logic
+      // If showing button (isMobile=true), need callback
+      // If showing QR (isMobile=false), NO callback needed
+      const shouldUseCallback = isMobile;
+
+      // Build callback URL based on context
+      let callbackUrl: string | undefined = undefined;
+      if (shouldUseCallback && typeof window !== 'undefined') {
+        if (isInFarcaster) {
+          // Farcaster native app → callback to miniapp URL
+          callbackUrl = 'https://farcaster.xyz/miniapps/NnmbCzDdddL5/cpiggy';
+        } else {
+          // Regular mobile browser → callback to current domain
+          callbackUrl = `${window.location.origin}/self?callback=true`;
+        }
+      }
+
+      console.log("🔗 Callback decision (aligned with UI):", {
+        isMobile,
+        isInFarcaster,
+        shouldUseCallback,
+        callbackUrl: callbackUrl || 'NO CALLBACK',
+        uiMode: isMobile ? 'BUTTON' : 'QR CODE'
+      });
+
       // Customize message based on context
       const verificationMessage = isInFarcaster
-        ? "🎭 Verificando tu Identidad en Farcaster MiniApp\n\nVerifying your Identity in Farcaster MiniApp"
-        : "Verifica tu Identidad en cPiggy! 🐷";
+        ? "Verificando tu Identidad en Farcaster MiniApp\nVerifying your Identity in Farcaster MiniApp"
+        : "Verifica tu Identidad en cPiggy!\nVerify your Identity in cPiggy! 🐷";
 
       console.log("🎭 Context detected:", { isInFarcaster, message: verificationMessage });
 
