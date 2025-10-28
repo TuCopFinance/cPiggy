@@ -97,7 +97,7 @@ This is an MVP foundation. Future versions will include:
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+
+- Node.js 20.18.0+
 - npm or pnpm
 - Celo wallet with cCOP
 

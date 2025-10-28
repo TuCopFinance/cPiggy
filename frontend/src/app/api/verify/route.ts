@@ -32,24 +32,54 @@ console.log(`🔧 Initializing verifier with ENDPOINT: ${process.env.NEXT_PUBLIC
 
 // 4. CREATE THE API ROUTE HANDLER
 export async function POST(req: NextRequest) {
-  console.log("✅ Received request at /api/verify endpoint.");
+  const timestamp = new Date().toISOString();
+  const requestId = Math.random().toString(36).substring(7);
 
-    let requestBody;
+  console.log(`\n${"=".repeat(80)}`);
+  console.log(`🔐 [${timestamp}] Self Verification Request - ID: ${requestId}`);
+  console.log(`${"=".repeat(80)}`);
+
+  // Log request headers for context detection
+  const userAgent = req.headers.get('user-agent') || 'unknown';
+  const referer = req.headers.get('referer') || 'unknown';
+  const origin = req.headers.get('origin') || 'unknown';
+
+  console.log("📱 Request Context:", {
+    requestId,
+    userAgent,
+    referer,
+    origin,
+    isMobile: /mobile|android|iphone/i.test(userAgent),
+    isFarcaster: /farcaster/i.test(userAgent)
+  });
+
+  let requestBody;
   try {
     requestBody = await req.json();
-    // DEBUGGING: Log the entire incoming payload to inspect what the frontend is sending
-    console.log("📦 Incoming request body:", JSON.stringify(requestBody, null, 2));
+    // Log key parts without exposing sensitive data
+    console.log(`📦 [${requestId}] Request payload received:`, {
+      hasAttestationId: !!requestBody.attestationId,
+      hasProof: !!requestBody.proof,
+      hasPublicSignals: !!requestBody.publicSignals,
+      userContextData: requestBody.userContextData,
+      attestationIdPreview: requestBody.attestationId?.substring(0, 10) + '...'
+    });
   } catch (error) {
-    console.error("❌ Failed to parse request body as JSON:", error);
+    console.error(`❌ [${requestId}] Failed to parse request body:`, error);
     return NextResponse.json({ message: "Invalid JSON in request body" }, { status: 400 });
   }
-  // Extract data from the request
+
   // Extract data from the request
   const { attestationId, proof, publicSignals, userContextData } = requestBody;
 
   // Verify all required fields are present
   if (!proof || !publicSignals || !attestationId || !userContextData) {
-    console.error("❌ Missing required fields in request.");
+    console.error(`❌ [${requestId}] Missing required fields:`, {
+      hasProof: !!proof,
+      hasPublicSignals: !!publicSignals,
+      hasAttestationId: !!attestationId,
+      hasUserContextData: !!userContextData
+    });
     return NextResponse.json({
       message: "Proof, publicSignals, attestationId and userContextData are required",
     }, { status: 400 });
@@ -57,24 +87,36 @@ export async function POST(req: NextRequest) {
 
   // Verify the proof
   try {
-    console.log("⏳ Calling selfBackendVerifier.verify()...");
+    console.log(`⏳ [${requestId}] Starting verification for userId: ${userContextData}`);
+    console.log(`🔍 [${requestId}] Calling selfBackendVerifier.verify()...`);
+
+    const verifyStartTime = Date.now();
     const result = await selfBackendVerifier.verify(
       attestationId,
       proof,
       publicSignals,
       userContextData
     );
+    const verifyDuration = Date.now() - verifyStartTime;
 
-    // DEBUGGING: Log the ENTIRE result object from the verifier.
-    // This object contains valuable details on why verification might have failed.
-    console.log("🔍 Verification result object:", JSON.stringify(result, null, 2));
+    console.log(`⏱️ [${requestId}] Verification took ${verifyDuration}ms`);
+    console.log(`🔍 [${requestId}] Verification result:`, {
+      isValid: result.isValidDetails.isValid,
+      hasDiscloseOutput: !!result.discloseOutput,
+      details: result.isValidDetails
+    });
 
     // Check if verification was successful
     if (result.isValidDetails.isValid) {
-      console.log("✅ Verification successful!");
+      console.log(`✅ [${requestId}] Verification SUCCESSFUL for userId: ${userContextData}`);
+      console.log(`💾 [${requestId}] Marking user as verified in store...`);
 
       // Store verification status for polling (mobile apps)
       markUserAsVerified(userContextData);
+
+      console.log(`✅ [${requestId}] User marked as verified. Store updated.`);
+      console.log(`📤 [${requestId}] Returning success response to client`);
+      console.log(`${"=".repeat(80)}\n`);
 
       return NextResponse.json({
         status: "success",
@@ -83,28 +125,34 @@ export async function POST(req: NextRequest) {
       });
     } else {
       // Verification failed, return the detailed reason
-      console.warn("⚠️ Verification failed. Details:", result.isValidDetails);
+      console.warn(`⚠️ [${requestId}] Verification FAILED for userId: ${userContextData}`);
+      console.warn(`📋 [${requestId}] Failure details:`, result.isValidDetails);
+      console.log(`${"=".repeat(80)}\n`);
+
       return NextResponse.json({
         status: "error",
         result: false,
         message: "Verification failed",
         // Return the specific details about why it failed
         details: result.isValidDetails,
-      }, { status: 400 }); // Use 400 for a bad request (invalid proof) instead of 500
+      }, { status: 400 });
     }
- } catch (error: unknown) { // Changed 'any' to 'unknown'
+ } catch (error: unknown) {
     // DEBUGGING: Log the full error object for a complete stack trace
-    console.error('💥 An unexpected error occurred during verification:', error);
+    console.error(`💥 [${requestId}] EXCEPTION during verification:`, error);
+    console.error(`💥 [${requestId}] Error stack:`, error instanceof Error ? error.stack : 'No stack trace');
 
     // Type-safe way to get the error message
     const message = error instanceof Error ? error.message : "An unknown error occurred.";
+
+    console.log(`${"=".repeat(80)}\n`);
 
     return NextResponse.json({
       status: "error",
       result: false,
       message: "An unexpected error occurred on the server.",
-      // In development, you might want to return the error message for easier debugging
-      error: process.env.NODE_ENV === 'development' ? message : undefined,
+      // Always return error in logs (Railway shows all logs)
+      error: message,
     }, { status: 500 });
   }
 }
