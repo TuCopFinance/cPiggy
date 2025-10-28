@@ -72,10 +72,11 @@ export async function POST(req: NextRequest) {
     // Log key parts without exposing sensitive data
     console.log(`📦 [${requestId}] Request payload received:`, {
       hasAttestationId: !!requestBody.attestationId,
+      attestationId: requestBody.attestationId,
       hasProof: !!requestBody.proof,
       hasPublicSignals: !!requestBody.publicSignals,
-      userContextData: requestBody.userContextData,
-      attestationIdPreview: requestBody.attestationId?.substring(0, 10) + '...'
+      publicSignalsCount: requestBody.publicSignals?.length,
+      userContextData: requestBody.userContextData?.substring(0, 20) + '...'
     });
   } catch (error) {
     console.error(`❌ [${requestId}] Failed to parse JSON:`, error);
