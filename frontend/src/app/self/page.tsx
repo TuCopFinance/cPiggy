@@ -156,35 +156,36 @@ function VerificationPage() {
       // DEBUGGING: Log the userId being used
       console.log("👤 Using userId:", userId);
 
-      // Detect if in Farcaster context for custom message
-      const isInFarcaster = typeof window !== 'undefined' && (
-        /farcaster/i.test(navigator.userAgent.toLowerCase()) ||
-        (window as any).fc !== undefined ||
-        window.self !== window.top
-      );
+      // Detect if in Farcaster context
+      const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
+      const hasFarcasterSDK = typeof window !== 'undefined' && (window as any).fc !== undefined;
+      const isInFarcaster = isInIframe && hasFarcasterSDK;
 
-      // Use the SAME mobile detection as QR vs Button logic
-      // If showing button (isMobile=true), need callback
-      // If showing QR (isMobile=false), NO callback needed
-      const shouldUseCallback = isMobile;
+      // Detect if in Farcaster NATIVE mobile app (not web)
+      const userAgent = typeof window !== 'undefined' ? navigator.userAgent.toLowerCase() : '';
+      const isMobileUserAgent = /android|iphone|ipad|ipod/i.test(userAgent);
+      const isFarcasterNativeMobile = isInFarcaster && isMobileUserAgent;
 
-      // Build callback URL based on context
-      let callbackUrl: string | undefined = undefined;
-      if (shouldUseCallback && typeof window !== 'undefined') {
-        if (isInFarcaster) {
-          // Farcaster native app → callback to miniapp URL
+      // Build callback URL based on context (always include it)
+      let callbackUrl: string;
+      if (typeof window !== 'undefined') {
+        if (isFarcasterNativeMobile) {
+          // Farcaster NATIVE mobile app → callback to miniapp URL
           callbackUrl = 'https://farcaster.xyz/miniapps/NnmbCzDdddL5/cpiggy';
         } else {
-          // Regular mobile browser → callback to current domain
+          // Any other context (desktop, mobile browser, Farcaster web) → callback to current domain
           callbackUrl = `${window.location.origin}/self?callback=true`;
         }
+      } else {
+        // Fallback for SSR
+        callbackUrl = 'https://cpiggy.xyz/self?callback=true';
       }
 
-      console.log("🔗 Callback decision (aligned with UI):", {
+      console.log("🔗 Callback URL:", {
         isMobile,
         isInFarcaster,
-        shouldUseCallback,
-        callbackUrl: callbackUrl || 'NO CALLBACK',
+        isFarcasterNativeMobile,
+        callbackUrl,
         uiMode: isMobile ? 'BUTTON' : 'QR CODE'
       });
 
@@ -205,7 +206,7 @@ function VerificationPage() {
         endpointType: "https",
         userIdType: "hex",
         userDefinedData: verificationMessage,
-        ...(callbackUrl && { deeplinkCallback: callbackUrl }), // Only add callback for mobile
+        deeplinkCallback: callbackUrl, // Always include callback (required by Self)
         disclosures: {
           excludedCountries: []
         }
