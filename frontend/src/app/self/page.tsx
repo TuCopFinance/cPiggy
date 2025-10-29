@@ -22,9 +22,27 @@ function VerificationPage() {
   const [isPolling, setIsPolling] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isReturningFromSelf, setIsReturningFromSelf] = useState(false);
+  const [serverDetection, setServerDetection] = useState<{
+    userAgent: string;
+    isWarpcast: boolean;
+    isMobileUserAgent: boolean;
+  } | null>(null);
 
   // Wait for wallet connection before proceeding
   const userId = address;
+
+  // Fetch server-side device detection on mount
+  useEffect(() => {
+    fetch('/api/detect-device')
+      .then(res => res.json())
+      .then(data => {
+        console.log("🖥️ Server-side detection:", data);
+        setServerDetection(data);
+      })
+      .catch(err => {
+        console.error("❌ Failed to fetch server detection:", err);
+      });
+  }, []);
 
   // Check if user is returning from Self app (via URL params)
   useEffect(() => {
@@ -156,18 +174,43 @@ function VerificationPage() {
       // DEBUGGING: Log the userId being used
       console.log("👤 Using userId:", userId);
 
-      // ENHANCED DEVICE DETECTION for debugging and correct callback
+      // ENHANCED DEVICE DETECTION combining server-side and client-side signals
       const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
       const hasFarcasterSDK = typeof window !== 'undefined' && (window as any).fc !== undefined;
       const userAgent = typeof window !== 'undefined' ? navigator.userAgent : '';
-      const isMobileUserAgent = /android|iphone|ipad|ipod/i.test(userAgent);
+      const clientIsMobileUA = /android|iphone|ipad|ipod/i.test(userAgent);
 
-      // Determine device scenario
-      const isInFarcaster = isInIframe && hasFarcasterSDK;
-      const isFarcasterNativeMobile = isInFarcaster && isMobileUserAgent;
-      const isFarcasterWeb = isInFarcaster && !isMobileUserAgent;
-      const isMobileBrowser = isMobileUserAgent && !isInFarcaster;
-      const isDesktop = !isMobileUserAgent && !isInFarcaster;
+      // Use server-side detection if available, fallback to client-side
+      const isWarpcast = serverDetection?.isWarpcast || userAgent.toLowerCase().includes('warpcast');
+      const isMobileUserAgent = serverDetection?.isMobileUserAgent ?? clientIsMobileUA;
+
+      // DEBUGGING: Log all detection signals
+      console.log("🔍 Device Detection Signals:", {
+        serverDetection,
+        isInIframe,
+        hasFarcasterSDK,
+        isWarpcast,
+        isMobileUserAgent,
+        clientIsMobileUA,
+        userAgent: userAgent.substring(0, 100),
+        serverUA: serverDetection?.userAgent?.substring(0, 100),
+        windowSelf: typeof window !== 'undefined' ? window.self : 'undefined',
+        windowTop: typeof window !== 'undefined' ? window.top : 'undefined',
+        fcObject: typeof window !== 'undefined' ? (window as any).fc : 'undefined'
+      });
+
+      // Determine device scenario with priority logic
+      // Priority 1: Warpcast UA = Farcaster native app (most reliable from server)
+      // Priority 2: iframe + SDK = Farcaster Web (client-side detection)
+      // Priority 3: Mobile UA without Farcaster = Mobile Browser
+      // Priority 4: Desktop without Farcaster = Desktop Browser
+
+      const isFarcasterNativeMobile = isWarpcast && isMobileUserAgent;
+      const isFarcasterWeb = !isWarpcast && isInIframe && hasFarcasterSDK;
+      const isMobileBrowser = !isWarpcast && !isFarcasterWeb && isMobileUserAgent;
+      const isDesktop = !isWarpcast && !isFarcasterWeb && !isMobileBrowser;
+
+      const isInFarcaster = isFarcasterNativeMobile || isFarcasterWeb;
 
       // Determine scenario name for debugging in message
       let scenarioKey: string;
@@ -257,7 +300,7 @@ function VerificationPage() {
     } catch (error) {
       console.error("❌ Failed to initialize Self app in useEffect:", error);
     }
-  }, [userId]);
+  }, [userId, serverDetection, t]);
 
   // Poll verification status for mobile apps (when user switches to Self app)
   useEffect(() => {
