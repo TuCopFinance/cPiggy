@@ -127,14 +127,18 @@ export async function POST(req: NextRequest) {
       console.log(`💾 [${requestId}] Marking user as verified in store...`);
 
       // Extract wallet address from userContextData for storage
-      // userContextData format: [64 chars chainId][40 chars address][rest is message]
-      // We need to extract the address (characters 64-104, which is the 40-char address)
+      // userContextData format: [64 chars chainId (padded)][64 chars address (padded)][rest is message]
+      // Each field is 32 bytes = 64 hex characters, padded with zeros on the left
+      // Address is in the second 64-char block, but the actual address is the last 40 chars
       let walletAddress = userContextData;
-      if (userContextData.length > 104) {
-        // Extract the 40-character address starting at position 64
-        const addressHex = userContextData.substring(64, 104);
+      if (userContextData.length > 128) {
+        // Extract the second 64-char block (characters 64-128)
+        const paddedAddressHex = userContextData.substring(64, 128);
+        // Take only the last 40 characters (20 bytes = ethereum address)
+        const addressHex = paddedAddressHex.substring(24); // Skip first 24 chars of padding (12 bytes)
         walletAddress = '0x' + addressHex;
         console.log(`📋 [${requestId}] Extracted wallet address: ${walletAddress}`);
+        console.log(`🔍 [${requestId}] Full padded block: ${paddedAddressHex}`);
       } else {
         console.log(`⚠️ [${requestId}] userContextData format unexpected, using as-is: ${userContextData}`);
       }
