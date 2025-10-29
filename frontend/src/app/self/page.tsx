@@ -155,13 +155,6 @@ function VerificationPage() {
       return;
     }
 
-    // Wait for Farcaster detection to complete (avoid race condition)
-    // detectionMethod 'none' means detection is still in progress
-    if (farcasterDetection.detectionMethod === 'none') {
-      console.log("⏳ Waiting for Farcaster detection to complete...");
-      return;
-    }
-
     console.log("🚀 useEffect triggered. Initializing SelfAppBuilder...");
     console.log("📱 Farcaster Detection State:", {
       isFarcasterMiniApp: farcasterDetection.isFarcasterMiniApp,
@@ -232,7 +225,7 @@ function VerificationPage() {
         callbackUrl = 'https://cpiggy.xyz/self?callback=true';
       }
 
-      console.log("🔗 Device Detection & Callback:", {
+      const detectionInfo = {
         scenarioKey,
         scenarioLabel,
         isMobile,
@@ -243,8 +236,22 @@ function VerificationPage() {
         isDesktop,
         userAgent: userAgent.substring(0, 60) + '...',
         callbackUrl: callbackUrl || 'EMPTY',
-        uiMode: isMobile ? 'BUTTON' : 'QR CODE'
-      });
+        uiMode: isMobile ? 'BUTTON' : 'QR CODE',
+        farcasterDetection: {
+          isFarcasterMiniApp: farcasterDetection.isFarcasterMiniApp,
+          sdkAvailable: farcasterDetection.sdkAvailable,
+          detectionMethod: farcasterDetection.detectionMethod
+        }
+      };
+
+      console.log("🔗 Device Detection & Callback:", detectionInfo);
+
+      // Log to server so we can see it on Railway (helpful for mobile debugging)
+      fetch('/api/log-detection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(detectionInfo)
+      }).catch(err => console.error("Failed to log detection to server:", err));
 
       // Verification message showing detected scenario for easy debugging
       // Using i18n system - message will be in Spanish or English based on current locale
