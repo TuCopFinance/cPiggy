@@ -169,7 +169,8 @@ function VerificationPage() {
 
       // SIMPLE DEVICE DETECTION using existing hook that works
       const userAgent = typeof window !== 'undefined' ? navigator.userAgent : '';
-      const isMobileUserAgent = /android|iphone|ipad|ipod/i.test(userAgent);
+      // Check for mobile devices OR warpcast (Farcaster native app)
+      const isMobileUserAgent = /android|iphone|ipad|ipod|warpcast/i.test(userAgent);
 
       // Use the Farcaster detection hook that already works
       const isInFarcaster = farcasterDetection.isFarcasterMiniApp;
