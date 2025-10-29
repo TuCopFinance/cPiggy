@@ -126,8 +126,21 @@ export async function POST(req: NextRequest) {
       console.log(`✅ [${requestId}] Verification SUCCESSFUL for userId: ${userContextData}`);
       console.log(`💾 [${requestId}] Marking user as verified in store...`);
 
+      // Extract wallet address from userContextData for storage
+      // userContextData format: [64 chars chainId][40 chars address][rest is message]
+      // We need to extract the address (characters 64-104, which is the 40-char address)
+      let walletAddress = userContextData;
+      if (userContextData.length > 104) {
+        // Extract the 40-character address starting at position 64
+        const addressHex = userContextData.substring(64, 104);
+        walletAddress = '0x' + addressHex;
+        console.log(`📋 [${requestId}] Extracted wallet address: ${walletAddress}`);
+      } else {
+        console.log(`⚠️ [${requestId}] userContextData format unexpected, using as-is: ${userContextData}`);
+      }
+
       // Store verification status for polling (mobile apps)
-      markUserAsVerified(userContextData);
+      markUserAsVerified(walletAddress);
 
       console.log(`✅ [${requestId}] User marked as verified. Store updated.`);
       console.log(`📤 [${requestId}] Returning success response to client`);
