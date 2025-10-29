@@ -156,24 +156,45 @@ function VerificationPage() {
       // DEBUGGING: Log the userId being used
       console.log("👤 Using userId:", userId);
 
-      // Detect if in Farcaster context
+      // ENHANCED DEVICE DETECTION for debugging and correct callback
       const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
       const hasFarcasterSDK = typeof window !== 'undefined' && (window as any).fc !== undefined;
-      const isInFarcaster = isInIframe && hasFarcasterSDK;
-
-      // Detect if in Farcaster NATIVE mobile app (not web)
-      const userAgent = typeof window !== 'undefined' ? navigator.userAgent.toLowerCase() : '';
+      const userAgent = typeof window !== 'undefined' ? navigator.userAgent : '';
       const isMobileUserAgent = /android|iphone|ipad|ipod/i.test(userAgent);
-      const isFarcasterNativeMobile = isInFarcaster && isMobileUserAgent;
 
-      // Build callback URL based on context (always include it)
+      // Determine device scenario
+      const isInFarcaster = isInIframe && hasFarcasterSDK;
+      const isFarcasterNativeMobile = isInFarcaster && isMobileUserAgent;
+      const isFarcasterWeb = isInFarcaster && !isMobileUserAgent;
+      const isMobileBrowser = isMobileUserAgent && !isInFarcaster;
+      const isDesktop = !isMobileUserAgent && !isInFarcaster;
+
+      // Determine scenario name for debugging in message
+      let scenarioKey: string;
+      if (isFarcasterNativeMobile) {
+        scenarioKey = 'farcasterApp';
+      } else if (isFarcasterWeb) {
+        scenarioKey = 'farcasterWeb';
+      } else if (isMobileBrowser) {
+        scenarioKey = 'mobileBrowser';
+      } else {
+        scenarioKey = 'desktop';
+      }
+
+      // Get localized scenario label
+      const scenarioLabel = t(`verification.scenarios.${scenarioKey}`);
+
+      // Build callback URL based on scenario
       let callbackUrl: string;
       if (typeof window !== 'undefined') {
         if (isFarcasterNativeMobile) {
-          // Farcaster NATIVE mobile app → callback to miniapp URL
+          // Scenario 4: Farcaster NATIVE mobile app → callback to miniapp URL
           callbackUrl = 'https://farcaster.xyz/miniapps/NnmbCzDdddL5/cpiggy';
+        } else if (isDesktop || isFarcasterWeb) {
+          // Scenario 1 & 3: Desktop or Farcaster web → empty callback (no redirect needed)
+          callbackUrl = '';
         } else {
-          // Any other context (desktop, mobile browser, Farcaster web) → callback to current domain
+          // Scenario 2: Mobile browser → callback to current domain
           callbackUrl = `${window.location.origin}/self?callback=true`;
         }
       } else {
@@ -181,18 +202,24 @@ function VerificationPage() {
         callbackUrl = 'https://cpiggy.xyz/self?callback=true';
       }
 
-      console.log("🔗 Callback URL:", {
+      console.log("🔗 Device Detection & Callback:", {
+        scenarioKey,
+        scenarioLabel,
         isMobile,
         isInFarcaster,
         isFarcasterNativeMobile,
-        callbackUrl,
+        isFarcasterWeb,
+        isMobileBrowser,
+        isDesktop,
+        userAgent: userAgent.substring(0, 60) + '...',
+        callbackUrl: callbackUrl || 'EMPTY',
         uiMode: isMobile ? 'BUTTON' : 'QR CODE'
       });
 
-      // Customize message based on context
-      const verificationMessage = isInFarcaster
-        ? "Verificando tu Identidad en Farcaster MiniApp\nVerifying your Identity in Farcaster MiniApp"
-        : "Verifica tu Identidad en cPiggy!\nVerify your Identity in cPiggy! 🐷";
+      // Verification message showing detected scenario for easy debugging
+      // Using i18n system - message will be in Spanish or English based on current locale
+      const messageTemplate = t('verification.verificationMessage');
+      const verificationMessage = messageTemplate.replace('{scenario}', scenarioLabel) + ' 🐷';
 
       console.log("🎭 Context detected:", { isInFarcaster, message: verificationMessage });
 

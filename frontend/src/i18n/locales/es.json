@@ -155,7 +155,14 @@
     "openSelfApp": "Abrir App Self para Verificar",
     "returnAfter": "Regresa aquí después de completar la verificación",
     "checkingStatus": "Verificando estado...",
-    "pleaseWait": "Por favor espera mientras verificamos tu identidad"
+    "pleaseWait": "Por favor espera mientras verificamos tu identidad",
+    "scenarios": {
+      "desktop": "Desktop",
+      "mobileBrowser": "Mobile Browser",
+      "farcasterWeb": "Farcaster Web",
+      "farcasterApp": "Farcaster App"
+    },
+    "verificationMessage": "Verifica tu Identidad en cPiggy ({scenario})!"
   },
   "footer": {
     "poweredBy": "Impulsado por Celo",
