@@ -169,6 +169,12 @@ function VerificationPage() {
       return;
     }
 
+    // Wait for server detection to complete (important for Warpcast detection)
+    if (!serverDetection) {
+      console.log("⏳ Waiting for server-side device detection...");
+      return;
+    }
+
     console.log("🚀 useEffect triggered. Initializing SelfAppBuilder...");
     try {
       // DEBUGGING: Log the userId being used
