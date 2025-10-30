@@ -37,15 +37,8 @@ if (!modalInstance) {
     networks,
     metadata,
     themeMode: 'light',
-    features: {
-      analytics: true,      // Analytics tracking
-      onramp: true,         // Buy crypto with fiat (solves insufficient balance)
-      swaps: true,          // Token swapping within app
-      email: true,          // Email login for non-crypto users
-      socials: ['google', 'github', 'apple', 'discord'], // Social login options
-      history: true,        // Transaction history in account view
-      // emailShowWallets: true // Show wallet options after email login (optional)
-    },
+    // Features are controlled remotely via Reown dashboard at dashboard.reown.com
+    // Current enabled features: email, socials, onramp, swaps, activity, event tracking
     themeVariables: {
       '--w3m-accent': '#000000',
     }
