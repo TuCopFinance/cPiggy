@@ -122,7 +122,91 @@ npm run dev
 
 ### Environment Variables
 
-See [claude-context.md](./claude-context.md) for complete list of required environment variables.
+**Required variables (create `.env.local` in `frontend/` directory):**
+
+```bash
+# Reown/WalletConnect Configuration
+NEXT_PUBLIC_PROJECT_ID="your_reown_project_id_here"
+
+# Self Protocol Configuration (identity verification)
+NEXT_PUBLIC_SELF_APP_NAME="cPiggyFX"
+NEXT_PUBLIC_SELF_SCOPE="your_unique_scope_here"
+NEXT_PUBLIC_SELF_ENDPOINT="https://your-domain.com/api/verify"
+```
+
+**Getting your credentials:**
+
+1. **Reown Project ID:**
+   - Visit [https://cloud.reown.com](https://cloud.reown.com)
+   - Create a new project
+   - Copy the Project ID
+
+2. **Self Protocol Configuration:**
+   - Visit [https://docs.self.xyz](https://docs.self.xyz) for setup instructions
+   - `SELF_SCOPE`: Create a unique identifier for your app (e.g., "myapp-prod")
+   - `SELF_ENDPOINT`: Must be a publicly accessible URL (localhost won't work)
+   - For local development, use a tunnel service (ngrok, Railway, etc.)
+
+See [claude-context.md](./claude-context.md) for complete configuration details.
+
+## 🔐 Self Protocol Identity Verification
+
+cPiggyFX uses [Self Protocol](https://docs.self.xyz/) for secure, decentralized identity verification. Users must complete verification before creating investments.
+
+### How It Works
+
+The verification system automatically adapts to 4 different scenarios:
+
+1. **Desktop Browser** - Shows QR code to scan with mobile Self app
+2. **Mobile Browser** - Shows button that opens Self app directly
+3. **Farcaster Web** - QR code for desktop Farcaster users
+4. **Farcaster Mobile App** - Button that opens Self app and returns to miniapp
+
+### Setup Requirements
+
+**Node.js Version:** Self Protocol requires Node.js 22.x (enforced via `.nvmrc` and `package.json`)
+
+**Environment Variables:**
+```bash
+NEXT_PUBLIC_SELF_APP_NAME="cPiggyFX"
+NEXT_PUBLIC_SELF_SCOPE="your-unique-scope"
+NEXT_PUBLIC_SELF_ENDPOINT="https://your-domain.com/api/verify"
+```
+
+**Important:** The endpoint MUST be publicly accessible (localhost won't work). For local development:
+- Use Railway, Vercel, or similar for deployment
+- Or use ngrok/localtunnel to expose localhost
+
+### Testing Different Scenarios
+
+**Desktop (QR Code):**
+- Open app in desktop browser
+- Connect wallet
+- Navigate to verification page
+- Scan QR with Self app on phone
+
+**Mobile Browser (Button):**
+- Open app in mobile browser (Safari/Chrome)
+- Connect wallet
+- Click "Open Self App to Verify" button
+- Complete verification in Self app
+- App automatically redirects back
+
+**Farcaster Mobile (Miniapp Deep Link):**
+- Open app in Warpcast mobile app
+- Connect Farcaster wallet
+- Click verification button
+- Complete in Self app
+- Returns to Farcaster miniapp
+
+### Recent Fixes
+
+1. **Warpcast Detection** - Added 'warpcast' to mobile user agent detection
+2. **Wallet Address Extraction** - Fixed padding calculation in userContextData parsing
+3. **Cross-Platform Deep Links** - Universal links work on both iOS and Android
+4. **Mobile Debugging** - Added `/api/log-detection` endpoint for Railway logs
+
+See `claude-context.md` for complete technical documentation of the verification flow.
 
 ## 🌐 Live Demo
 

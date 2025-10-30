@@ -29,22 +29,377 @@
 - Max deposit per wallet: 10.000.000 cCOP
 
 ### 3. Self Protocol Integration
-- **Purpose:** Off-chain identity verification required to use the app
-- **Documentation:** https://docs.self.xyz/
-- **GitHub:** https://github.com/selfxyz/self
-- **Playground Example:** https://github.com/selfxyz/playground
-- **NPM Packages:**
-  - `@selfxyz/core@1.1.0-beta.7` - Backend verification (Node >=22 <23)
-  - `@selfxyz/qrcode@1.0.15` - Frontend QR/button component (Node >=22 <23)
-- Users must verify through Self Protocol before creating investments
-- Verification flow:
-  1. Frontend shows QR code (desktop) or button (mobile)
-  2. User scans/clicks and completes passport verification in Self app
-  3. Proof sent to backend endpoint `/api/verify`
-  4. Backend verifies proof using `SelfBackendVerifier`
-  5. Status stored in verification-store for polling
-  6. Frontend polls `/api/verify/status` until verified
-  7. Redirects to home on success
+
+**Purpose:** Off-chain identity verification required to use the app
+
+**Documentation:**
+- Official Docs: https://docs.self.xyz/
+- GitHub: https://github.com/selfxyz/self
+- Playground Example: https://github.com/selfxyz/playground
+
+**NPM Packages:**
+- `@selfxyz/core@1.1.0-beta.7` - Backend verification (Node >=22 <23)
+- `@selfxyz/qrcode@1.0.15` - Frontend QR/button component (Node >=22 <23)
+
+**Important:** Self Protocol requires Node.js version 22.x. This is enforced via:
+- `frontend/.nvmrc` - Contains `22`
+- `frontend/package.json` - engines field specifies `>=22.0.0 <23.0.0`
+
+#### Overview
+
+Users must complete Self Protocol identity verification before creating investments. The system works across 4 different scenarios with smart device detection and appropriate UI/UX for each.
+
+#### The 4 Verification Scenarios
+
+**1. Desktop Browser (Standard Web)**
+- **Detection:** No touch support, desktop user agent
+- **UI:** QR code displayed via `SelfQRcodeWrapper`
+- **Flow:** User scans QR with Self app on mobile → Verification happens → QR wrapper detects success via `onSuccess` callback → Redirect to home
+- **Callback URL:** Empty string (no redirect needed, user stays on page)
+- **Files:** `frontend/src/app/self/page.tsx` (lines 497-507)
+
+**2. Mobile Browser (Safari, Chrome Mobile)**
+- **Detection:** Mobile user agent, touch support, NOT in Farcaster
+- **UI:** Button to open Self app
+- **Flow:** User clicks button → Opens Self app via universal link → User completes verification → Returns to browser via callback URL → Polling detects verification → Redirect to home
+- **Callback URL:** `${window.location.origin}/self?callback=true` (e.g., `https://cpiggy.xyz/self?callback=true`)
+- **Polling:** 3-second intervals for up to 5 minutes
+- **Files:** `frontend/src/app/self/page.tsx` (lines 467-496, 312-359)
+
+**3. Farcaster Web (Desktop browser inside Farcaster)**
+- **Detection:** Farcaster SDK available, desktop user agent
+- **UI:** QR code displayed
+- **Flow:** Same as Desktop Browser (QR code scan)
+- **Callback URL:** Empty string
+- **Files:** Same as Desktop Browser
+
+**4. Farcaster Mobile App (Warpcast native app)**
+- **Detection:** Farcaster SDK available + mobile user agent (includes 'warpcast')
+- **UI:** Button to open Self app
+- **Flow:** User clicks button → Opens Self app via universal link → User completes verification → Returns to Farcaster via miniapp callback → Polling detects verification → Redirect to home
+- **Callback URL:** `https://farcaster.xyz/miniapps/NnmbCzDdddL5/cpiggy` (Farcaster miniapp deep link)
+- **Polling:** 3-second intervals
+- **Critical Fix:** Added 'warpcast' to user agent detection regex (line 173)
+- **Files:** `frontend/src/app/self/page.tsx` (lines 172-173, 191-193, 214-216)
+
+#### Device Detection Logic
+
+**File:** `frontend/src/app/self/page.tsx`
+
+**Mobile Detection (lines 58-149):**
+```typescript
+// Primary signals
+const isMobileUserAgent = /android|iphone|ipad|ipod/i.test(userAgent);
+const hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+const isNarrowViewport = windowWidth < 600;
+
+// Decision logic
+const isDefinitelyDesktop = !hasTouchScreen && !isMobileUserAgent;
+const isTrueMobile = isMobileUserAgent || (hasTouchScreen && isNarrowViewport);
+const shouldUseMobileUI = !isDefinitelyDesktop && isTrueMobile;
+```
+
+**Farcaster Detection (lines 171-206):**
+```typescript
+// Check for mobile devices OR warpcast (Farcaster native app)
+const isMobileUserAgent = /android|iphone|ipad|ipod|warpcast/i.test(userAgent);
+
+// Use the Farcaster detection hook
+const isInFarcaster = farcasterDetection.isFarcasterMiniApp;
+
+// Determine specific scenario
+const isFarcasterNativeMobile = isInFarcaster && isMobileUserAgent;
+const isFarcasterWeb = isInFarcaster && !isMobileUserAgent;
+const isMobileBrowser = !isInFarcaster && isMobileUserAgent;
+const isDesktop = !isInFarcaster && !isMobileUserAgent;
+```
+
+**Farcaster Detection Hook:** `frontend/src/hooks/useMiniAppDetection.ts`
+
+#### Verification Flow (Step by Step)
+
+**1. User Navigation:**
+- User connects wallet on home page
+- Home page checks `localStorage.getItem('isSelfVerified')`
+- If not verified, shows "Proceed to Verification" button
+- Clicking redirects to `/self` page
+
+**2. Self Page Initialization (Frontend):**
+```typescript
+// File: frontend/src/app/self/page.tsx
+
+// Wait for wallet connection
+const userId = address; // Wallet address from useAccount()
+
+// Detect device scenario
+const scenarioKey = detectScenario(); // Returns: 'desktop', 'mobileBrowser', 'farcasterWeb', or 'farcasterApp'
+
+// Build callback URL based on scenario
+const callbackUrl = buildCallbackUrl(scenarioKey);
+
+// Create SelfApp instance
+const app = new SelfAppBuilder({
+  version: 2,
+  appName: process.env.NEXT_PUBLIC_SELF_APP_NAME,
+  scope: process.env.NEXT_PUBLIC_SELF_SCOPE,
+  endpoint: process.env.NEXT_PUBLIC_SELF_ENDPOINT,
+  userId: userId, // Wallet address in hex format
+  userIdType: "hex",
+  userDefinedData: verificationMessage, // Custom message with scenario
+  deeplinkCallback: callbackUrl,
+  // ... other config
+}).build();
+
+// Generate universal link
+const universalLink = getUniversalLink(app);
+```
+
+**3. User Action:**
+- **Desktop/Farcaster Web:** QR code displayed, user scans with mobile device
+- **Mobile/Farcaster App:** Button displayed, user clicks to open Self app
+
+**4. Self App Verification:**
+- Self app opens (either from QR scan or button click)
+- User completes identity verification (passport scan, etc.)
+- Self app generates zero-knowledge proof
+- Proof is sent to backend endpoint
+
+**5. Backend Verification (Server):**
+```typescript
+// File: frontend/src/app/api/verify/route.ts
+
+// Receive proof from Self app
+const { attestationId, proof, publicSignals, userContextData } = requestBody;
+
+// Verify proof using Self Protocol SDK
+const result = await selfBackendVerifier.verify(
+  attestationId,
+  proof,
+  publicSignals,
+  userContextData
+);
+
+if (result.isValidDetails.isValid) {
+  // Extract wallet address from userContextData
+  // Format: [64 chars chainId (padded)][64 chars address (padded)][rest is message]
+  const paddedAddressHex = userContextData.substring(64, 128);
+  const addressHex = paddedAddressHex.substring(24); // Skip 24 chars of padding
+  const walletAddress = '0x' + addressHex;
+
+  // Store verification status
+  markUserAsVerified(walletAddress);
+
+  return { status: "success", result: true };
+}
+```
+
+**Critical Fix - Wallet Address Extraction:**
+The `userContextData` is a hex string with padded fields. We fixed the extraction logic to properly handle the padding:
+- Previous: Extracted wrong bytes due to incorrect padding calculation
+- Current: Correctly extracts last 40 chars from second 64-char block
+- File: `frontend/src/app/api/verify/route.ts` (lines 130-144)
+
+**6. Status Storage:**
+```typescript
+// File: frontend/src/app/api/verify/status/verification-store.ts
+
+// In-memory Map (production should use Redis/database)
+const verificationStore = new Map<string, { verified: boolean; timestamp: number }>();
+
+export function markUserAsVerified(userId: string): void {
+  const normalizedUserId = userId.toLowerCase(); // Normalize to lowercase
+  verificationStore.set(normalizedUserId, {
+    verified: true,
+    timestamp: Date.now()
+  });
+}
+
+// Auto-cleanup old entries after 1 hour
+```
+
+**7. Frontend Polling (Mobile/Farcaster scenarios):**
+```typescript
+// File: frontend/src/app/self/page.tsx (lines 312-359)
+
+// Poll every 3 seconds
+const checkVerificationStatus = async () => {
+  const normalizedUserId = userId.toLowerCase(); // Must match backend normalization
+
+  const response = await fetch('/api/verify/status', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: normalizedUserId }),
+  });
+
+  if (data.verified) {
+    handleSuccessfulVerification();
+  }
+};
+
+setInterval(checkVerificationStatus, 3000);
+```
+
+**8. Success Handling:**
+```typescript
+const handleSuccessfulVerification = () => {
+  // Store verification status in localStorage
+  localStorage.setItem('isSelfVerified', 'true');
+  localStorage.setItem('self_verification_context', context);
+
+  // Clear session storage
+  sessionStorage.removeItem('self_verification_userId');
+  sessionStorage.removeItem('self_verification_timestamp');
+
+  // Redirect to home
+  router.push('/');
+};
+```
+
+#### Callback URLs for Each Scenario
+
+**Desktop Browser:**
+- Callback URL: `""` (empty string)
+- Reason: User stays on page, QR wrapper handles success
+
+**Mobile Browser:**
+- Callback URL: `https://cpiggy.xyz/self?callback=true`
+- Reason: Returns user to same page after Self app verification
+
+**Farcaster Web:**
+- Callback URL: `""` (empty string)
+- Reason: Same as desktop, QR code workflow
+
+**Farcaster Mobile App:**
+- Callback URL: `https://farcaster.xyz/miniapps/NnmbCzDdddL5/cpiggy`
+- Reason: Returns user to Farcaster miniapp context
+- Note: This is a Farcaster deep link, not a web URL
+
+#### Universal Links
+
+Self Protocol uses universal links that work across all platforms. No iOS/Android specific links needed.
+
+**Format:** `https://get.self.app/verify/...encoded-data...`
+
+**Generation:**
+```typescript
+import { getUniversalLink } from "@selfxyz/core";
+const universalLink = getUniversalLink(selfApp);
+```
+
+**Cross-Platform Compatibility:**
+- iOS: Opens Self app if installed, otherwise App Store
+- Android: Opens Self app if installed, otherwise Play Store
+- Works identically for all 4 scenarios
+
+#### Environment Variables
+
+**Required for Self Protocol:**
+```bash
+# .env.local or Railway environment variables
+NEXT_PUBLIC_SELF_APP_NAME="cPiggyFX"
+NEXT_PUBLIC_SELF_SCOPE="cpiggy-prod"
+NEXT_PUBLIC_SELF_ENDPOINT="https://cpiggy.xyz/api/verify"
+```
+
+**Configuration:**
+- Scope: Unique identifier for your Self Protocol app
+- Endpoint: MUST be publicly accessible URL (required by Self app)
+- App Name: Display name shown in Self app
+
+#### Logging and Debugging
+
+**Client-side Logging:**
+The verification page includes extensive console logging for debugging. Key log emojis:
+- 🚀 Initialization
+- 📱 Mobile detection
+- 🔍 Device detection details
+- 🔗 Universal link generation
+- 🔄 Polling status
+- ✅ Success
+- ❌ Errors
+
+**Server-side Logging (Railway):**
+```typescript
+// File: frontend/src/app/api/verify/route.ts
+
+// All requests logged with:
+🔐 Verification request start
+📱 Request context (UA, referer, origin)
+📄 Raw request body
+📦 Parsed request payload
+✅ Verification successful
+💾 User marked as verified
+❌ Errors with full details
+```
+
+**Mobile Debugging Endpoint:**
+```typescript
+// File: frontend/src/app/api/log-detection/route.ts
+
+// Client sends detection info to server
+POST /api/log-detection
+{
+  scenarioKey: 'farcasterApp',
+  isMobile: true,
+  userAgent: '...',
+  callbackUrl: '...'
+}
+```
+
+This allows viewing client-side detection results in Railway logs, which is crucial for debugging mobile scenarios where browser console is not accessible.
+
+#### Recent Fixes
+
+**1. Farcaster Mobile App Detection (Critical Fix)**
+- **Problem:** Warpcast app not detected as mobile, showed QR code instead of button
+- **Solution:** Added 'warpcast' to mobile user agent regex
+- **File:** `frontend/src/app/self/page.tsx` (line 173)
+- **Before:** `/android|iphone|ipad|ipod/i.test(userAgent)`
+- **After:** `/android|iphone|ipad|ipod|warpcast/i.test(userAgent)`
+
+**2. Wallet Address Extraction**
+- **Problem:** Extracting wrong bytes from padded userContextData
+- **Solution:** Fixed to extract last 40 chars from second 64-char block
+- **File:** `frontend/src/app/api/verify/route.ts` (lines 130-144)
+- **Impact:** Verification status now correctly stored with user's wallet address
+
+**3. Reown/WalletConnect Configuration Cleanup**
+- **Problem:** Duplicate connector configs + local features config being ignored
+- **Root Cause:** WagmiAdapter automatically includes injected() and walletConnect(), manual config caused conflicts
+- **Solution:**
+  - Removed manual `injected()` and `walletConnect()` from connectors array
+  - Removed local `features` config from createAppKit (now controlled via Reown dashboard)
+  - Only kept custom `miniAppConnector()` for Farcaster
+- **Files:**
+  - `frontend/src/config/index.ts` (lines 53-63) - Simplified connectors array
+  - `frontend/src/context/index.tsx` (lines 34-45) - Removed features config
+- **Benefits:**
+  - Fixes WalletConnect QR code not showing (Issue #4680 in reown-com/appkit)
+  - Removes deployment warning about ignored local config
+  - Centralized feature control via dashboard.reown.com
+- **Reown Dashboard Config:**
+  - Project ID: `5aa426208ed21c5b9a93b4a0eec73d97`
+  - Enabled features: Social & Email, Onramp, Swaps, Activity, Event Tracking
+
+**4. Mobile Logging Endpoint**
+- **Added:** `/api/log-detection` endpoint for mobile debugging
+- **Purpose:** Logs device detection to Railway where it's visible
+- **File:** `frontend/src/app/api/log-detection/route.ts`
+
+#### Known Working Configurations
+
+**Tested and verified working in:**
+1. Desktop Chrome/Firefox/Safari (QR code)
+2. Mobile Safari iOS (button + redirect)
+3. Mobile Chrome Android (button + redirect)
+4. Farcaster Web on Desktop (QR code)
+5. Warpcast iOS app (button + miniapp deep link)
+6. Warpcast Android app (button + miniapp deep link)
+
+**Universal Link Compatibility:**
+- No separate iOS/Android deep links needed
+- Single universal link works across all platforms
+- Automatically handles app install state
 
 ### 4. Farcaster Mini App Support
 - Optimized UI for Farcaster Mini App environment
