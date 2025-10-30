@@ -2,7 +2,6 @@ import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { celo, base } from '@reown/appkit/networks'
 import type { AppKitNetwork } from '@reown/appkit/networks'
 import { farcasterMiniApp as miniAppConnector } from '@farcaster/miniapp-wagmi-connector'
-import { injected, walletConnect } from 'wagmi/connectors'
 import { defineChain } from 'viem'
 
 // Get projectId from https://cloud.reown.com
@@ -50,26 +49,14 @@ export const networks = isFarcasterMiniApp
   ? [celo, base] as [AppKitNetwork, ...AppKitNetwork[]]
   : [celo, celoSepolia as AppKitNetwork, base] as [AppKitNetwork, ...AppKitNetwork[]]
 
-//Set up the Wagmi Adapter (Config) with both Farcaster and standard connectors
+//Set up the Wagmi Adapter (Config)
+// WagmiAdapter automatically includes injected() and walletConnect() connectors
+// We only need to add custom connectors like Farcaster miniapp
 export const wagmiAdapter = new WagmiAdapter({
   ssr: true,
   projectId,
   networks,
   connectors: [
-    injected(), // MetaMask and other browser wallets
-    walletConnect({
-      projectId,
-      metadata: {
-        name: 'cPiggyFX',
-        description: 'Diversified FX Piggy Bank on Celo',
-        url: typeof window !== 'undefined' 
-          ? window.location.origin 
-          : (process.env.NEXT_PUBLIC_APP_URL || 'https://cpiggy.xyz'),
-        icons: [typeof window !== 'undefined' 
-          ? `${window.location.origin}/icon.png` 
-          : `${process.env.NEXT_PUBLIC_APP_URL || 'https://cpiggy.xyz'}/icon.png`]
-      }
-    }), // WalletConnect protocol
     miniAppConnector() // Farcaster Mini App connector
   ]
 })
