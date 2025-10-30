@@ -287,6 +287,18 @@ function VerificationPage() {
       console.log("🔗 Generated Universal Link:", generatedLink);
       setUniversalLink(generatedLink);
 
+      // Also log to Railway for mobile debugging
+      fetch('/api/log-detection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'universalLink',
+          link: generatedLink,
+          scenarioKey,
+          userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
+        })
+      }).catch(err => console.error("Failed to log universal link:", err));
+
       // Store userId and context in sessionStorage for recovery after redirect
       sessionStorage.setItem('self_verification_userId', userId);
       sessionStorage.setItem('self_verification_timestamp', Date.now().toString());
